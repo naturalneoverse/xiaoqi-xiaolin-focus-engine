@@ -24,5 +24,6 @@ Component({
         showTip: !this.data.showTip
       });
     },
+    onImageError() {},
   }
 });

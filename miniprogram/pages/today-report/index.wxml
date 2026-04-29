@@ -1,7 +1,7 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-nav">
-    <view class="nav-btn" bindtap="goBack">
-      <image class="nav-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    <view class="nav-btn tap-target" bindtap="goBack">
+      <image class="nav-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <view class="top-space"></view>
   </view>
@@ -15,11 +15,12 @@
   <view class="card">
     <text class="title">小麟建议</text>
     <view class="advice-row">
-      <image class="advice-mascot" src="/images/transparent background/xiaolin.png" mode="aspectFit" />
+      <image class="advice-mascot" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
       <chat-bubble
-        text="累了就歇，不扛着。身体在教你：真正的强大不是硬撑，是知道自己该停。"
+        text="{{adviceText}}"
         color="#b7d6ea"
         arrowPosition="left"
+        maxLength="{{48}}"
       />
     </view>
   </view>

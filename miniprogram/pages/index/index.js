@@ -1,4 +1,14 @@
 // index.js
+const STORAGE_KEYS = require("../../config/storageKeys");
+
+function getTodayKey() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 Page({
   data: {
     userProfile: {
@@ -85,12 +95,37 @@ Page({
     haveCreateCollection: false,
     title: "",
     content: "",
+    hasBodyHistory: false,
+    hasTodayBodyRecord: false,
+    showBodyHint: true,
   },
 
   onShow() {
     this.syncUserProfile();
+    this.syncBodyRecordState();
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({ selected: 1 });
+    }
+  },
+
+  syncBodyRecordState() {
+    try {
+      const saved = wx.getStorageSync(STORAGE_KEYS.BODY_RECORDS);
+      const records = Array.isArray(saved) ? saved : [];
+      const today = getTodayKey();
+      const hasBodyHistory = records.length > 0;
+      const hasTodayBodyRecord = records.some((item) => item && item.dateKey === today);
+      this.setData({
+        hasBodyHistory,
+        hasTodayBodyRecord,
+        showBodyHint: !hasTodayBodyRecord,
+      });
+    } catch (e) {
+      this.setData({
+        hasBodyHistory: false,
+        hasTodayBodyRecord: false,
+        showBodyHint: true,
+      });
     }
   },
 
@@ -165,50 +200,52 @@ Page({
   },
 
   onClickDatabase(powerList, selectedItem) {
-    wx.showLoading({
-      title: "",
-    });
-    wx.cloud
-      .callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "createCollection",
-        },
-      })
-      .then((resp) => {
-        if (resp.result.success) {
-          this.setData({
-            haveCreateCollection: true,
-          });
-        }
-        selectedItem.showItem = !selectedItem.showItem;
-        this.setData({
-          powerList,
-        });
-        wx.hideLoading();
-      })
-      .catch((e) => {
-        wx.hideLoading();
-        const { errCode, errMsg } = e;
-        if (errMsg.includes("Environment not found")) {
-          this.setData({
-            showTip: true,
-            title: "云开发环境未找到",
-            content:
-              "如果已经开通云开发，请检查环境ID与 `miniprogram/app.js` 中的 `env` 参数是否一致。",
-          });
-          return;
-        }
-        if (errMsg.includes("FunctionName parameter could not be found")) {
-          this.setData({
-            showTip: true,
-            title: "请上传云函数",
-            content:
-              "在'cloudfunctions/quickstartFunctions'目录右键，选择【上传并部署-云端安装依赖】，等待云函数上传完成后重试。",
-          });
-          return;
-        }
+    return this.__withSubmitting("createCollection", () => {
+      wx.showLoading({
+        title: "",
       });
+      wx.cloud
+        .callFunction({
+          name: "quickstartFunctions",
+          data: {
+            type: "createCollection",
+          },
+        })
+        .then((resp) => {
+          if (resp.result.success) {
+            this.setData({
+              haveCreateCollection: true,
+            });
+          }
+          selectedItem.showItem = !selectedItem.showItem;
+          this.setData({
+            powerList,
+          });
+          wx.hideLoading();
+        })
+        .catch((e) => {
+          wx.hideLoading();
+          const { errCode, errMsg } = e;
+          if (errMsg.includes("Environment not found")) {
+            this.setData({
+              showTip: true,
+              title: "云开发环境未找到",
+              content:
+                "如果已经开通云开发，请检查环境ID与 `miniprogram/app.js` 中的 `env` 参数是否一致。",
+            });
+            return;
+          }
+          if (errMsg.includes("FunctionName parameter could not be found")) {
+            this.setData({
+              showTip: true,
+              title: "请上传云函数",
+              content:
+                "在'cloudfunctions/quickstartFunctions'目录右键，选择【上传并部署-云端安装依赖】，等待云函数上传完成后重试。",
+            });
+            return;
+          }
+        });
+    });
   },
 
   goMy() {

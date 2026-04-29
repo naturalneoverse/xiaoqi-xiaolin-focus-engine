@@ -1,3 +1,5 @@
+const STORAGE_KEYS = require("../../config/storageKeys");
+
 Page({
   data: {
     isFirstLogin: true,
@@ -15,8 +17,12 @@ Page({
   },
 
   getHasLoggedIn() {
+    const app = getApp();
+    if (app && app.globalData && typeof app.globalData.hasLoggedIn === "boolean") {
+      return app.globalData.hasLoggedIn;
+    }
     try {
-      return !!wx.getStorageSync("hasLoggedIn");
+      return !!wx.getStorageSync(STORAGE_KEYS.HAS_LOGGED_IN);
     } catch (e) {
       return false;
     }
@@ -38,51 +44,57 @@ Page({
   },
 
   async onLoginTap() {
-    if (this.data.isLoading) return;
     if (this.data.isFirstLogin && !this.data.agree) return;
+    await this.__withSubmitting("login", async () => {
+      if (this.data.isLoading) return;
+      this.setData({
+        isLoading: true,
+        loadingText: "登录中",
+      });
+      this.startLoadingAnimation();
 
-    this.setData({
-      isLoading: true,
-      loadingText: "登录中",
+      try {
+        const code = await this.getWxLoginCode();
+        const loginRes = await this.loginWithCode(code);
+        const result = (loginRes && loginRes.result) || {};
+        if (!result.success) {
+          throw new Error(result.errMsg || "loginByCode failed");
+        }
+        const app = getApp();
+        if (app && typeof app.setHasLoggedIn === "function") {
+          app.setHasLoggedIn(true);
+        } else {
+          wx.setStorageSync(STORAGE_KEYS.HAS_LOGGED_IN, true);
+        }
+        this.setData({
+          isFirstLogin: false,
+          agree: true,
+        });
+        wx.switchTab({
+          url: "/pages/sleep/index",
+        });
+      } catch (e) {
+        const errMsg = (e && (e.errMsg || e.message)) || "";
+        let toastTitle = "登录失败，请重试";
+        if (/FunctionName parameter could not be found/i.test(errMsg)) {
+          toastTitle = "云函数未部署";
+        } else if (/Environment not found/i.test(errMsg)) {
+          toastTitle = "云环境配置错误";
+        } else if (/network/i.test(errMsg)) {
+          toastTitle = "网络异常，请稍后再试";
+        }
+        console.error("login failed:", e);
+        wx.showToast({
+          title: toastTitle,
+          icon: "none",
+        });
+      } finally {
+        this.stopLoadingAnimation();
+        this.setData({
+          isLoading: false,
+        });
+      }
     });
-    this.startLoadingAnimation();
-
-    try {
-      const code = await this.getWxLoginCode();
-      const loginRes = await this.loginWithCode(code);
-      const result = (loginRes && loginRes.result) || {};
-      if (!result.success) {
-        throw new Error(result.errMsg || "loginByCode failed");
-      }
-      wx.setStorageSync("hasLoggedIn", true);
-      this.setData({
-        isFirstLogin: false,
-        agree: true,
-      });
-      wx.switchTab({
-        url: "/pages/sleep/index",
-      });
-    } catch (e) {
-      const errMsg = (e && (e.errMsg || e.message)) || "";
-      let toastTitle = "登录失败，请重试";
-      if (/FunctionName parameter could not be found/i.test(errMsg)) {
-        toastTitle = "云函数未部署";
-      } else if (/Environment not found/i.test(errMsg)) {
-        toastTitle = "云环境配置错误";
-      } else if (/network/i.test(errMsg)) {
-        toastTitle = "网络异常，请稍后再试";
-      }
-      console.error("login failed:", e);
-      wx.showToast({
-        title: toastTitle,
-        icon: "none",
-      });
-    } finally {
-      this.stopLoadingAnimation();
-      this.setData({
-        isLoading: false,
-      });
-    }
   },
 
   startLoadingAnimation() {

@@ -82,8 +82,8 @@ page {
   border-radius: 30rpx;
   padding: 22rpx;
   margin-bottom: 22rpx;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: 40rpx;
+  margin-right: 40rpx;
 }
 
 .story-card,
@@ -99,7 +99,7 @@ page {
 .keepers-card,
 .philo-card,
 .contact-card {
-  margin-bottom: 30px;
+  margin-bottom: 60rpx;
 }
 
 .title {
@@ -125,13 +125,13 @@ page {
 }
 
 .keepers-card .title {
-  font-size: 16px;
+  font-size: 32rpx;
   color: #184061;
   font-weight: 500;
 }
 
 .keepers-card .line {
-  height: 0.5px;
+  height: 1rpx;
   background: #e1e5ea;
 }
 
@@ -143,7 +143,7 @@ page {
 }
 
 .keeper-item + .keeper-item {
-  margin-top: 20px;
+  margin-top: 40rpx;
 }
 
 .keeper-avatar {
@@ -171,7 +171,7 @@ page {
 .keeper-name {
   display: block;
   color: #184061;
-  font-size: 15px;
+  font-size: 30rpx;
   font-weight: 500;
 }
 
@@ -179,7 +179,7 @@ page {
   display: block;
   margin-top: 6rpx;
   color: #577388;
-  font-size: 13px;
+  font-size: 26rpx;
   line-height: 1.6;
 }
 
@@ -190,7 +190,7 @@ page {
 .philo-name {
   display: block;
   color: #184061;
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: 500;
 }
 
@@ -198,7 +198,7 @@ page {
   display: block;
   margin-top: 4rpx;
   color: #577388;
-  font-size: 13px;
+  font-size: 26rpx;
   line-height: 1.6;
 }
 

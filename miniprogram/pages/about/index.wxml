@@ -1,7 +1,7 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-bar">
-    <view class="back-wrap" bindtap="goBack">
-      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    <view class="back-wrap tap-target" bindtap="goBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <text class="page-title">关于我们</text>
     <view class="top-space"></view>
@@ -9,7 +9,7 @@
 
   <view class="brand">
     <view class="logo">
-      <image class="logo-image" src="/images/transparent background/logo.png" mode="aspectFit" />
+      <image class="logo-image" src="/images/transparent background/logo.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <text class="name">小麒小麟专注引擎</text>
     <text class="version">版本 1.0.0</text>
@@ -33,7 +33,7 @@
     <view class="line"></view>
     <view class="keeper-item">
       <view class="keeper-avatar">
-        <image class="keeper-avatar-image" src="/images/transparent background/xiaoqi.png" mode="aspectFill" />
+        <image class="keeper-avatar-image" src="/images/transparent background/xiaoqi.png" mode="aspectFill" binderror="onImageError" />
       </view>
       <view class="keeper-main">
         <text class="keeper-name">小麒 · 向外行动的能量</text>
@@ -42,7 +42,7 @@
     </view>
     <view class="keeper-item">
       <view class="keeper-avatar">
-        <image class="keeper-avatar-image keeper-avatar-image-right" src="/images/transparent background/xiaolin.png" mode="aspectFill" />
+        <image class="keeper-avatar-image keeper-avatar-image-right" src="/images/transparent background/xiaolin.png" mode="aspectFill" binderror="onImageError" />
       </view>
       <view class="keeper-main">
         <text class="keeper-name">小麟 · 向内觉察的智慧</text>

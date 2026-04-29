@@ -23,6 +23,17 @@ Component({
     ],
   },
   methods: {
+    onImageError(e) {
+      const index = Number(e.currentTarget.dataset.index);
+      if (!Number.isInteger(index) || index < 0 || index >= this.data.list.length) return;
+      const list = this.data.list.slice();
+      list[index] = {
+        ...list[index],
+        iconPath: "/images/transparent background/avatar.png",
+        selectedIconPath: "/images/transparent background/avatar.png",
+      };
+      this.setData({ list });
+    },
     switchTab(e) {
       const index = e.currentTarget.dataset.index;
       const url = this.data.list[index].pagePath;

@@ -1,7 +1,7 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="nav">
-    <view class="back" bindtap="onBack">
-      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    <view class="back tap-target" bindtap="onBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <text class="nav-title">创建新任务</text>
     <view class="nav-space"></view>
@@ -16,8 +16,14 @@
       placeholder="输入任务名称"
       placeholder-class="placeholder-text"
       value="{{taskName}}"
+      maxlength="200"
+      adjust-position
       bindinput="onTaskNameInput"
     />
+    <text wx:if="{{taskNameError}}" class="limit-error">{{taskNameError}}</text>
+    <text class="limit-tip limit-tip-corner {{taskNameLength > 30 ? 'limit-tip-exceeded' : ''}}">
+      {{taskNameLength}}/30
+    </text>
   </view>
 
   <view class="input-card">
@@ -27,28 +33,35 @@
       placeholder="详细描述你的任务..."
       placeholder-class="placeholder-text"
       value="{{taskContent}}"
+      maxlength="2000"
+      auto-height
+      adjust-position
       bindinput="onTaskContentInput"
     />
+    <text wx:if="{{taskContentError}}" class="limit-error">{{taskContentError}}</text>
+    <text class="limit-tip limit-tip-corner {{taskContentLength > 600 ? 'limit-tip-exceeded' : ''}}">
+      {{taskContentLength}}/600
+    </text>
   </view>
 
   <view class="grid">
     <view class="grid-item">
       <view class="box" bindtap="openDateModal">
-        <image class="icon-calendar" src="/images/transparent background/calendar.png" mode="aspectFit" />
+        <image class="icon-calendar" src="/images/transparent background/calendar.png" mode="aspectFit" binderror="onImageError" />
         <text class="box-main">选择日期</text>
         <text class="box-sub">{{dateText}}</text>
       </view>
     </view>
     <view class="grid-item">
       <view class="box" bindtap="openReminderModal">
-        <image class="icon-remind" src="/images/transparent background/alarm.png" mode="aspectFit" />
+        <image class="icon-remind" src="/images/transparent background/alarm.png" mode="aspectFit" binderror="onImageError" />
         <text class="box-main">设置提醒</text>
         <text class="box-sub">{{reminderText}}</text>
       </view>
     </view>
   </view>
 
-  <button class="btn" bindtap="next">下一步</button>
+  <button class="btn" bindtap="next" disabled="{{submitting}}">{{submitting ? '提交中...' : '下一步'}}</button>
 
   <view wx:if="{{showDateModal}}" class="modal-mask" bindtap="closeDateModal">
     <view class="modal-panel" catchtap="noop">

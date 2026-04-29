@@ -81,6 +81,42 @@ page {
   margin-top: 34rpx;
 }
 
+.task-empty-wrap {
+  margin-top: 34rpx;
+  min-height: 280rpx;
+  border-radius: 32rpx;
+  background: linear-gradient(180deg, #f7fbff 0%, #edf4fc 100%);
+  border: 2rpx solid rgba(186, 204, 224, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 42rpx 36rpx;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 0 1rpx rgba(255, 255, 255, 0.8);
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.task-empty-icon {
+  width: 192rpx;
+  height: 192rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.78;
+}
+
+.task-empty-wrap-hover {
+  transform: scale(0.995);
+  opacity: 0.96;
+}
+
+.task-empty-text {
+  color: #6f86a0;
+  font-size: 36rpx;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.8;
+}
+
 .task-card {
   background: #ffffff;
   border-radius: 32rpx;
@@ -129,14 +165,21 @@ page {
 
 .task-title {
   color: #183f5f;
-  font-size: 41rpx;
+  font-size: 36rpx;
   font-weight: 700;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .task-time {
   color: #7f8fa3;
-  font-size: 30rpx;
+  font-size: 28rpx;
   margin-top: 4rpx;
+  margin-left: 12rpx;
+  flex-shrink: 0;
 }
 
 .task-foot {
@@ -167,19 +210,64 @@ page {
   background: #f1dfe3;
 }
 
+.tag-orange {
+  color: #a5673f;
+  background: #f7e4d6;
+}
+
 .tag-gray {
-  color: #7f94ab;
-  background: #e5edf4;
+  color: #66758b;
+  background: #e3e8f0;
+}
+
+.tag-blue {
+  color: #4a78a2;
+  background: #ddeaf7;
+}
+
+.tag-berry {
+  color: #8c566a;
+  background: #f1e2e8;
+}
+
+.tag-lavender {
+  color: #6f689b;
+  background: #ebe8f8;
+}
+
+.tag-sky {
+  color: #567fa3;
+  background: #e2eef8;
+}
+
+.tag-violet {
+  color: #665a94;
+  background: #e8e3f6;
+}
+
+.tag-amber {
+  color: #90674e;
+  background: #f5eadf;
+}
+
+.tag-teal {
+  color: #4f7b72;
+  background: #e0efe9;
+}
+
+.tag-gold {
+  color: #8a7a4a;
+  background: #f3edd8;
+}
+
+.tag-deep {
+  color: #4f6a8b;
+  background: #dfe8f5;
 }
 
 .tag-green {
   color: #4f8b67;
   background: #ddefe4;
-}
-
-.tag-blue {
-  color: #4f79a3;
-  background: #d8e7f5;
 }
 
 .tag-blue-light {
@@ -190,11 +278,6 @@ page {
 .tag-priority {
   color: #12598f;
   background: #eaf2fb;
-}
-
-.tag-amber {
-  color: #8c7558;
-  background: #f1e9dd;
 }
 
 .status {

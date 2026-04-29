@@ -65,14 +65,32 @@ button .wechat-btn-text {
 
 
 page {
-  background: #f6f6f6;
+  background: #e2eaf7;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
 
+.page-content {
+  padding-left: 30rpx;
+  padding-right: 30rpx;
+  box-sizing: border-box;
+}
+
+.tap-target {
+  min-width: 88rpx;
+  min-height: 88rpx;
+  padding: 12rpx;
+  box-sizing: border-box;
+}
+
 /* Global helper for pages that need to avoid overlap with custom tabbar */
 .with-custom-tabbar {
   padding-bottom: calc(130rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.with-safe-bottom {
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }

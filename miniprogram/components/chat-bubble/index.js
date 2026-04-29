@@ -43,6 +43,19 @@ function normalizeBubbleText(value, keepManualBreak) {
   return preventOrphanLastChar(sanitizeText(value, false));
 }
 
+function truncateByLength(text, maxLength) {
+  const safeMax = Number(maxLength);
+  if (!safeMax || safeMax <= 0) return text || "";
+  const chars = Array.from(text || "");
+  if (chars.length <= safeMax) return text || "";
+  return `${chars.slice(0, safeMax).join("")}...`;
+}
+
+function buildBubbleText(value, keepManualBreak, maxLength) {
+  const normalized = normalizeBubbleText(value, keepManualBreak);
+  return truncateByLength(normalized, maxLength);
+}
+
 Component({
   properties: {
     text: {
@@ -61,6 +74,10 @@ Component({
       type: Boolean,
       value: false,
     },
+    maxLength: {
+      type: Number,
+      value: 48,
+    },
   },
 
   data: {
@@ -70,8 +87,8 @@ Component({
   },
 
   observers: {
-    "text, keepManualBreak"(value, keepManualBreak) {
-      const next = normalizeBubbleText(value, keepManualBreak);
+    "text, keepManualBreak, maxLength"(value, keepManualBreak, maxLength) {
+      const next = buildBubbleText(value, keepManualBreak, maxLength);
       this.setData({ normalizedText: next });
     },
     arrowPosition(value) {
@@ -89,7 +106,7 @@ Component({
       this.setData({
         arrowClass: this.properties.arrowPosition === "right" ? "arrow-right" : "arrow-left",
         bubbleColor: this.properties.color || "#7FB3D6",
-        normalizedText: normalizeBubbleText(this.properties.text, this.properties.keepManualBreak),
+        normalizedText: buildBubbleText(this.properties.text, this.properties.keepManualBreak, this.properties.maxLength),
       });
     },
   },

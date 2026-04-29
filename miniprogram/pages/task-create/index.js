@@ -1,4 +1,6 @@
 const REMIND_FREQUENCY_OPTIONS = ["不重复", "每天", "每周", "每月"];
+const TASK_NAME_MAX = 30;
+const TASK_CONTENT_MAX = 600;
 
 function formatDateRangeText(startDate, endDate) {
   if (!startDate) return "未选择";
@@ -10,10 +12,22 @@ function formatReminderText(reminderDate, reminderTime, frequency) {
   return `${reminderDate} ${reminderTime}（${frequency || "不重复"}）`;
 }
 
+function clampTextByLength(value, maxLength) {
+  const chars = Array.from(value || "");
+  if (chars.length <= maxLength) return value || "";
+  return chars.slice(0, maxLength).join("");
+}
+
+function getLength(value) {
+  return Array.from((value || "").trim()).length;
+}
+
 Page({
   data: {
     taskName: "",
     taskContent: "",
+    taskNameLength: 0,
+    taskContentLength: 0,
     dateText: "未选择",
     dateValue: "",
     startDate: "",
@@ -28,6 +42,9 @@ Page({
     reminderFrequencyOptions: REMIND_FREQUENCY_OPTIONS,
     reminderFrequencyIndex: 0,
     reminderText: "未设置",
+    submitting: false,
+    taskNameError: "",
+    taskContentError: "",
   },
 
   onLoad() {
@@ -41,14 +58,24 @@ Page({
   },
 
   onTaskNameInput(e) {
+    const rawValue = e.detail.value || "";
+    const currentLength = getLength(rawValue);
+    const isExceeded = currentLength > TASK_NAME_MAX;
     this.setData({
-      taskName: e.detail.value,
+      taskName: rawValue,
+      taskNameLength: currentLength,
+      taskNameError: isExceeded ? "字数超限" : "",
     });
   },
 
   onTaskContentInput(e) {
+    const rawValue = e.detail.value || "";
+    const currentLength = getLength(rawValue);
+    const isExceeded = currentLength > TASK_CONTENT_MAX;
     this.setData({
-      taskContent: e.detail.value,
+      taskContent: rawValue,
+      taskContentLength: currentLength,
+      taskContentError: isExceeded ? "字数超限" : "",
     });
   },
 
@@ -196,19 +223,35 @@ Page({
   },
 
   next() {
+    if (this.data.submitting) return;
     const { taskName, taskContent, dateValue, startDate, endDate, reminderDate, reminderTime, reminderFrequency } =
       this.data;
-    if (!taskName.trim()) {
+    const safeTaskName = (taskName || "").trim();
+    const safeTaskContent = (taskContent || "").trim();
+    const nameExceeded = getLength(safeTaskName) > TASK_NAME_MAX;
+    const contentExceeded = getLength(safeTaskContent) > TASK_CONTENT_MAX;
+    this.setData({
+      taskNameError: nameExceeded ? "字数超限" : "",
+      taskContentError: contentExceeded ? "字数超限" : "",
+    });
+    if (!safeTaskName) {
       wx.showToast({
         title: "请输入任务名称",
         icon: "none",
       });
       return;
     }
+    if (nameExceeded || contentExceeded) {
+      wx.showToast({
+        title: "字数超限",
+        icon: "none",
+      });
+      return;
+    }
     const payload = encodeURIComponent(
       JSON.stringify({
-        taskName: taskName.trim(),
-        taskContent: taskContent.trim(),
+        taskName: safeTaskName,
+        taskContent: safeTaskContent,
         dateValue,
         startDate,
         endDate,
@@ -217,8 +260,14 @@ Page({
         reminderFrequency,
       }),
     );
+    this.setData({ submitting: true });
     wx.navigateTo({
       url: `/pages/task-priority/index?payload=${payload}`,
+      complete: () => {
+        setTimeout(() => {
+          this.setData({ submitting: false });
+        }, 400);
+      },
     });
   },
 });

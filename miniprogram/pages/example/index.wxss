@@ -1,6 +1,6 @@
 page {
   background-color: white;
-  padding-bottom: 50px;
+  padding-bottom: 100rpx;
   font-family: PingFang SC;
 }
 
@@ -39,7 +39,7 @@ page {
   margin: 250rpx auto 0 auto;
   height: 80rpx;
   color: white;
-  border-radius: 5px;
+  border-radius: 10rpx;
   line-height: 80rpx;
   background-color: #07c160;
 }
@@ -50,7 +50,7 @@ page {
   margin: 0 auto 0 auto;
   height: 80rpx;
   color: #07c160;
-  border-radius: 5px;
+  border-radius: 10rpx;
   line-height: 80rpx;
   background-color: rgba(0, 0, 0, 0.03);
 }
@@ -96,15 +96,15 @@ page {
 }
 
 .title {
-  margin-top: 16px;
-  margin-bottom: 8px;
+  margin-top: 32rpx;
+  margin-bottom: 16rpx;
   font-size: 36rpx;
   font-weight: 500;
   color: #000;
 }
 
 .info {
-  margin-top: 12px;
+  margin-top: 24rpx;
   font-size: 28rpx;
   font-weight: 400;
   color: rgba(0, 0, 0, 0.6);
@@ -112,7 +112,7 @@ page {
 }
 
 .img {
-  /* margin-top: 16px; */
+  /* margin-top: 32rpx; */
   width: 100%;
 }
 
@@ -128,23 +128,23 @@ page {
 }
 
 .block {
-  font-size: 16px;
-  line-height: 40px;
+  font-size: 32rpx;
+  line-height: 80rpx;
 }
 
 .step-left {
   color: #FFF;
   background-color: #1aad19;
   border: #1aad19 solid 1px;
-  padding: 0px 6px;
+  padding: 0rpx 12rpx;
 }
 
 .step-right {
   color: #1aad19;
   background-color: #FFF;
   border: #1aad19 solid 1px;
-  padding: 0px 6px;
-  margin-right: 10px;
+  padding: 0rpx 12rpx;
+  margin-right: 20rpx;
 }
 
 .code_zone {
@@ -152,30 +152,30 @@ page {
   color: rgba(255, 255, 255, 0.7);
   border-radius: 12rpx;
   padding: 16rpx 32rpx;
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12rpx 16rpx rgba(0, 0, 0, 0.15);
   position: relative;
   margin-bottom: 24rpx;
 }
 
 .btn-full {
-  height: 40px;
-  border-radius: 4px;
-  line-height: 40px;
+  height: 80rpx;
+  border-radius: 8rpx;
+  line-height: 80rpx;
   color: #fff;
   background-color: #1aad19;
   text-align: center;
-  margin-bottom: 5px;
+  margin-bottom: 10rpx;
 }
 
 .step-title {
-  line-height: 37px;
-  font-size: 16px;
+  line-height: 74rpx;
+  font-size: 32rpx;
 }
 
 .step-text{
-  font-size: 14px;
-  line-height: 24px;
-  padding: 10px 0px;
+  font-size: 28rpx;
+  line-height: 48rpx;
+  padding: 20rpx 0rpx;
   text-align: justify;
 }
 
@@ -184,11 +184,11 @@ page {
   background: rgba(0,0,0,0.3); z-index: 1000; display: flex; align-items: center; justify-content: center;
 }
 .modal-content {
-  background: #fff; padding: 24px; border-radius: 8px; width: 80%;
+  background: #fff; padding: 48rpx; border-radius: 16rpx; width: 80%;
 }
-.modal-title { font-size: 18px; margin-bottom: 16px; }
-.modal-input { margin-bottom: 12px; border: 1px solid #eee; padding: 8px; border-radius: 4px; width: 100%; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.modal-title { font-size: 36rpx; margin-bottom: 32rpx; }
+.modal-input { margin-bottom: 24rpx; border: 1px solid #eee; padding: 16rpx; border-radius: 8rpx; width: 100%; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 24rpx; }
 
 /* AI助手相关样式 */
 .notice-box {

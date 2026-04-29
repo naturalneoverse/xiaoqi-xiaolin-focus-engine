@@ -2,7 +2,7 @@
   <view class="card">
     <view class="title-row">
       <view class="title-main">
-        <image class="title-icon" src="/images/transparent background/why.png" mode="aspectFit" />
+        <image class="title-icon" src="/images/transparent background/why.png" mode="aspectFit" binderror="onImageError" />
         <text class="title">为何而做？</text>
       </view>
       <text class="step">3/3</text>

@@ -6,7 +6,7 @@ function parsePayload(payload) {
   }
 }
 
-const TASKS_STORAGE_KEY = "sleep_tasks";
+const STORAGE_KEYS = require("../../config/storageKeys");
 const STATUS_OPTIONS = ["进行中", "已完成", "已延期", "已取消"];
 
 function getStatusClass(statusText) {
@@ -43,7 +43,7 @@ Page({
     showMascotModal: false,
     xiaoqiImage: "/images/transparent background/xiaoqi.png",
     mascotBubbleText:
-      "恭喜您完成全部选择～\n认真梳理轻重、对象与初心，\n慢慢理清生活的秩序感，\n每一次向内梳理，都是在好好爱自己❤️",
+      "恭喜您完成全部选择～\n认真梳理轻重、对象与初心，\n慢慢理清生活的秩序感，\n每一次向内梳理，都是在好好爱自己。",
   },
 
   onLoad(options) {
@@ -96,7 +96,7 @@ Page({
   persistStatus(nextStatus) {
     const { taskId } = this.data;
     if (!taskId) return;
-    const tasks = wx.getStorageSync(TASKS_STORAGE_KEY);
+    const tasks = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
     if (!Array.isArray(tasks)) return;
     const nextTasks = tasks.map((task) =>
       task.id === taskId
@@ -111,7 +111,7 @@ Page({
           }
         : task,
     );
-    wx.setStorageSync(TASKS_STORAGE_KEY, nextTasks);
+    wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
   },
 
   closeMascotModal() {

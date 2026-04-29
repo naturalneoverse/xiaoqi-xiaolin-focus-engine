@@ -1,7 +1,7 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-bar">
-    <view class="back-wrap" bindtap="goBack">
-      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    <view class="back-wrap tap-target" bindtap="goBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <text class="page-title">帮助与支持</text>
     <view class="top-space"></view>
@@ -51,8 +51,8 @@
 
   <view class="brand-wrap">
     <view class="mascot-row">
-      <image class="mascot-image mascot-left" src="/images/transparent background/xiaoqi.png" mode="aspectFit" />
-      <image class="mascot-image mascot-right" src="/images/transparent background/xiaolin.png" mode="aspectFit" />
+      <image class="mascot-image mascot-left" src="/images/transparent background/xiaoqi.png" mode="aspectFit" binderror="onImageError" />
+      <image class="mascot-image mascot-right" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <text class="brand-slogan">用智慧爱自己  用行动爱世界</text>
   </view>

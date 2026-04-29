@@ -1,5 +1,5 @@
 Page({
   goBack() {
-    wx.navigateBack();
+    this.__safeNavigateBack("/pages/my/index");
   },
 });

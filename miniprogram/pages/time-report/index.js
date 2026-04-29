@@ -1,4 +1,4 @@
-const TASKS_STORAGE_KEY = "sleep_tasks";
+const STORAGE_KEYS = require("../../config/storageKeys");
 
 function toDateLabel(dateKey) {
   if (!dateKey) return "未分组";
@@ -65,7 +65,7 @@ Page({
   },
 
   loadReportFromTasks() {
-    const tasks = wx.getStorageSync(TASKS_STORAGE_KEY);
+    const tasks = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
     if (!Array.isArray(tasks)) return;
     const doneTasks = getDoneTasks(tasks);
     const groups = buildGroups(doneTasks);

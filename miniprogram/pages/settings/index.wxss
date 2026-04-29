@@ -81,3 +81,8 @@ page {
   color: #8ea1b6;
   font-size: 28rpx;
 }
+
+.notify-switch {
+  transform: scale(0.8);
+  transform-origin: right center;
+}

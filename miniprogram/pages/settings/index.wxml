@@ -1,7 +1,7 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-bar">
-    <view class="back-wrap" bindtap="goBack">
-      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    <view class="back-wrap tap-target" bindtap="goBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <text class="page-title">设置</text>
     <view class="top-space"></view>
@@ -13,22 +13,27 @@
         <text class="cell-title">提醒设置</text>
         <text class="cell-sub">任务与周报提醒</text>
       </view>
-      <switch checked="{{notifyOn}}" color="#12598f" bindchange="onNotifyChange" />
+      <switch class="notify-switch" checked="{{notifyOn}}" color="#12598f" bindchange="onNotifyChange" />
+    </view>
+    <view class="line"></view>
+    <view class="cell" bindtap="goEditProfile">
+      <text class="cell-title">修改资料</text>
+      <text class="arrow">></text>
     </view>
   </view>
 
   <view class="group">
     <view class="cell" bindtap="goPrivacy">
       <text class="cell-title">隐私协议</text>
-      <text class="arrow">›</text>
+      <text class="arrow">></text>
     </view>
     <view class="line"></view>
     <view class="cell" bindtap="onClearCache">
       <text class="cell-title">清除缓存</text>
-      <text class="arrow">›</text>
+      <text class="arrow">></text>
     </view>
     <view class="line"></view>
-    <view class="cell">
+    <view class="cell" bindtap="onTapVersion">
       <text class="cell-title">关于版本</text>
       <text class="version">{{version}}</text>
     </view>

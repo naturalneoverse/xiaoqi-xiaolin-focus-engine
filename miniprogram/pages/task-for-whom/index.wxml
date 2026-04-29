@@ -2,7 +2,7 @@
   <view class="card">
     <view class="title-row">
       <view class="title-main">
-        <image class="title-icon title-icon-who" src="/images/transparent background/who.png" mode="aspectFit" />
+        <image class="title-icon title-icon-who" src="/images/transparent background/who.png" mode="aspectFit" binderror="onImageError" />
         <text class="title">为谁而做？</text>
       </view>
       <text class="step">2/3</text>

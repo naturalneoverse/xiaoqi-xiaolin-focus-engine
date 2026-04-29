@@ -1,4 +1,4 @@
-const TASKS_STORAGE_KEY = "sleep_tasks";
+const STORAGE_KEYS = require("../../config/storageKeys");
 
 function getTodayKey() {
   const now = new Date();
@@ -22,6 +22,43 @@ function normalizeStatus(task) {
   return task.done ? "已完成" : "进行中";
 }
 
+function formatListTitle(title) {
+  const text = (title || "").trim();
+  const chars = Array.from(text);
+  if (chars.length <= 10) return text || "未命名任务";
+  return `${chars.slice(0, 10).join("")}...`;
+}
+
+function getPriorityTagClass(text) {
+  if (text === "重要且紧急") return "tag-red";
+  if (text === "重要不紧急") return "tag-orange";
+  if (text === "紧急不重要") return "tag-blue";
+  if (text === "不重要不紧急") return "tag-gray";
+  return "";
+}
+
+function getForWhomTagClass(text) {
+  if (text === "自己") return "tag-berry";
+  if (text === "至亲") return "tag-lavender";
+  if (text === "外缘") return "tag-sky";
+  if (text === "不二") return "tag-violet";
+  return "";
+}
+
+function getWhyTagClass(text) {
+  if (text === "生计") return "tag-amber";
+  if (text === "职责") return "tag-teal";
+  if (text === "真我") return "tag-gold";
+  if (text === "合一") return "tag-deep";
+  return "";
+}
+
+function mapTagClassByText(text, fallbackClassName) {
+  const mappedClassName =
+    getPriorityTagClass(text) || getForWhomTagClass(text) || getWhyTagClass(text);
+  return mappedClassName || fallbackClassName || "tag";
+}
+
 function normalizeTask(task) {
   const statusText = normalizeStatus(task);
   const createdAt = task.createdAt || task.timeText || formatDateTime(new Date());
@@ -29,6 +66,8 @@ function normalizeTask(task) {
   const typeClass = getTaskTypeClass(tags);
   return {
     ...task,
+    title: task.title || "未命名任务",
+    displayTitle: formatListTitle(task.title),
     createdAt,
     timeText: createdAt,
     statusText,
@@ -36,6 +75,7 @@ function normalizeTask(task) {
     typeClass,
     tags: tags.map((tag) => ({
       ...tag,
+      className: mapTagClassByText(tag.text || "", tag.className),
       isPriority: /优先/.test(tag.text || ""),
     })),
   };
@@ -116,13 +156,12 @@ Page({
   },
 
   loadTasks() {
-    const storedTasks = wx.getStorageSync(TASKS_STORAGE_KEY);
+    const storedTasks = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
     let normalized = [];
     if (Array.isArray(storedTasks) && storedTasks.length) {
       normalized = storedTasks.map(normalizeTask);
     } else {
-      normalized = this.data.tasks.map(normalizeTask);
-      wx.setStorageSync(TASKS_STORAGE_KEY, normalized);
+      normalized = [];
     }
     const today = getTodayKey();
     const visibleTasks = normalized.filter((task) => {
@@ -195,7 +234,7 @@ Page({
       success: (res) => {
         if (!res.confirm) return;
         allTasks.splice(index, 1);
-        wx.setStorageSync(TASKS_STORAGE_KEY, allTasks);
+        wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, allTasks);
         this.loadTasks();
         wx.showToast({
           title: "已删除",

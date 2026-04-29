@@ -13,7 +13,8 @@ function parsePayload(payload) {
   }
 }
 
-const TASKS_STORAGE_KEY = "sleep_tasks";
+const STORAGE_KEYS = require("../../config/storageKeys");
+const TASK_NAME_MAX = 30;
 
 function formatDateTime(date) {
   const y = date.getFullYear();
@@ -24,12 +25,42 @@ function formatDateTime(date) {
   return `${y}/${m}/${d} ${hh}:${mm}`;
 }
 
+function getPriorityTagClass(text) {
+  if (text === "重要且紧急") return "tag-red";
+  if (text === "重要不紧急") return "tag-orange";
+  if (text === "紧急不重要") return "tag-blue";
+  if (text === "不重要不紧急") return "tag-gray";
+  return "tag-gray";
+}
+
+function getForWhomTagClass(text) {
+  if (text === "自己") return "tag-berry";
+  if (text === "至亲") return "tag-lavender";
+  if (text === "外缘") return "tag-sky";
+  if (text === "不二") return "tag-violet";
+  return "tag-violet";
+}
+
+function getWhyTagClass(text) {
+  if (text === "生计") return "tag-amber";
+  if (text === "职责") return "tag-teal";
+  if (text === "真我") return "tag-gold";
+  if (text === "合一") return "tag-deep";
+  return "tag-deep";
+}
+
 function buildTags(payload, selectedWhy) {
   return [
-    payload.priority ? { text: payload.priority, className: "tag-red" } : null,
-    payload.forWhom ? { text: payload.forWhom, className: "tag-gray" } : null,
-    selectedWhy ? { text: selectedWhy, className: "tag-green" } : null,
+    payload.priority ? { text: payload.priority, className: getPriorityTagClass(payload.priority) } : null,
+    payload.forWhom ? { text: payload.forWhom, className: getForWhomTagClass(payload.forWhom) } : null,
+    selectedWhy ? { text: selectedWhy, className: getWhyTagClass(selectedWhy) } : null,
   ].filter(Boolean);
+}
+
+function clampTextByLength(value, maxLength) {
+  const chars = Array.from(value || "");
+  if (chars.length <= maxLength) return value || "";
+  return chars.slice(0, maxLength).join("");
 }
 
 Page({
@@ -54,7 +85,7 @@ Page({
   },
 
   goPrev() {
-    wx.navigateBack();
+    this.__safeNavigateBack("/pages/sleep/index");
   },
 
   saveTask() {
@@ -69,7 +100,7 @@ Page({
     const createdAt = formatDateTime(now);
     const task = {
       id: taskId,
-      title: mergedPayload.taskName || "未命名任务",
+      title: clampTextByLength(mergedPayload.taskName || "未命名任务", TASK_NAME_MAX),
       content: mergedPayload.taskContent || "暂无描述",
       timeText: createdAt,
       createdAt,
@@ -81,9 +112,9 @@ Page({
       reminderFrequency: mergedPayload.reminderFrequency || "不重复",
       tags: buildTags(mergedPayload, selected),
     };
-    const tasks = wx.getStorageSync(TASKS_STORAGE_KEY);
+    const tasks = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
     const nextTasks = Array.isArray(tasks) ? [task, ...tasks] : [task];
-    wx.setStorageSync(TASKS_STORAGE_KEY, nextTasks);
+    wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
 
     const nextPayload = encodeURIComponent(
       JSON.stringify({

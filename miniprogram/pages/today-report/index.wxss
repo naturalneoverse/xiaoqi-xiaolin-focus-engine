@@ -97,7 +97,7 @@ page {
 
 .advice-row chat-bubble {
   flex: 1;
-  max-width: 70vw;
+  max-width: 525rpx;
 }
 
 .btn {

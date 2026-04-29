@@ -3,7 +3,7 @@
 
   <view class="hero">
     <view class="avatar-wrap">
-      <image class="avatar-inner" src="{{userProfile.avatarUrl}}" mode="aspectFill" />
+      <image class="avatar-inner" src="{{userProfile.avatarUrl}}" mode="aspectFill" binderror="onImageError" data-err-field="userProfile.avatarUrl" />
     </view>
     <text class="hero-title" bindtap="goBodyQuizStart">身心平衡</text>
     <text class="hero-subtitle">寻找内在的宁静与自律</text>
@@ -12,16 +12,17 @@
   <view class="category-grid">
     <view class="card card-active" bindtap="goBodyQuizStart">
       <view class="card-head">
-        <image class="card-icon-image card-icon-image-active" src="/images/transparent background/body.png" mode="aspectFit" />
+        <image class="card-icon-image card-icon-image-active" src="/images/transparent background/body.png" mode="aspectFit" binderror="onImageError" />
         <text class="card-tag">ACTIVE</text>
       </view>
       <text class="card-title">身体</text>
       <text class="card-desc">能量状态：充足</text>
+      <text wx:if="{{showBodyHint}}" class="card-hint">戳我，聆听身体</text>
     </view>
 
     <view class="card card-muted">
       <view class="card-head">
-        <image class="card-icon-image card-icon-image-muted" src="/images/transparent background/relation.png" mode="aspectFit" />
+        <image class="card-icon-image card-icon-image-muted" src="/images/transparent background/relation.png" mode="aspectFit" binderror="onImageError" />
         <view class="card-tag-placeholder"></view>
       </view>
       <text class="card-title card-title-muted">关系</text>
@@ -30,7 +31,7 @@
 
     <view class="card card-muted">
       <view class="card-head">
-        <image class="card-icon-image card-icon-image-muted" src="/images/transparent background/meaning.png" mode="aspectFit" />
+        <image class="card-icon-image card-icon-image-muted" src="/images/transparent background/meaning.png" mode="aspectFit" binderror="onImageError" />
         <view class="card-tag-placeholder"></view>
       </view>
       <text class="card-title card-title-muted">意义</text>
@@ -39,7 +40,7 @@
 
     <view class="card card-muted">
       <view class="card-head">
-        <image class="card-icon-image card-icon-image-muted" src="/images/transparent background/freedom.png" mode="aspectFit" />
+        <image class="card-icon-image card-icon-image-muted" src="/images/transparent background/freedom.png" mode="aspectFit" binderror="onImageError" />
         <view class="card-tag-placeholder"></view>
       </view>
       <text class="card-title card-title-muted">自由</text>
@@ -49,10 +50,11 @@
 
   <view class="stats">
     <text class="stats-title">近七日状态</text>
+    <view wx:if="{{hasBodyHistory}}">
     <view class="progress-item">
       <view class="progress-head">
         <view class="progress-left">
-          <image class="progress-icon-image" src="/images/transparent background/sleep.png" mode="aspectFit" />
+          <image class="progress-icon-image" src="/images/transparent background/sleep.png" mode="aspectFit" binderror="onImageError" />
           <text class="progress-label">睡眠质量</text>
         </view>
         <text class="progress-status">很好</text>
@@ -64,7 +66,7 @@
     <view class="progress-item">
       <view class="progress-head">
         <view class="progress-left">
-          <image class="progress-icon-image" src="/images/transparent background/sport.png" mode="aspectFit" />
+          <image class="progress-icon-image" src="/images/transparent background/sport.png" mode="aspectFit" binderror="onImageError" />
           <text class="progress-label">运动消耗</text>
         </view>
         <text class="progress-status">一般</text>
@@ -76,7 +78,7 @@
     <view class="progress-item progress-item-last">
       <view class="progress-head">
         <view class="progress-left">
-          <image class="progress-icon-image" src="/images/transparent background/singnal.png" mode="aspectFit" />
+          <image class="progress-icon-image" src="/images/transparent background/singnal.png" mode="aspectFit" binderror="onImageError" />
           <text class="progress-label">身体信号</text>
         </view>
         <text class="progress-status">很好</text>
@@ -86,6 +88,10 @@
       </view>
     </view>
     <button class="record-btn" hover-class="record-btn-hover" bindtap="goBodyReport">查看身体边界记录＞</button>
+    </view>
+    <view wx:else class="stats-empty-wrap" bindtap="goBodyQuizStart" hover-class="stats-empty-wrap-hover" hover-stay-time="70">
+      <text class="stats-empty-text">今天还是空白页，身体在等你的信号</text>
+    </view>
   </view>
 
   <view class="advice">
@@ -93,6 +99,6 @@
       <text class="advice-tag">守护者建议</text>
       <text class="advice-text">“深呼吸，感受此时此刻的空气。你的身体正在通过平静来积蓄下一次爆发的力量。今天也很棒，再坚持一下。”</text>
     </view>
-    <image class="advice-mascot" src="/images/transparent background/xiaolin.png" mode="aspectFit" />
+    <image class="advice-mascot" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
   </view>
 </view>

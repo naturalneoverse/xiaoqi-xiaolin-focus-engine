@@ -1,7 +1,7 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-nav">
-    <view class="nav-btn" bindtap="goBack">
-      <image class="nav-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    <view class="nav-btn tap-target" bindtap="goBack">
+      <image class="nav-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <view class="top-space"></view>
   </view>

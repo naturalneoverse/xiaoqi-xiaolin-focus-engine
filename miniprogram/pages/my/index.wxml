@@ -1,13 +1,13 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-bar">
-    <view class="setting-btn" bindtap="onTapSetting">
-      <image class="setting-icon" src="/images/transparent background/setting.svg" mode="aspectFit" />
+    <view class="setting-btn tap-target" bindtap="onTapSetting">
+      <image class="setting-icon" src="/images/transparent background/setting.svg" mode="aspectFit" binderror="onImageError" />
     </view>
   </view>
 
   <view class="profile-card profile-card-gradient">
     <view class="avatar-wrap" bindtap="onTapAvatar">
-      <image wx:if="{{userProfile.avatarUrl}}" class="avatar-image" src="{{userProfile.avatarUrl}}" mode="aspectFill" />
+      <image wx:if="{{userProfile.avatarUrl}}" class="avatar-image" src="{{userProfile.avatarUrl}}" mode="aspectFill" binderror="onImageError" data-err-field="userProfile.avatarUrl" />
       <view wx:else class="avatar">👤</view>
     </view>
     <input
@@ -26,7 +26,7 @@
       wx:if="{{editingSignature}}"
       class="signature-input"
       value="{{editingSignatureValue}}"
-      maxlength="50"
+      maxlength="60"
       focus
       cursor-spacing="20"
       bindinput="onSignatureInput"
@@ -39,7 +39,7 @@
   <view class="stats">
     <view class="stat-item">
       <view class="stat-icon-wrap">
-        <image class="stat-icon-image" src="/images/transparent background/realme.png" mode="aspectFit" />
+        <image class="stat-icon-image" src="/images/transparent background/realme.png" mode="aspectFit" binderror="onImageError" />
       </view>
       <view class="stat-content">
         <text class="stat-title">真我时刻</text>
@@ -51,7 +51,7 @@
     </view>
     <view class="stat-item">
       <view class="stat-icon-wrap">
-        <image class="stat-icon-image stat-icon-image-clocking" src="/images/transparent background/clocking.png" mode="aspectFit" />
+        <image class="stat-icon-image stat-icon-image-clocking" src="/images/transparent background/clocking.png" mode="aspectFit" binderror="onImageError" />
       </view>
       <view class="stat-content">
         <text class="stat-title">打卡记录</text>

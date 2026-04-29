@@ -33,7 +33,7 @@ Page({
   },
 
   goPrev() {
-    wx.navigateBack();
+    this.__safeNavigateBack("/pages/sleep/index");
   },
 
   goNext() {

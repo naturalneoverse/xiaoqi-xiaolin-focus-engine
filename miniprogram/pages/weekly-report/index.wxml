@@ -1,7 +1,7 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-bar">
-    <view class="back-wrap" bindtap="goBack" hover-class="row-hover">
-      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    <view class="back-wrap tap-target" bindtap="goBack" hover-class="row-hover">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <text class="page-title">时间编织报告</text>
     <view class="top-space"></view>
@@ -88,13 +88,14 @@
   <view class="mascot-bottom-wrap">
     <view class="mascot-bubble-wrap">
       <chat-bubble
-        text="这周你扛了很多责任，也给自己留了 8 个真我时刻。辛苦了，也值得❤️"
+        text="这周你扛了很多责任，也给自己留了 8 个真我时刻。辛苦了，也值得。"
         color="#b7d6ea"
         arrowPosition="right"
+        maxLength="{{56}}"
       />
     </view>
     <view class="mascot-image-wrap">
-      <image class="mascot-image" src="/images/transparent background/xiaolin.png" mode="aspectFit" />
+      <image class="mascot-image" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
     </view>
   </view>
 

@@ -11,8 +11,8 @@
   position:absolute;
   right: 10rpx;
   top: 10rpx;
-  width: 32px;
-  height: 32px;
+  width: 64rpx;
+  height: 64rpx;
   /* background-color: red; */
 }
 .install_tip_detail {

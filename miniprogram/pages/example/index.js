@@ -121,6 +121,13 @@ Page({
     this.setData({ type: options?.type, envId: options?.envId });
   },
 
+  onImageError() {
+    wx.showToast({
+      title: "图片加载失败",
+      icon: "none",
+    });
+  },
+
   copyUrl() {
     wx.setClipboardData({
       data: "https://gitee.com/TencentCloudBase/cloudbase-agent-ui/tree/main/apps/miniprogram-agent-ui/miniprogram/components/agent-ui",
@@ -168,35 +175,37 @@ Page({
   },
 
   deleteRecord(e) {
-    // 调用云函数删除记录
-    wx.showLoading({
-      title: "删除中...",
-    });
-    wx.cloud
-      .callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "deleteRecord",
-          data: {
-            _id: e.currentTarget.dataset.id,
-          },
-        },
-      })
-      .then((resp) => {
-        wx.showToast({
-          title: "删除成功",
-        });
-        this.getRecord(); // 刷新列表
-        wx.hideLoading();
-      })
-      .catch((e) => {
-        console.error("deleteRecord failed:", normalizeError(e), e);
-        wx.showToast({
-          title: "删除失败",
-          icon: "none",
-        });
-        wx.hideLoading();
+    return this.__withSubmitting("deleteRecord", () => {
+      // 调用云函数删除记录
+      wx.showLoading({
+        title: "删除中...",
       });
+      wx.cloud
+        .callFunction({
+          name: "quickstartFunctions",
+          data: {
+            type: "deleteRecord",
+            data: {
+              _id: e.currentTarget.dataset.id,
+            },
+          },
+        })
+        .then((resp) => {
+          wx.showToast({
+            title: "删除成功",
+          });
+          this.getRecord(); // 刷新列表
+          wx.hideLoading();
+        })
+        .catch((e) => {
+          console.error("deleteRecord failed:", normalizeError(e), e);
+          wx.showToast({
+            title: "删除失败",
+            icon: "none",
+          });
+          wx.hideLoading();
+        });
+    });
   },
 
   // 输入框事件
@@ -216,76 +225,80 @@ Page({
 
   // 确认插入
   async onInsertConfirm() {
-    const { insertRegion, insertCity, insertSales } = this.data;
-    if (!insertRegion || !insertCity || !insertSales) {
-      wx.showToast({ title: "请填写完整信息", icon: "none" });
-      return;
-    }
-    wx.showLoading({ title: "插入中..." });
-    try {
-      await wx.cloud.callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "insertRecord",
+    return this.__withSubmitting("insertRecord", async () => {
+      const { insertRegion, insertCity, insertSales } = this.data;
+      if (!insertRegion || !insertCity || !insertSales) {
+        wx.showToast({ title: "请填写完整信息", icon: "none" });
+        return;
+      }
+      wx.showLoading({ title: "插入中..." });
+      try {
+        await wx.cloud.callFunction({
+          name: "quickstartFunctions",
           data: {
-            region: insertRegion,
-            city: insertCity,
-            sales: Number(insertSales),
+            type: "insertRecord",
+            data: {
+              region: insertRegion,
+              city: insertCity,
+              sales: Number(insertSales),
+            },
           },
-        },
-      });
-      wx.showToast({ title: "插入成功" });
-      this.setData({ showInsertModal: false });
-      this.getRecord(); // 刷新列表
-    } catch (e) {
-      wx.showToast({ title: "插入失败", icon: "none" });
-      console.error("insertRecord failed:", normalizeError(e), e);
-    } finally {
-      wx.hideLoading();
-    }
+        });
+        wx.showToast({ title: "插入成功" });
+        this.setData({ showInsertModal: false });
+        this.getRecord(); // 刷新列表
+      } catch (e) {
+        wx.showToast({ title: "插入失败", icon: "none" });
+        console.error("insertRecord failed:", normalizeError(e), e);
+      } finally {
+        wx.hideLoading();
+      }
+    });
   },
 
   getOpenId() {
-    wx.showLoading({
-      title: "",
-    });
-    wx.cloud
-      .callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "getOpenId",
-        },
-      })
-      .then((resp) => {
-        this.setData({
-          haveGetOpenId: true,
-          openId: resp.result.openid,
-        });
-        wx.hideLoading();
-      })
-      .catch((e) => {
-        wx.hideLoading();
-        console.error("getOpenId failed:", normalizeError(e), e);
-        const { errCode, errMsg } = e;
-        if (errMsg.includes("Environment not found")) {
-          this.setData({
-            showTip: true,
-            title: "云开发环境未找到",
-            content:
-              "如果已经开通云开发，请检查环境ID与 `miniprogram/app.js` 中的 `env` 参数是否一致。",
-          });
-          return;
-        }
-        if (errMsg.includes("FunctionName parameter could not be found")) {
-          this.setData({
-            showTip: true,
-            title: "请上传云函数",
-            content:
-              "在'cloudfunctions/quickstartFunctions'目录右键，选择【上传并部署-云端安装依赖】，等待云函数上传完成后重试。",
-          });
-          return;
-        }
+    return this.__withSubmitting("getOpenId", () => {
+      wx.showLoading({
+        title: "",
       });
+      wx.cloud
+        .callFunction({
+          name: "quickstartFunctions",
+          data: {
+            type: "getOpenId",
+          },
+        })
+        .then((resp) => {
+          this.setData({
+            haveGetOpenId: true,
+            openId: resp.result.openid,
+          });
+          wx.hideLoading();
+        })
+        .catch((e) => {
+          wx.hideLoading();
+          console.error("getOpenId failed:", normalizeError(e), e);
+          const errMsg = String((e && e.errMsg) || (e && e.message) || "");
+          if (errMsg.includes("Environment not found")) {
+            this.setData({
+              showTip: true,
+              title: "云开发环境未找到",
+              content:
+                "如果已经开通云开发，请检查环境ID与 `miniprogram/app.js` 中的 `env` 参数是否一致。",
+            });
+            return;
+          }
+          if (errMsg.includes("FunctionName parameter could not be found")) {
+            this.setData({
+              showTip: true,
+              title: "请上传云函数",
+              content:
+                "在'cloudfunctions/quickstartFunctions'目录右键，选择【上传并部署-云端安装依赖】，等待云函数上传完成后重试。",
+            });
+            return;
+          }
+        });
+    });
   },
 
   clearOpenId() {
@@ -303,46 +316,48 @@ Page({
   },
 
   getCodeSrc() {
-    wx.showLoading({
-      title: "",
-    });
-    wx.cloud
-      .callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "getMiniProgramCode",
-        },
-      })
-      .then((resp) => {
-        this.setData({
-          haveGetCodeSrc: true,
-          codeSrc: resp.result,
-        });
-        wx.hideLoading();
-      })
-      .catch((e) => {
-        wx.hideLoading();
-        console.error("getMiniProgramCode failed:", normalizeError(e), e);
-        const { errCode, errMsg } = e;
-        if (errMsg.includes("Environment not found")) {
-          this.setData({
-            showTip: true,
-            title: "云开发环境未找到",
-            content:
-              "如果已经开通云开发，请检查环境ID与 `miniprogram/app.js` 中的 `env` 参数是否一致。",
-          });
-          return;
-        }
-        if (errMsg.includes("FunctionName parameter could not be found")) {
-          this.setData({
-            showTip: true,
-            title: "请上传云函数",
-            content:
-              "在'cloudfunctions/quickstartFunctions'目录右键，选择【上传并部署-云端安装依赖】，等待云函数上传完成后重试。",
-          });
-          return;
-        }
+    return this.__withSubmitting("getCodeSrc", () => {
+      wx.showLoading({
+        title: "",
       });
+      wx.cloud
+        .callFunction({
+          name: "quickstartFunctions",
+          data: {
+            type: "getMiniProgramCode",
+          },
+        })
+        .then((resp) => {
+          this.setData({
+            haveGetCodeSrc: true,
+            codeSrc: resp.result,
+          });
+          wx.hideLoading();
+        })
+        .catch((e) => {
+          wx.hideLoading();
+          console.error("getMiniProgramCode failed:", normalizeError(e), e);
+          const errMsg = String((e && e.errMsg) || (e && e.message) || "");
+          if (errMsg.includes("Environment not found")) {
+            this.setData({
+              showTip: true,
+              title: "云开发环境未找到",
+              content:
+                "如果已经开通云开发，请检查环境ID与 `miniprogram/app.js` 中的 `env` 参数是否一致。",
+            });
+            return;
+          }
+          if (errMsg.includes("FunctionName parameter could not be found")) {
+            this.setData({
+              showTip: true,
+              title: "请上传云函数",
+              content:
+                "在'cloudfunctions/quickstartFunctions'目录右键，选择【上传并部署-云端安装依赖】，等待云函数上传完成后重试。",
+            });
+            return;
+          }
+        });
+    });
   },
 
   clearCodeSrc() {
@@ -362,30 +377,32 @@ Page({
   },
 
   getRecord() {
-    wx.showLoading({
-      title: "",
-    });
-    wx.cloud
-      .callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "selectRecord",
-        },
-      })
-      .then((resp) => {
-        this.setData({
-          haveGetRecord: true,
-          record: resp.result.data,
-        });
-        wx.hideLoading();
-      })
-      .catch((e) => {
-        this.setData({
-          showTip: true,
-        });
-        wx.hideLoading();
-        console.error("selectRecord failed:", normalizeError(e), e);
+    return this.__withSubmitting("getRecord", () => {
+      wx.showLoading({
+        title: "",
       });
+      wx.cloud
+        .callFunction({
+          name: "quickstartFunctions",
+          data: {
+            type: "selectRecord",
+          },
+        })
+        .then((resp) => {
+          this.setData({
+            haveGetRecord: true,
+            record: resp.result.data,
+          });
+          wx.hideLoading();
+        })
+        .catch((e) => {
+          this.setData({
+            showTip: true,
+          });
+          wx.hideLoading();
+          console.error("selectRecord failed:", normalizeError(e), e);
+        });
+    });
   },
 
   clearRecord() {
@@ -395,61 +412,65 @@ Page({
     });
   },
   updateRecord() {
-    wx.showLoading({
-      title: "",
-    });
-    wx.cloud
-      .callFunction({
-        name: "quickstartFunctions",
-        data: {
-          type: "updateRecord",
-          data: this.data.record,
-        },
-      })
-      .then((resp) => {
-        wx.showToast({
-          title: "更新成功",
-        });
-        wx.hideLoading();
-      })
-      .catch((e) => {
-        console.error("updateRecord failed:", normalizeError(e), e);
-        this.setData({
-          showUploadTip: true,
-        });
-        wx.hideLoading();
+    return this.__withSubmitting("updateRecord", () => {
+      wx.showLoading({
+        title: "",
       });
+      wx.cloud
+        .callFunction({
+          name: "quickstartFunctions",
+          data: {
+            type: "updateRecord",
+            data: this.data.record,
+          },
+        })
+        .then((resp) => {
+          wx.showToast({
+            title: "更新成功",
+          });
+          wx.hideLoading();
+        })
+        .catch((e) => {
+          console.error("updateRecord failed:", normalizeError(e), e);
+          this.setData({
+            showUploadTip: true,
+          });
+          wx.hideLoading();
+        });
+    });
   },
 
   uploadImg() {
-    wx.showLoading({
-      title: "",
-    });
-    // 让用户选择一张图片
-    wx.chooseMedia({
-      count: 1,
-      success: (chooseResult) => {
-        // 将图片上传至云存储空间
-        wx.cloud
-          .uploadFile({
-            // 指定上传到的云路径
-            cloudPath: `my-photo-${new Date().getTime()}.png`,
-            // 指定要上传的文件的小程序临时文件路径
-            filePath: chooseResult.tempFiles[0].tempFilePath,
-          })
-          .then((res) => {
-            this.setData({
-              haveGetImgSrc: true,
-              imgSrc: res.fileID,
+    return this.__withSubmitting("uploadImg", () => {
+      wx.showLoading({
+        title: "",
+      });
+      // 让用户选择一张图片
+      wx.chooseMedia({
+        count: 1,
+        success: (chooseResult) => {
+          // 将图片上传至云存储空间
+          wx.cloud
+            .uploadFile({
+              // 指定上传到的云路径
+              cloudPath: `my-photo-${new Date().getTime()}.png`,
+              // 指定要上传的文件的小程序临时文件路径
+              filePath: chooseResult.tempFiles[0].tempFilePath,
+            })
+            .then((res) => {
+              this.setData({
+                haveGetImgSrc: true,
+                imgSrc: res.fileID,
+              });
+            })
+            .catch((e) => {
+              console.error("uploadFile failed:", normalizeError(e), e);
             });
-          })
-          .catch((e) => {
-            console.error("uploadFile failed:", normalizeError(e), e);
-          });
-      },
-      complete: () => {
-        wx.hideLoading();
-      },
+        },
+        complete: () => {
+          wx.hideLoading();
+        },
+      });
     });
   },
 
@@ -467,24 +488,26 @@ Page({
     });
   },
   runCallContainer: async function () {
-    const app = getApp();
-    console.log("globalData", app.globalData);
-    const c1 = new wx.cloud.Cloud({
-      resourceEnv: app.globalData.env,
-    });
-    await c1.init();
-    const r = await c1.callContainer({
-      path: "/api/users", // 填入业务自定义路径
-      header: {
-        "X-WX-SERVICE": "express-test", // 填入服务名称
-      },
-      // 其余参数同 wx.request
-      method: "GET",
-    });
-    console.log(r);
-    this.setData({
-      haveGetCallContainerRes: true,
-      callContainerResStr: `${JSON.stringify(r.data.items, null, 2)}`,
+    return this.__withSubmitting("runCallContainer", async () => {
+      const app = getApp();
+      console.log("globalData", app.globalData);
+      const c1 = new wx.cloud.Cloud({
+        resourceEnv: app.globalData.env,
+      });
+      await c1.init();
+      const r = await c1.callContainer({
+        path: "/api/users", // 填入业务自定义路径
+        header: {
+          "X-WX-SERVICE": "express-test", // 填入服务名称
+        },
+        // 其余参数同 wx.request
+        method: "GET",
+      });
+      console.log(r);
+      this.setData({
+        haveGetCallContainerRes: true,
+        callContainerResStr: `${JSON.stringify(r.data.items, null, 2)}`,
+      });
     });
   },
   getCallcbrCode: function () {

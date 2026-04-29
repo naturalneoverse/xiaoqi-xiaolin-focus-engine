@@ -171,6 +171,12 @@ page {
   white-space: nowrap;
 }
 
+.card-hint {
+  margin-top: 8rpx;
+  color: #8ea1b6;
+  font-size: 24rpx;
+}
+
 .card-desc-muted {
   display: block;
   margin-top: 12rpx;
@@ -194,6 +200,33 @@ page {
   color: #284f73;
   font-size: 47rpx;
   font-weight: 700;
+}
+
+.stats-empty-wrap {
+  margin-top: 32rpx;
+  min-height: 220rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: 28rpx;
+  background: linear-gradient(180deg, #f7fbff 0%, #edf4fc 100%);
+  border: 2rpx solid rgba(186, 204, 224, 0.5);
+  box-shadow: inset 0 0 0 1rpx rgba(255, 255, 255, 0.82);
+  padding: 32rpx 28rpx;
+  box-sizing: border-box;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.stats-empty-text {
+  color: #6f86a0;
+  font-size: 32rpx;
+  line-height: 1.8;
+}
+
+.stats-empty-wrap-hover {
+  transform: scale(0.995);
+  opacity: 0.96;
 }
 
 .progress-item {

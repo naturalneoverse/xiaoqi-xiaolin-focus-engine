@@ -54,8 +54,9 @@ page {
   background: rgba(255, 255, 255, 0.75);
   border: 2rpx solid rgba(255, 255, 255, 0.9);
   box-shadow: 0 10rpx 24rpx rgba(143, 182, 219, 0.14);
-  padding: 30rpx;
+  padding: 30rpx 30rpx 54rpx;
   margin-bottom: 22rpx;
+  position: relative;
 }
 
 .label {
@@ -76,6 +77,31 @@ page {
   height: 190rpx;
   font-size: 42rpx;
   color: #295a80;
+}
+
+.limit-error {
+  display: block;
+  margin-top: 8rpx;
+  color: #dc2626;
+  font-size: 22rpx;
+}
+
+.limit-tip {
+  display: block;
+  margin-top: 6rpx;
+  color: rgba(156, 178, 200, 0.45);
+  font-size: 22rpx;
+}
+
+.limit-tip-corner {
+  position: absolute;
+  right: 30rpx;
+  bottom: 20rpx;
+  margin-top: 0;
+}
+
+.limit-tip-exceeded {
+  color: #dc2626;
 }
 
 .placeholder-text {

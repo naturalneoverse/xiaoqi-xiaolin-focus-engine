@@ -2,7 +2,7 @@
   <view class="card">
     <view class="title-row">
       <view class="title-main">
-        <image class="title-icon" src="/images/transparent background/important.png" mode="aspectFit" />
+        <image class="title-icon" src="/images/transparent background/important.png" mode="aspectFit" binderror="onImageError" />
         <text class="title">轻重缓急？</text>
       </view>
       <text class="step">1/3</text>

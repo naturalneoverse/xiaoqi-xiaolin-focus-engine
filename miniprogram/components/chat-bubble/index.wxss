@@ -1,12 +1,12 @@
 :host {
   display: inline-block;
-  max-width: 70vw;
+  max-width: 525rpx;
 }
 
 .chat-bubble {
   position: relative;
   width: auto;
-  max-width: 70vw;
+  max-width: 525rpx;
   min-height: 116rpx;
   padding: 26rpx 24rpx;
   box-sizing: border-box;

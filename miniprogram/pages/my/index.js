@@ -14,8 +14,27 @@ Page({
 
   onShow() {
     this.syncUserProfile();
+    this.tryOpenPendingProfileEdit();
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({ selected: 2 });
+    }
+  },
+
+  tryOpenPendingProfileEdit() {
+    const app = getApp();
+    const field = app && app.globalData ? app.globalData.pendingProfileEditField : "";
+    if (!field) return;
+    app.globalData.pendingProfileEditField = "";
+    if (field === "头像") {
+      this.onTapAvatar();
+      return;
+    }
+    if (field === "昵称") {
+      this.startEditNickname();
+      return;
+    }
+    if (field === "个性签名") {
+      this.startEditSignature();
     }
   },
 
@@ -34,36 +53,38 @@ Page({
   },
 
   onTapAvatar() {
-    const app = getApp();
-    const previousAvatar = this.data.userProfile.avatarUrl;
-    wx.chooseImage({
-      count: 1,
-      sizeType: ["compressed"],
-      sourceType: ["album"],
-      success: async (res) => {
-        const tempFilePath = res.tempFilePaths && res.tempFilePaths[0];
-        if (!tempFilePath) return;
-        wx.showLoading({ title: "上传中", mask: true });
-        try {
-          const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).slice(2)}.png`;
-          const uploadRes = await wx.cloud.uploadFile({
-            cloudPath,
-            filePath: tempFilePath,
-          });
-          const fileID = uploadRes && uploadRes.fileID;
-          if (!fileID) throw new Error("avatar_upload_no_fileid");
-          const ok = app.setUserProfile({
-            avatarUrl: fileID,
-          });
-          if (!ok) throw new Error("avatar_save_failed");
-          wx.showToast({ title: "头像已更新", icon: "success" });
-        } catch (e) {
-          app.setUserProfile({ avatarUrl: previousAvatar });
-          wx.showToast({ title: "上传失败", icon: "none" });
-        } finally {
-          wx.hideLoading();
-        }
-      },
+    return this.__withSubmitting("avatarUpload", async () => {
+      const app = getApp();
+      const previousAvatar = this.data.userProfile.avatarUrl;
+      wx.chooseImage({
+        count: 1,
+        sizeType: ["compressed"],
+        sourceType: ["album"],
+        success: async (res) => {
+          const tempFilePath = res.tempFilePaths && res.tempFilePaths[0];
+          if (!tempFilePath) return;
+          wx.showLoading({ title: "上传中", mask: true });
+          try {
+            const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).slice(2)}.png`;
+            const uploadRes = await wx.cloud.uploadFile({
+              cloudPath,
+              filePath: tempFilePath,
+            });
+            const fileID = uploadRes && uploadRes.fileID;
+            if (!fileID) throw new Error("avatar_upload_no_fileid");
+            const ok = app.setUserProfile({
+              avatarUrl: fileID,
+            });
+            if (!ok) throw new Error("avatar_save_failed");
+            wx.showToast({ title: "头像已更新", icon: "success" });
+          } catch (e) {
+            app.setUserProfile({ avatarUrl: previousAvatar });
+            wx.showToast({ title: "上传失败", icon: "none" });
+          } finally {
+            wx.hideLoading();
+          }
+        },
+      });
     });
   },
 

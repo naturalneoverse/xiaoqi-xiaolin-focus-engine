@@ -1,11 +1,14 @@
 // app.js
 const TAB_PAGE_ROUTES = new Set(["pages/sleep/index", "pages/index/index", "pages/my/index"]);
 const NO_TOP_SAFE_AREA_ROUTES = new Set(["pages/login/index"]);
-const USER_PROFILE_KEY = "user_profile";
+const STORAGE_KEYS = require("./config/storageKeys");
 const DEFAULT_USER_PROFILE = {
   avatarUrl: "/images/transparent background/avatar.png",
   nickname: "用户名",
   signature: "我的个性签名",
+};
+const DEFAULT_SETTINGS = {
+  reminderEnabled: true,
 };
 
 function getWindowInfoSafe() {
@@ -76,6 +79,7 @@ if (!wx.__GLOBAL_SAFE_AREA_PATCHED__) {
     options.data = {
       ...originalData,
       _globalSafeAreaStyle: originalData._globalSafeAreaStyle || "",
+      _globalImagePlaceholder: originalData._globalImagePlaceholder || "/images/transparent background/avatar.png",
     };
 
     options.__applyGlobalSafeArea = function applyGlobalSafeArea() {
@@ -85,6 +89,35 @@ if (!wx.__GLOBAL_SAFE_AREA_PATCHED__) {
         _globalSafeAreaStyle: nextStyle,
       });
     };
+
+    options.__safeNavigateBack = function safeNavigateBack(fallbackTabPath = "/pages/sleep/index") {
+      const pages = getCurrentPages();
+      if (pages.length > 1) {
+        wx.navigateBack();
+        return;
+      }
+      wx.switchTab({
+        url: fallbackTabPath,
+      });
+    };
+
+    options.__withSubmitting = function withSubmitting(key, task) {
+      const app = getApp();
+      if (!app || typeof app.withSubmitting !== "function") {
+        return Promise.resolve().then(task);
+      }
+      return app.withSubmitting(this, key, task);
+    };
+
+    if (typeof options.onImageError !== "function") {
+      options.onImageError = function onImageError(e) {
+        const field = e && e.currentTarget && e.currentTarget.dataset ? e.currentTarget.dataset.errField : "";
+        if (!field) return;
+        this.setData({
+          [field]: this.data._globalImagePlaceholder,
+        });
+      };
+    }
 
     options.onLoad = function wrappedOnLoad(...args) {
       this.__applyGlobalSafeArea();
@@ -107,6 +140,8 @@ if (!wx.__GLOBAL_SAFE_AREA_PATCHED__) {
 App({
   onLaunch: function () {
     const localProfile = this.loadLocalUserProfile();
+    const localSettings = this.loadLocalSettings();
+    const hasLoggedIn = this.loadHasLoggedIn();
     this.globalData = {
       // env 参数说明：
       // env 参数决定接下来小程序发起的云开发调用（wx.cloud.xxx）会请求到哪个云环境的资源
@@ -116,9 +151,13 @@ App({
         logo: "/images/transparent background/logo.png",
         xiaoqi: "/images/transparent background/xiaoqi.png",
         xiaolin: "/images/transparent background/xiaolin.png",
+        placeholder: "/images/transparent background/avatar.png",
       },
       userProfile: localProfile,
+      settings: localSettings,
+      hasLoggedIn,
       safeAreaInsets: computeSafeAreaInsets(),
+      pendingProfileEditField: "",
     };
     if (!wx.cloud) {
       console.error("请使用 2.2.3 或以上的基础库以使用云能力");
@@ -132,7 +171,7 @@ App({
 
   loadLocalUserProfile() {
     try {
-      const saved = wx.getStorageSync(USER_PROFILE_KEY);
+      const saved = wx.getStorageSync(STORAGE_KEYS.USER_PROFILE);
       if (!saved || typeof saved !== "object") return { ...DEFAULT_USER_PROFILE };
       return {
         ...DEFAULT_USER_PROFILE,
@@ -141,6 +180,68 @@ App({
     } catch (e) {
       return { ...DEFAULT_USER_PROFILE };
     }
+  },
+
+  loadLocalSettings() {
+    try {
+      const reminderEnabled = wx.getStorageSync(STORAGE_KEYS.REMINDER_ENABLED);
+      return {
+        ...DEFAULT_SETTINGS,
+        reminderEnabled: typeof reminderEnabled === "boolean" ? reminderEnabled : DEFAULT_SETTINGS.reminderEnabled,
+      };
+    } catch (e) {
+      return { ...DEFAULT_SETTINGS };
+    }
+  },
+
+  setSettings(nextPatch) {
+    const previous = (this.globalData && this.globalData.settings) || DEFAULT_SETTINGS;
+    const nextSettings = {
+      ...previous,
+      ...(nextPatch || {}),
+    };
+    try {
+      wx.setStorageSync(STORAGE_KEYS.REMINDER_ENABLED, !!nextSettings.reminderEnabled);
+      this.globalData.settings = nextSettings;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  loadHasLoggedIn() {
+    try {
+      return !!wx.getStorageSync(STORAGE_KEYS.HAS_LOGGED_IN);
+    } catch (e) {
+      return false;
+    }
+  },
+
+  setHasLoggedIn(nextValue) {
+    const value = !!nextValue;
+    try {
+      wx.setStorageSync(STORAGE_KEYS.HAS_LOGGED_IN, value);
+      this.globalData.hasLoggedIn = value;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  withSubmitting(page, key, task) {
+    if (!page || typeof task !== "function") return Promise.resolve();
+    const stateKey = `__submitting_${key || "default"}`;
+    if (page.data && page.data[stateKey]) return Promise.resolve(false);
+    page.setData({
+      [stateKey]: true,
+    });
+    return Promise.resolve()
+      .then(task)
+      .finally(() => {
+        page.setData({
+          [stateKey]: false,
+        });
+      });
   },
 
   getUserProfile() {
@@ -158,7 +259,7 @@ App({
       ...(nextPatch || {}),
     };
     try {
-      wx.setStorageSync(USER_PROFILE_KEY, nextProfile);
+      wx.setStorageSync(STORAGE_KEYS.USER_PROFILE, nextProfile);
       this.globalData.userProfile = nextProfile;
       const pages = getCurrentPages();
       pages.forEach((page) => {

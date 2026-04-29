@@ -1,11 +1,11 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="bg-clouds">
-    <image class="cloud-texture" src="/images/transparent background/cloud-texture.png" mode="widthFix" />
+    <image class="cloud-texture" src="/images/transparent background/cloud-texture.png" mode="widthFix" binderror="onImageError" />
     <view class="cloud-fade"></view>
   </view>
 
   <view class="hero">
-    <image class="logo-mark" src="/images/transparent background/logo.png" mode="aspectFit" />
+    <image class="logo-mark" src="/images/transparent background/logo.png" mode="aspectFit" binderror="onImageError" />
     <text class="brand-cn">小麒小麟专注引擎</text>
     <text class="brand-en">PRECISION FOCUS & AWARENESS ENGINE</text>
     <text class="quote">“时间不是客观流逝，而是我们对未来、当下、过去的编织。”</text>

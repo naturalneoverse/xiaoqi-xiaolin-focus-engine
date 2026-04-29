@@ -44,8 +44,8 @@ page {
   border-radius: 30rpx;
   padding: 24rpx 22rpx;
   margin-bottom: 22rpx;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: 40rpx;
+  margin-right: 40rpx;
 }
 
 .section-title {
