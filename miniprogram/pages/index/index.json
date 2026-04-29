@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "身心平衡",
+  "usingComponents": {
+    "cloud-tip-modal": "/components/cloudTipModal/index"
+  }
+}

@@ -1,0 +1,84 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="back-wrap" bindtap="goBack" hover-class="row-hover">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    </view>
+    <text class="page-title">时间编织图</text>
+    <view class="top-space"></view>
+  </view>
+
+  <view class="card latest-card" bindtap="goWeeklyFromLatest" hover-class="row-hover">
+    <view class="card-head">
+      <text class="card-title">最新报告</text>
+      <text class="card-range">{{latest.range}}</text>
+    </view>
+
+    <view class="latest-body">
+      <view class="metric">
+        <view class="metric-value-wrap">
+          <text class="metric-value">{{latest.moments}}</text>
+          <text class="metric-unit">次</text>
+        </view>
+        <text class="metric-label">真我时刻</text>
+      </view>
+      <view class="metric-divider"></view>
+      <view class="metric">
+        <view class="metric-value-wrap">
+          <text class="metric-value">{{latest.doneCount}}</text>
+          <text class="metric-unit">件</text>
+        </view>
+        <text class="metric-label">完成任务</text>
+      </view>
+      <view class="metric-divider"></view>
+      <view class="metric">
+        <text class="metric-status">{{latest.status}}</text>
+        <text class="metric-label">心流水平</text>
+      </view>
+      <text class="chevron">›</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="card-title card-title-history">历史报告</text>
+    <view class="line"></view>
+    <view
+      wx:for="{{historyReports}}"
+      wx:key="range"
+      class="history-row {{index < historyReports.length - 1 ? 'history-row-border' : ''}}"
+      data-index="{{index}}"
+      bindtap="goHistoryReport"
+      hover-class="row-hover"
+    >
+      <text class="history-left">{{item.range}}</text>
+      <view class="history-right-wrap">
+        <text class="history-right">真我时刻 {{item.moments}}次</text>
+        <text class="history-arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="past-head">
+      <text class="card-title">往期任务</text>
+      <text class="past-subtitle">已完成的任务</text>
+    </view>
+    <view class="line"></view>
+    <view wx:for="{{pastTaskGroups}}" wx:key="range" class="past-group">
+      <view
+        class="group-title-row"
+        data-index="{{index}}"
+        bindtap="toggleTaskGroup"
+        hover-class="row-hover"
+      >
+        <text class="group-arrow">{{item.expanded ? "▾" : "▸"}}</text>
+        <text class="group-range">{{item.range}}{{item.expanded ? "" : "（折叠）"}}</text>
+      </view>
+      <view wx:if="{{item.expanded}}" class="task-items">
+        <view wx:for="{{item.tasks}}" wx:key="name" class="task-item-row">
+          <text class="task-item-name">{{item.name}}</text>
+          <text class="task-item-tag">{{item.tag}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,6 @@
+@import "../../styles/quiz-common.wxss";
+
+.title-icon-who {
+  width: 56rpx;
+  height: 56rpx;
+}

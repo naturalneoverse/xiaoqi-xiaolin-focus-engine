@@ -1,0 +1,41 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="card">
+    <view class="title-row">
+      <view class="title-main">
+        <image class="title-icon" src="/images/transparent background/why.png" mode="aspectFit" />
+        <text class="title">为何而做？</text>
+      </view>
+      <text class="step">3/3</text>
+    </view>
+    <view class="list">
+      <view
+        wx:for="{{options}}"
+        wx:key="key"
+        class="item {{selected === item.key ? 'item-selected' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="chooseOption"
+      >
+        <view>
+          <text class="item-title">{{item.key}}</text>
+          <text class="item-desc">{{item.desc}}</text>
+        </view>
+        <text class="mark">{{selected === item.key ? "✓" : "○"}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="tip">
+    找到每一项任务背后的深层动力，让效率成为一种心流。
+  </view>
+
+  <view class="actions">
+    <button class="btn btn-light" bindtap="goPrev">上一步</button>
+    <button class="btn" bindtap="saveTask">保存任务</button>
+  </view>
+
+  <view class="progress">
+    <view class="dot"></view>
+    <view class="dot"></view>
+    <view class="dot dot-active"></view>
+  </view>
+</view>

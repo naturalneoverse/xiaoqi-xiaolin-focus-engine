@@ -1,0 +1,267 @@
+page {
+  background: linear-gradient(180deg, #deebf8 0%, #d8e7f5 56%, #d3e3f1 100%);
+}
+
+.page {
+  min-height: 100vh;
+  padding: 0 34rpx 20rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-clouds {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 620rpx;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.cloud-texture {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: -6rpx;
+  width: 860rpx;
+  opacity: 0.56;
+}
+
+.cloud-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 620rpx;
+  background: linear-gradient(
+    180deg,
+    rgba(220, 234, 248, 0.99) 0%,
+    rgba(220, 234, 248, 0.88) 22%,
+    rgba(220, 234, 248, 0.48) 46%,
+    rgba(220, 234, 248, 0.2) 68%,
+    rgba(220, 234, 248, 0) 100%
+  );
+}
+
+.hero {
+  width: 100%;
+  margin-top: 172rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.logo-mark {
+  width: 252rpx;
+  height: 252rpx;
+}
+
+.brand-cn {
+  margin-top: 40rpx;
+  color: #234e72;
+  font-size: 66rpx;
+  font-weight: 700;
+  letter-spacing: 1.4rpx;
+}
+
+.brand-en {
+  margin-top: 32rpx;
+  color: #6f859b;
+  font-size: 28rpx;
+  letter-spacing: 2.4rpx;
+}
+
+.hero-line {
+  margin-top: 32rpx;
+  width: 92rpx;
+  height: 2rpx;
+  background: rgba(120, 143, 164, 0.45);
+}
+
+.quote {
+  margin-top: 48rpx;
+  width: 85%;
+  text-align: center;
+  color: #798ca1;
+  font-size: 33rpx;
+  line-height: 1.66;
+}
+
+.quote-author {
+  margin-top: 10rpx;
+  color: #8ea1b6;
+  font-size: 30rpx;
+}
+
+.login-card {
+  width: 100%;
+  margin-top: 80rpx;
+  border-radius: 48rpx;
+  background: rgba(255, 255, 255, 0.76);
+  border: 2rpx solid rgba(255, 255, 255, 0.98);
+  padding: 80rpx 48rpx 80rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  backdrop-filter: blur(18rpx);
+  -webkit-backdrop-filter: blur(18rpx);
+  box-shadow:
+    0 0 0 2rpx rgba(255, 255, 255, 0.34) inset,
+    0 0 30rpx rgba(255, 255, 255, 0.42),
+    0 20rpx 38rpx rgba(110, 136, 162, 0.13);
+  position: relative;
+  z-index: 2;
+}
+
+.login-card::before {
+  content: "";
+  position: absolute;
+  left: 20rpx;
+  right: 20rpx;
+  top: 12rpx;
+  height: 34%;
+  border-radius: 34rpx;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.28) 48%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  pointer-events: none;
+}
+
+.login-card::after {
+  content: "";
+  position: absolute;
+  inset: 10rpx;
+  border-radius: 38rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.56);
+  pointer-events: none;
+}
+
+.welcome-title {
+  color: #1f476a;
+  font-size: 48rpx;
+  font-weight: 700;
+}
+
+.welcome-sub {
+  margin-top: 32rpx;
+  color: #738aa2;
+  font-size: 28rpx;
+  line-height: 1.38;
+}
+
+.wechat-btn {
+  margin-top: 80rpx;
+  width: 540rpx;
+  height: 88rpx;
+  border-radius: 999rpx;
+  border: 0;
+  background: linear-gradient(180deg, #18c882 0%, #14c372 100%);
+  color: #ffffff;
+  box-shadow: 0 12rpx 24rpx rgba(17, 156, 94, 0.24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wechat-btn-disabled {
+  background: linear-gradient(180deg, #9fc9b5 0%, #94c1ab 100%);
+  box-shadow: none;
+  opacity: 0.72;
+}
+
+.wechat-btn-text {
+  font-size: 42rpx;
+  font-weight: 700;
+  letter-spacing: 1.2rpx;
+  white-space: nowrap;
+  line-height: 88rpx;
+  text-align: center;
+}
+
+.footer-tip {
+  margin-top: 72rpx;
+  color: #7f95aa;
+  font-size: 32rpx;
+  position: relative;
+  z-index: 2;
+}
+
+.agreement-row {
+  margin-top: 36rpx;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.checkbox {
+  width: 30rpx;
+  height: 30rpx;
+  border: 2rpx solid #9cb0c4;
+  border-radius: 50%;
+  margin-right: 10rpx;
+  box-sizing: border-box;
+  background: #ffffff;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.checkbox::after {
+  content: "";
+  position: absolute;
+  left: 9rpx;
+  top: 4rpx;
+  width: 8rpx;
+  height: 14rpx;
+  border-right: 2rpx solid #ffffff;
+  border-bottom: 2rpx solid #ffffff;
+  transform: rotate(45deg);
+  opacity: 0;
+}
+
+.checkbox-on {
+  background: #18c882;
+  border-color: #18c882;
+}
+
+.checkbox-on::after {
+  opacity: 1;
+}
+
+.agreement-text {
+  color: #48617a;
+  font-size: 30rpx;
+  line-height: 30rpx;
+  white-space: nowrap;
+  max-width: calc(100% - 42rpx);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media screen and (min-width: 768px) {
+  .checkbox {
+    width: 18px;
+    height: 18px;
+  }
+
+  .checkbox::after {
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 9px;
+  }
+}

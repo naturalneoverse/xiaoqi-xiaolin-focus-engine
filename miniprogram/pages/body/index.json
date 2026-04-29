@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "身体信号",
+  "usingComponents": {
+    "chat-bubble": "/components/chat-bubble/index"
+  }
+}

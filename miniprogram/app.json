@@ -1,0 +1,58 @@
+{
+  "entryPagePath": "pages/login/index",
+  "pages": [
+    "pages/login/index",
+    "pages/sleep/index",
+    "pages/index/index",
+    "pages/body-sleep/index",
+    "pages/body-sport/index",
+    "pages/body/index",
+    "pages/body-report/index",
+    "pages/today-report/index",
+    "pages/time-report/index",
+    "pages/poster/index",
+    "pages/weekly-report/index",
+    "pages/task-create/index",
+    "pages/task-priority/index",
+    "pages/task-for-whom/index",
+    "pages/task-why/index",
+    "pages/task-detail/index",
+    "pages/my/index",
+    "pages/settings/index",
+    "pages/privacy/index",
+    "pages/help/index",
+    "pages/about/index",
+    "pages/example/index"
+  ],
+  "window": {
+    "backgroundColor": "#F0F7FF",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#F0F7FF",
+    "navigationBarTitleText": "时间",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#9EC7E6",
+    "selectedColor": "#184A72",
+    "backgroundColor": "#00000000",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/sleep/index",
+        "text": "时间"
+      },
+      {
+        "pagePath": "pages/index/index",
+        "text": "身心"
+      },
+      {
+        "pagePath": "pages/my/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents"
+}

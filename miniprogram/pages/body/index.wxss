@@ -1,0 +1,53 @@
+@import "../../styles/body-quiz-common.wxss";
+
+.mascot-modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 24, 40, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36rpx;
+  z-index: 99;
+}
+
+.mascot-modal {
+  width: 100%;
+  max-width: 560rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  padding: 30rpx 28rpx 24rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.mascot-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12rpx;
+}
+
+.mascot-image {
+  width: 168rpx;
+  height: 168rpx;
+  flex-shrink: 0;
+  transform: scaleX(-1);
+}
+
+.mascot-modal chat-bubble {
+  flex: 1;
+  max-width: none;
+}
+
+.mascot-btn {
+  margin-top: 18rpx;
+  width: 100%;
+  height: 78rpx;
+  line-height: 78rpx;
+  border-radius: 999rpx;
+  background: #12598f;
+  color: #ffffff;
+  font-size: 28rpx;
+}

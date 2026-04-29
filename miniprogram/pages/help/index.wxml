@@ -1,0 +1,59 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="back-wrap" bindtap="goBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    </view>
+    <text class="page-title">帮助与支持</text>
+    <view class="top-space"></view>
+  </view>
+
+  <view class="card guide-card">
+    <text class="section-title">使用指南</text>
+
+    <view class="guide-item" wx:for="{{guideList}}" wx:key="title">
+      <view class="guide-head" bindtap="toggleGuide" data-index="{{index}}">
+        <view class="guide-left">
+          <text class="guide-index">{{index + 1}}</text>
+          <text class="guide-q">{{item.title}}</text>
+        </view>
+        <text class="guide-arrow">{{guideOpen[index] ? "⌃" : "⌄"}}</text>
+      </view>
+      <view wx:if="{{guideOpen[index]}}" class="guide-answer-wrap">
+        <text class="guide-answer">{{item.content}}</text>
+      </view>
+      <view wx:if="{{index !== guideList.length - 1}}" class="line"></view>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="section-title">常见问题</text>
+
+    <view class="faq-item" wx:for="{{faqList}}" wx:key="question">
+      <view class="faq-cell" bindtap="toggleFaq" data-index="{{index}}">
+        <text class="faq-text">{{item.question}}</text>
+        <text class="faq-arrow">{{faqOpen[index] ? "⌃" : "›"}}</text>
+      </view>
+      <view wx:if="{{faqOpen[index]}}" class="faq-answer-wrap">
+        <text class="faq-answer">{{item.answer}}</text>
+      </view>
+      <view wx:if="{{index !== faqList.length - 1}}" class="line"></view>
+    </view>
+  </view>
+
+  <view class="card contact-card">
+    <text class="section-title">联系我们</text>
+    <text class="contact-guide">如以上未能解决您的问题，请通过下方式联系我们</text>
+    <text class="contact">邮箱：info@naturenw.cn</text>
+    <text class="contact">微信：naturepeace123898161</text>
+    <text class="contact">服务时间：工作日 9:00-18:00</text>
+    <text class="contact-tail">我们会在24小时内回复您的邮件</text>
+  </view>
+
+  <view class="brand-wrap">
+    <view class="mascot-row">
+      <image class="mascot-image mascot-left" src="/images/transparent background/xiaoqi.png" mode="aspectFit" />
+      <image class="mascot-image mascot-right" src="/images/transparent background/xiaolin.png" mode="aspectFit" />
+    </view>
+    <text class="brand-slogan">用智慧爱自己  用行动爱世界</text>
+  </view>
+</view>

@@ -1,0 +1,142 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="back-wrap" bindtap="goBack" hover-class="row-hover">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    </view>
+    <text class="page-title">身体边界报告</text>
+    <view class="top-space"></view>
+  </view>
+
+  <view class="range-wrap">
+    <text class="range-text">3月10日 — 3月16日</text>
+  </view>
+
+  <view class="main-card">
+    <view class="section">
+      <text class="section-title">本周回顾</text>
+      <text class="section-desc">这周你记录了 7 天，共 14 次.</text>
+    </view>
+
+    <view class="group">
+      <view class="group-title-row">
+        <image class="group-icon-image" src="/images/transparent background/sleep.png" mode="aspectFit" />
+        <text class="group-title">睡眠</text>
+      </view>
+      <view class="grid-two">
+        <view class="mini-item">
+          <view class="mini-row"><text>睡得香</text><text>65%</text></view>
+          <view class="bar"><view class="fill" style="width: 65%;"></view></view>
+        </view>
+        <view class="mini-item">
+          <view class="mini-row"><text>做梦了</text><text>20%</text></view>
+          <view class="bar"><view class="fill" style="width: 20%;"></view></view>
+        </view>
+        <view class="mini-item">
+          <view class="mini-row"><text>睡不实</text><text>10%</text></view>
+          <view class="bar"><view class="fill" style="width: 10%;"></view></view>
+        </view>
+        <view class="mini-item">
+          <view class="mini-row"><text>睡不着</text><text>5%</text></view>
+          <view class="bar"><view class="fill" style="width: 5%;"></view></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="group">
+      <view class="group-title-row">
+        <image class="group-icon-image" src="/images/transparent background/sport.png" mode="aspectFit" />
+        <text class="group-title">运动</text>
+      </view>
+      <view class="grid-two">
+        <view class="mini-item">
+          <view class="mini-row"><text>动够了</text><text>40%</text></view>
+          <view class="bar"><view class="fill" style="width: 40%;"></view></view>
+        </view>
+        <view class="mini-item">
+          <view class="mini-row"><text>动了点</text><text>45%</text></view>
+          <view class="bar"><view class="fill" style="width: 45%;"></view></view>
+        </view>
+        <view class="mini-item">
+          <view class="mini-row"><text>没咋动</text><text>15%</text></view>
+          <view class="bar"><view class="fill" style="width: 15%;"></view></view>
+        </view>
+        <view class="mini-item">
+          <view class="mini-row"><text>动过头</text><text>0%</text></view>
+          <view class="bar"><view class="fill" style="width: 0%;"></view></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="group">
+      <view class="group-title-row">
+        <image class="group-icon-image" src="/images/transparent background/singnal.png" mode="aspectFit" />
+        <text class="group-title">身体信号</text>
+      </view>
+      <view class="grid-two">
+        <view class="mini-item">
+          <view class="mini-row"><text>没事</text><text>70%</text></view>
+          <view class="bar"><view class="fill" style="width: 70%;"></view></view>
+        </view>
+        <view class="mini-item">
+          <view class="mini-row"><text>有劲</text><text>20%</text></view>
+          <view class="bar"><view class="fill" style="width: 20%;"></view></view>
+        </view>
+        <view class="mini-item">
+          <view class="mini-row"><text>累了</text><text>10%</text></view>
+          <view class="bar"><view class="fill" style="width: 10%;"></view></view>
+        </view>
+        <view class="mini-item">
+          <view class="mini-row"><text>疼了</text><text>0%</text></view>
+          <view class="bar"><view class="fill" style="width: 0%;"></view></view>
+        </view>
+      </view>
+    </view>
+
+    <view class="status-card">
+      <view class="status-left">
+        <text class="status-label">本周状态</text>
+        <view class="status-title-row">
+          <text class="status-title">身心满格</text>
+          <image class="status-icon-image" src="/images/transparent background/good.png" mode="aspectFit" />
+        </view>
+        <text class="status-desc">保持专注与放松的平衡，让身体在规律中获得滋养.</text>
+      </view>
+    </view>
+
+    <view class="ai-card">
+      <view class="ai-avatar">
+        <image class="ai-avatar-image" src="/images/transparent background/xiaolin.png" mode="aspectFit" />
+      </view>
+      <view class="ai-bubble-wrap">
+        <chat-bubble
+          text="这周动得少了一点。下周散个步就行，不追求多，只追求动."
+          color="#b7d6ea"
+          arrowPosition="left"
+        />
+      </view>
+    </view>
+
+    <view class="quote-list">
+      <view class="quote-item">
+        <view class="quote-body">
+          <text class="quote-title">累到不行的时候，你才想起来自己还有个身体.</text>
+          <text class="quote-sub">—雅斯贝尔斯说，人在身体的极限处，才真正意识到自己活着.</text>
+        </view>
+      </view>
+      <view class="quote-item">
+        <view class="quote-body">
+          <text class="quote-title">疼了知道停，累了知道歇，好了知道珍惜.</text>
+          <text class="quote-sub">—身体从不撒谎，它的信号就是边界.</text>
+        </view>
+      </view>
+      <view class="quote-item">
+        <view class="quote-body">
+          <text class="quote-title">对自己好一点，不是口号，是练习.</text>
+          <text class="quote-sub">—边界不是限制，是保护。不是束缚，是自由.</text>
+        </view>
+      </view>
+    </view>
+
+    <button class="back-btn" bindtap="goHome">返回身心页面</button>
+  </view>
+</view>

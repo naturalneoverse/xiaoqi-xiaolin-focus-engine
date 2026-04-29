@@ -1,0 +1,174 @@
+// app.js
+const TAB_PAGE_ROUTES = new Set(["pages/sleep/index", "pages/index/index", "pages/my/index"]);
+const NO_TOP_SAFE_AREA_ROUTES = new Set(["pages/login/index"]);
+const USER_PROFILE_KEY = "user_profile";
+const DEFAULT_USER_PROFILE = {
+  avatarUrl: "/images/transparent background/avatar.png",
+  nickname: "用户名",
+  signature: "我的个性签名",
+};
+
+function getWindowInfoSafe() {
+  try {
+    if (wx.getWindowInfo) return wx.getWindowInfo();
+    return wx.getSystemInfoSync();
+  } catch (e) {
+    return {};
+  }
+}
+
+function computeSafeAreaInsets() {
+  let statusBarHeight = 0;
+  let windowHeight = 0;
+  let safeAreaBottom = 0;
+  let windowWidth = 375;
+
+  const win = getWindowInfoSafe();
+  statusBarHeight = win.statusBarHeight || 0;
+  windowHeight = win.windowHeight || 0;
+  windowWidth = win.windowWidth || 375;
+  if (win.safeArea) safeAreaBottom = win.safeArea.bottom || 0;
+
+  let topInset = statusBarHeight;
+  try {
+    const menuRect = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null;
+    if (menuRect && menuRect.top) {
+      // Keep content in the same horizontal band as the native capsule.
+      topInset = Math.max(menuRect.top, statusBarHeight);
+    }
+  } catch (e) {
+    // Keep status bar fallback.
+  }
+
+  let bottomInset = 0;
+  if (windowHeight && safeAreaBottom) {
+    bottomInset = Math.max(windowHeight - safeAreaBottom, 0);
+  }
+  return {
+    top: Math.max(topInset, 0),
+    bottom: Math.max(bottomInset, 0),
+    windowWidth,
+  };
+}
+
+function getTabBarExtraBottom(route, windowWidth) {
+  if (!TAB_PAGE_ROUTES.has(route)) return 0;
+  const unit = windowWidth / 750;
+  return Math.ceil(unit * 160);
+}
+
+function buildSafeAreaStyle(route) {
+  const insets = computeSafeAreaInsets();
+  const bottom = insets.bottom + getTabBarExtraBottom(route, insets.windowWidth);
+  const top = NO_TOP_SAFE_AREA_ROUTES.has(route) ? 0 : insets.top;
+  return `padding-top:${top}px;padding-bottom:${bottom}px;box-sizing:border-box;`;
+}
+
+const rawPage = Page;
+if (!wx.__GLOBAL_SAFE_AREA_PATCHED__) {
+  wx.__GLOBAL_SAFE_AREA_PATCHED__ = true;
+  Page = function safeAreaPage(pageOptions) {
+    const options = pageOptions || {};
+    const originalData = options.data || {};
+    const originalOnLoad = options.onLoad;
+    const originalOnShow = options.onShow;
+
+    options.data = {
+      ...originalData,
+      _globalSafeAreaStyle: originalData._globalSafeAreaStyle || "",
+    };
+
+    options.__applyGlobalSafeArea = function applyGlobalSafeArea() {
+      const nextStyle = buildSafeAreaStyle(this.route || "");
+      if (this.data && this.data._globalSafeAreaStyle === nextStyle) return;
+      this.setData({
+        _globalSafeAreaStyle: nextStyle,
+      });
+    };
+
+    options.onLoad = function wrappedOnLoad(...args) {
+      this.__applyGlobalSafeArea();
+      if (typeof originalOnLoad === "function") {
+        originalOnLoad.apply(this, args);
+      }
+    };
+
+    options.onShow = function wrappedOnShow(...args) {
+      this.__applyGlobalSafeArea();
+      if (typeof originalOnShow === "function") {
+        originalOnShow.apply(this, args);
+      }
+    };
+
+    return rawPage(options);
+  };
+}
+
+App({
+  onLaunch: function () {
+    const localProfile = this.loadLocalUserProfile();
+    this.globalData = {
+      // env 参数说明：
+      // env 参数决定接下来小程序发起的云开发调用（wx.cloud.xxx）会请求到哪个云环境的资源
+      // 此处请填入环境 ID, 环境 ID 可在微信开发者工具右上顶部工具栏点击云开发按钮打开获取
+      env: "cloud1-9goe0m7d1d397415",
+      imageAssets: {
+        logo: "/images/transparent background/logo.png",
+        xiaoqi: "/images/transparent background/xiaoqi.png",
+        xiaolin: "/images/transparent background/xiaolin.png",
+      },
+      userProfile: localProfile,
+      safeAreaInsets: computeSafeAreaInsets(),
+    };
+    if (!wx.cloud) {
+      console.error("请使用 2.2.3 或以上的基础库以使用云能力");
+    } else {
+      wx.cloud.init({
+        env: this.globalData.env,
+        traceUser: true,
+      });
+    }
+  },
+
+  loadLocalUserProfile() {
+    try {
+      const saved = wx.getStorageSync(USER_PROFILE_KEY);
+      if (!saved || typeof saved !== "object") return { ...DEFAULT_USER_PROFILE };
+      return {
+        ...DEFAULT_USER_PROFILE,
+        ...saved,
+      };
+    } catch (e) {
+      return { ...DEFAULT_USER_PROFILE };
+    }
+  },
+
+  getUserProfile() {
+    const current = (this.globalData && this.globalData.userProfile) || {};
+    return {
+      ...DEFAULT_USER_PROFILE,
+      ...current,
+    };
+  },
+
+  setUserProfile(nextPatch) {
+    const previous = this.getUserProfile();
+    const nextProfile = {
+      ...previous,
+      ...(nextPatch || {}),
+    };
+    try {
+      wx.setStorageSync(USER_PROFILE_KEY, nextProfile);
+      this.globalData.userProfile = nextProfile;
+      const pages = getCurrentPages();
+      pages.forEach((page) => {
+        if (page && typeof page.onGlobalUserProfileChange === "function") {
+          page.onGlobalUserProfileChange(nextProfile);
+        }
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+});

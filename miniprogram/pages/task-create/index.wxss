@@ -1,0 +1,282 @@
+page {
+  background: linear-gradient(180deg, #f8fbff 0%, #e8f3ff 100%);
+}
+
+.page {
+  min-height: 100vh;
+  padding: 18rpx 28rpx 34rpx;
+  box-sizing: border-box;
+}
+
+.nav {
+  height: 74rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.back {
+  width: 74rpx;
+  height: 74rpx;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.close-icon {
+  width: 40rpx;
+  height: 40rpx;
+  display: block;
+}
+
+.nav-title {
+  color: #12598f;
+  font-size: 48rpx;
+  font-weight: 700;
+}
+
+.nav-space {
+  width: 74rpx;
+}
+
+.quote {
+  display: block;
+  text-align: center;
+  color: #8ab0d1;
+  font-size: 30rpx;
+  letter-spacing: 2rpx;
+  margin-top: 60rpx;
+  margin-bottom: 48rpx;
+}
+
+.input-card {
+  border-radius: 34rpx;
+  background: rgba(255, 255, 255, 0.75);
+  border: 2rpx solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10rpx 24rpx rgba(143, 182, 219, 0.14);
+  padding: 30rpx;
+  margin-bottom: 22rpx;
+}
+
+.label {
+  display: block;
+  color: #8ca6be;
+  font-size: 40rpx;
+  margin-bottom: 14rpx;
+}
+
+.input {
+  height: 72rpx;
+  font-size: 44rpx;
+  color: #295a80;
+}
+
+.textarea {
+  width: 100%;
+  height: 190rpx;
+  font-size: 42rpx;
+  color: #295a80;
+}
+
+.placeholder-text {
+  color: #b9cad9;
+  font-size: 32rpx;
+}
+
+.grid {
+  margin-top: 18rpx;
+  display: flex;
+  gap: 22rpx;
+  width: 100%;
+}
+
+.grid-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.picker {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.box {
+  width: 100%;
+  height: 188rpx;
+  border-radius: 30rpx;
+  background: rgba(255, 255, 255, 0.56);
+  border: 2rpx solid rgba(255, 255, 255, 0.86);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.icon-calendar {
+  width: 84rpx;
+  height: 84rpx;
+  display: block;
+}
+
+.icon-bell {
+  width: 52rpx;
+  height: 52rpx;
+  position: relative;
+}
+
+.icon-remind {
+  width: 84rpx;
+  height: 84rpx;
+  background: transparent;
+}
+
+.bell-dome {
+  position: absolute;
+  left: 8rpx;
+  top: 8rpx;
+  width: 36rpx;
+  height: 26rpx;
+  border-radius: 22rpx 22rpx 10rpx 10rpx;
+  border: 3rpx solid #a6c2d8;
+  border-bottom: none;
+  box-sizing: border-box;
+}
+
+.bell-bottom {
+  position: absolute;
+  left: 10rpx;
+  top: 32rpx;
+  width: 32rpx;
+  height: 6rpx;
+  border-radius: 8rpx;
+  background: #a6c2d8;
+}
+
+.bell-dot {
+  position: absolute;
+  left: 22rpx;
+  top: 40rpx;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: #a6c2d8;
+}
+
+.box-main {
+  margin-top: 10rpx;
+  color: #6c92b1;
+  font-size: 40rpx;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.box-sub {
+  margin-top: 8rpx;
+  color: #7f95aa;
+  font-size: 24rpx;
+  max-width: 88%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn {
+  margin-top: 62rpx;
+  width: 100%;
+  height: 114rpx;
+  line-height: 1;
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, #d9eeff 0%, #c9e6ff 100%);
+  color: #1a5a90;
+  font-size: 48rpx;
+  font-weight: 700;
+  box-shadow: inset 0 2rpx 0 rgba(255, 255, 255, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-panel {
+  width: 620rpx;
+  border-radius: 24rpx;
+  background: #ffffff;
+  padding: 28rpx 24rpx;
+  box-sizing: border-box;
+}
+
+.modal-title {
+  display: block;
+  color: #1f476a;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.modal-row {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.modal-label {
+  color: #5f7f99;
+  font-size: 28rpx;
+}
+
+.modal-value {
+  color: #295a80;
+  font-size: 28rpx;
+}
+
+.modal-value-disabled {
+  color: #b5c3d0;
+}
+
+.modal-inline-pickers {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.modal-link {
+  display: inline-block;
+  margin-top: 10rpx;
+  color: #6a8eac;
+  font-size: 24rpx;
+}
+
+.modal-actions {
+  margin-top: 24rpx;
+  display: flex;
+  gap: 14rpx;
+}
+
+.modal-btn {
+  flex: 1;
+  height: 74rpx;
+  line-height: 74rpx;
+  border-radius: 999rpx;
+  background: #12598f;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.modal-btn-light {
+  background: #eef5fc;
+  color: #6a849c;
+}

@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "今日报告",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "chat-bubble": "/components/chat-bubble/index"
+  }
+}

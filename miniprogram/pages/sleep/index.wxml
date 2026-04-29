@@ -1,0 +1,52 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <text class="main-title">今日任务</text>
+    <view class="add-btn" bindtap="goTaskCreate">
+      <image class="add-btn-icon" src="/images/transparent background/creat.png" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view class="title-row">
+    <view class="meta-wrap">
+      <view class="meta-date-wrap">
+        <text class="meta-date-icon">◷</text>
+        <text class="meta-date">2024年5月20日</text>
+      </view>
+      <view class="meta-progress">
+        <text class="meta-text">已完成任务：{{doneCount}}/{{totalCount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="task-list">
+    <view
+      wx:for="{{tasks}}"
+      wx:key="id"
+      class="task-card {{item.typeClass}}"
+      data-id="{{item.id}}"
+      bindtap="openTaskDetail"
+      bindlongpress="onTaskLongPress"
+      hover-class="task-card-hover"
+      hover-stay-time="70"
+    >
+      <view class="task-head">
+        <text class="task-title">{{item.title}}</text>
+        <text class="task-time">{{item.timeText}}</text>
+      </view>
+      <view class="task-foot">
+        <view class="task-tags">
+          <text wx:for="{{item.tags}}" wx:key="text" class="tag {{item.className}} {{item.isPriority ? 'tag-priority' : ''}}">{{item.text}}</text>
+        </view>
+        <view class="status {{item.done ? 'status-done' : ''}}">{{item.done ? '✓' : '○'}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-divider"></view>
+
+  <view class="report-card" bindtap="goTimeReport">
+    <text class="report-title">时间编织图</text>
+    <text class="report-sub">你编织的，不是时间，是自己。</text>
+    <text class="report-arrow">></text>
+  </view>
+</view>

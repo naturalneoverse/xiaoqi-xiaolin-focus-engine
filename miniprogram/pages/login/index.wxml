@@ -1,0 +1,29 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="bg-clouds">
+    <image class="cloud-texture" src="/images/transparent background/cloud-texture.png" mode="widthFix" />
+    <view class="cloud-fade"></view>
+  </view>
+
+  <view class="hero">
+    <image class="logo-mark" src="/images/transparent background/logo.png" mode="aspectFit" />
+    <text class="brand-cn">小麒小麟专注引擎</text>
+    <text class="brand-en">PRECISION FOCUS & AWARENESS ENGINE</text>
+    <text class="quote">“时间不是客观流逝，而是我们对未来、当下、过去的编织。”</text>
+    <text class="quote-author">— 胡塞尔</text>
+  </view>
+
+  <view class="login-card">
+    <text class="welcome-title">欢迎回来</text>
+    <text class="welcome-sub">开启您的生命觉察与专注之旅</text>
+    <button class="wechat-btn {{(isLoading || (isFirstLogin && !agree)) ? 'wechat-btn-disabled' : ''}}" bindtap="onLoginTap" disabled="{{isLoading || (isFirstLogin && !agree)}}">
+      <text class="wechat-btn-text">{{isLoading ? loadingText : "微信一键登录"}}</text>
+    </button>
+  </view>
+
+  <text class="footer-tip">用智慧爱自己 用行动爱世界</text>
+
+  <view wx:if="{{isFirstLogin}}" class="agreement-row" bindtap="toggleAgree">
+    <view class="checkbox {{agree ? 'checkbox-on' : ''}}"></view>
+    <text class="agreement-text">我已阅读并同意《用户服务协议》《隐私政策》</text>
+  </view>
+</view>

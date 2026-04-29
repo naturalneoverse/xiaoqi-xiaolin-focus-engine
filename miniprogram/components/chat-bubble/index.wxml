@@ -1,0 +1,6 @@
+<view
+  class="chat-bubble {{arrowClass}}"
+  style="--bubble-border: {{bubbleColor}};"
+>
+  <text class="bubble-text">{{normalizedText}}</text>
+</view>

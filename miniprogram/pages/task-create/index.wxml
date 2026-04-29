@@ -1,0 +1,110 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="nav">
+    <view class="back" bindtap="onBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    </view>
+    <text class="nav-title">创建新任务</text>
+    <view class="nav-space"></view>
+  </view>
+
+  <text class="quote">“记下你要做的，时间就有了形状。”</text>
+
+  <view class="input-card">
+    <text class="label">任务名称</text>
+    <input
+      class="input"
+      placeholder="输入任务名称"
+      placeholder-class="placeholder-text"
+      value="{{taskName}}"
+      bindinput="onTaskNameInput"
+    />
+  </view>
+
+  <view class="input-card">
+    <text class="label">任务内容</text>
+    <textarea
+      class="textarea"
+      placeholder="详细描述你的任务..."
+      placeholder-class="placeholder-text"
+      value="{{taskContent}}"
+      bindinput="onTaskContentInput"
+    />
+  </view>
+
+  <view class="grid">
+    <view class="grid-item">
+      <view class="box" bindtap="openDateModal">
+        <image class="icon-calendar" src="/images/transparent background/calendar.png" mode="aspectFit" />
+        <text class="box-main">选择日期</text>
+        <text class="box-sub">{{dateText}}</text>
+      </view>
+    </view>
+    <view class="grid-item">
+      <view class="box" bindtap="openReminderModal">
+        <image class="icon-remind" src="/images/transparent background/alarm.png" mode="aspectFit" />
+        <text class="box-main">设置提醒</text>
+        <text class="box-sub">{{reminderText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <button class="btn" bindtap="next">下一步</button>
+
+  <view wx:if="{{showDateModal}}" class="modal-mask" bindtap="closeDateModal">
+    <view class="modal-panel" catchtap="noop">
+      <text class="modal-title">选择日期</text>
+      <view class="modal-row">
+        <text class="modal-label">开始日期</text>
+        <picker mode="date" value="{{draftStartDate}}" bindchange="onDraftStartDateChange">
+          <text class="modal-value">{{draftStartDate}}</text>
+        </picker>
+      </view>
+      <view class="modal-row">
+        <text class="modal-label">结束日期</text>
+        <picker mode="date" value="{{draftEndDate}}" start="{{draftStartDate}}" bindchange="onDraftEndDateChange">
+          <text class="modal-value">{{draftEndDate || "不填写"}}</text>
+        </picker>
+      </view>
+      <text class="modal-link" bindtap="clearDraftEndDate">清空结束日期</text>
+      <view class="modal-actions">
+        <button class="modal-btn modal-btn-light" bindtap="closeDateModal">取消</button>
+        <button class="modal-btn" bindtap="confirmDateModal">确定</button>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{showReminderModal}}" class="modal-mask" bindtap="closeReminderModal">
+    <view class="modal-panel" catchtap="noop">
+      <text class="modal-title">设置提醒</text>
+      <view class="modal-row">
+        <text class="modal-label">提醒时间</text>
+        <view class="modal-inline-pickers">
+          <picker mode="date" value="{{reminderDate}}" bindchange="onReminderDateChange">
+            <text class="modal-value">{{reminderDate || "选择日期"}}</text>
+          </picker>
+          <picker mode="time" value="{{reminderTime}}" bindchange="onReminderTimeChange">
+            <text class="modal-value">{{reminderTime || "选择时间"}}</text>
+          </picker>
+        </view>
+      </view>
+      <view class="modal-row">
+        <text class="modal-label">提醒频率</text>
+        <picker
+          mode="selector"
+          range="{{reminderFrequencyOptions}}"
+          value="{{reminderFrequencyIndex}}"
+          bindchange="onReminderFrequencyChange"
+          disabled="{{!reminderDate || !reminderTime}}"
+        >
+          <text class="modal-value {{(!reminderDate || !reminderTime) ? 'modal-value-disabled' : ''}}">
+            {{reminderFrequency}}
+          </text>
+        </picker>
+      </view>
+      <view class="modal-actions">
+        <button class="modal-btn modal-btn-light" bindtap="closeReminderModal">取消</button>
+        <button class="modal-btn" bindtap="confirmReminderModal">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

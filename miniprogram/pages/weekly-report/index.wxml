@@ -1,0 +1,105 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="back-wrap" bindtap="goBack" hover-class="row-hover">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" />
+    </view>
+    <text class="page-title">时间编织报告</text>
+    <view class="top-space"></view>
+  </view>
+
+  <view class="range-wrap">
+    <text class="range-text">3月10日 — 3月16日</text>
+  </view>
+
+  <view class="card">
+    <text class="section-title">时间流向看得清</text>
+    <text class="section-desc">这一周，你记下了 24 件事，做完了 18 件。</text>
+
+    <view class="progress-list">
+      <view class="progress-item">
+        <view class="progress-row"><text>重要且紧急</text><text>45%</text></view>
+        <view class="bar"><view class="fill" style="width: 45%;"></view></view>
+      </view>
+      <view class="progress-item">
+        <view class="progress-row"><text>重要不紧急</text><text>30%</text></view>
+        <view class="bar"><view class="fill" style="width: 30%;"></view></view>
+      </view>
+      <view class="progress-item">
+        <view class="progress-row"><text>紧急不重要</text><text>15%</text></view>
+        <view class="bar"><view class="fill" style="width: 15%;"></view></view>
+      </view>
+      <view class="progress-item">
+        <view class="progress-row"><text>不重要不紧急</text><text>10%</text></view>
+        <view class="bar"><view class="fill" style="width: 10%;"></view></view>
+      </view>
+    </view>
+
+  </view>
+
+  <view class="card">
+    <text class="section-title">意义质地能看见</text>
+    <view class="dual-grid">
+      <view class="col">
+        <text class="col-title">为谁而做</text>
+        <view class="mini-item">
+          <view class="mini-bar"><view class="mini-fill" style="width: 60%;"></view></view>
+          <text class="mini-label">自己 (60%)</text>
+        </view>
+        <view class="mini-item">
+          <view class="mini-bar"><view class="mini-fill" style="width: 20%;"></view></view>
+          <text class="mini-label">至亲 (20%)</text>
+        </view>
+        <view class="mini-item">
+          <view class="mini-bar"><view class="mini-fill" style="width: 15%;"></view></view>
+          <text class="mini-label">外缘 (15%)</text>
+        </view>
+        <view class="mini-item">
+          <view class="mini-bar"><view class="mini-fill" style="width: 5%;"></view></view>
+          <text class="mini-label">不二 (5%)</text>
+        </view>
+      </view>
+
+      <view class="col">
+        <text class="col-title">为何而做</text>
+        <view class="mini-item">
+          <view class="mini-bar"><view class="mini-fill" style="width: 40%;"></view></view>
+          <text class="mini-label">生计 (40%)</text>
+        </view>
+        <view class="mini-item">
+          <view class="mini-bar"><view class="mini-fill" style="width: 30%;"></view></view>
+          <text class="mini-label">职责 (30%)</text>
+        </view>
+        <view class="mini-item">
+          <view class="mini-bar"><view class="mini-fill" style="width: 20%;"></view></view>
+          <text class="mini-label">真我 (20%)</text>
+        </view>
+        <view class="mini-item">
+          <view class="mini-bar"><view class="mini-fill" style="width: 10%;"></view></view>
+          <text class="mini-label">合一 (10%)</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="moment-wrap">
+      <text class="moment-text">真我时刻：8 次</text>
+    </view>
+  </view>
+
+  <view class="mascot-bottom-wrap">
+    <view class="mascot-bubble-wrap">
+      <chat-bubble
+        text="这周你扛了很多责任，也给自己留了 8 个真我时刻。辛苦了，也值得❤️"
+        color="#b7d6ea"
+        arrowPosition="right"
+      />
+    </view>
+    <view class="mascot-image-wrap">
+      <image class="mascot-image" src="/images/transparent background/xiaolin.png" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view class="actions">
+    <button class="action-btn action-btn-primary" bindtap="goPoster">生成真我时刻海报</button>
+    <button class="action-btn action-btn-ghost" bindtap="onShareToFriend">分享给朋友</button>
+  </view>
+</view>

@@ -1,0 +1,72 @@
+:host {
+  display: inline-block;
+  max-width: 70vw;
+}
+
+.chat-bubble {
+  position: relative;
+  width: auto;
+  max-width: 70vw;
+  min-height: 116rpx;
+  padding: 26rpx 24rpx;
+  box-sizing: border-box;
+  border: 3rpx solid var(--bubble-border);
+  border-radius: 999rpx;
+  background: #ffffff;
+}
+
+.chat-bubble::before {
+  content: "";
+  position: absolute;
+  top: 12rpx;
+  width: 56rpx;
+  height: 16rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.chat-bubble.arrow-left::before {
+  left: 22rpx;
+  transform: rotate(-14deg);
+}
+
+.chat-bubble.arrow-right::before {
+  right: 22rpx;
+  transform: rotate(14deg);
+}
+
+.chat-bubble::after {
+  content: "";
+  position: absolute;
+  width: 18rpx;
+  height: 18rpx;
+  background: #ffffff;
+}
+
+.chat-bubble.arrow-left::after {
+  left: -10rpx;
+  bottom: 24rpx;
+  border-left: 3rpx solid var(--bubble-border);
+  border-bottom: 3rpx solid var(--bubble-border);
+  border-radius: 0 0 0 14rpx;
+  transform: rotate(34deg);
+}
+
+.chat-bubble.arrow-right::after {
+  right: -10rpx;
+  bottom: 24rpx;
+  border-right: 3rpx solid var(--bubble-border);
+  border-bottom: 3rpx solid var(--bubble-border);
+  border-radius: 0 0 14rpx 0;
+  transform: rotate(-34deg);
+}
+
+.bubble-text {
+  display: block;
+  color: #184061;
+  font-size: 30rpx;
+  line-height: 1.55;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}

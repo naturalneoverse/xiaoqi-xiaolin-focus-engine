@@ -1,0 +1,142 @@
+page {
+  background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
+}
+
+.page {
+  min-height: 100vh;
+  padding: 28rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card {
+  width: 100%;
+  max-width: 694rpx;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(18, 89, 143, 0.06);
+  box-sizing: border-box;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #184061;
+}
+
+.title-main {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.title-icon {
+  width: 68rpx;
+  height: 68rpx;
+  flex-shrink: 0;
+}
+
+.step {
+  color: #8a9cb0;
+  font-size: 22rpx;
+}
+
+.list {
+  margin-top: 18rpx;
+}
+
+.item {
+  border: 2rpx solid #e1e5ea;
+  border-radius: 20rpx;
+  padding: 18rpx;
+  margin-bottom: 14rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-selected {
+  border-color: #12598f;
+  background: #edf6fd;
+}
+
+.item-title {
+  display: block;
+  color: #184061;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.item-desc {
+  display: block;
+  margin-top: 6rpx;
+  color: #577388;
+  font-size: 23rpx;
+}
+
+.mark {
+  color: #12598f;
+  font-size: 34rpx;
+}
+
+.tip {
+  margin-top: 24rpx;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20rpx;
+  padding: 20rpx;
+  color: #577388;
+  font-size: 23rpx;
+  text-align: center;
+}
+
+.actions {
+  margin-top: 24rpx;
+  display: flex;
+  gap: 14rpx;
+}
+
+.btn {
+  flex: 1;
+  height: 82rpx;
+  line-height: 82rpx;
+  border-radius: 999rpx;
+  background: #12598f;
+  color: #fff;
+  font-size: 28rpx;
+}
+
+.btn-light {
+  background: #fff;
+  color: #577388;
+  border: 2rpx solid #e1e5ea;
+}
+
+.progress {
+  margin-top: 18rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 999rpx;
+  background: #c7d4e1;
+}
+
+.dot-active {
+  width: 26rpx;
+  background: #12598f;
+}

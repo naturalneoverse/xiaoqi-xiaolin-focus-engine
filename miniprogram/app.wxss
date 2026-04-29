@@ -1,0 +1,78 @@
+/**app.wxss**/
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+} 
+
+button {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20rpx;
+  background: linear-gradient(180deg, #2a79b2 0%, #12598f 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+  box-shadow: 0 10rpx 24rpx rgba(11, 57, 93, 0.22), 0 2rpx 6rpx rgba(20, 84, 134, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.55);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8rpx);
+  -webkit-backdrop-filter: blur(8rpx);
+}
+
+button:focus{
+  outline: 0;
+}
+
+button::after{
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 22%;
+  height: 14rpx;
+  border: none;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.28);
+  filter: blur(3rpx);
+  pointer-events: none;
+}
+
+button::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.04) 58%, rgba(255, 255, 255, 0) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 100%);
+}
+
+button text,
+button .button-text,
+button .wechat-btn-text {
+  position: relative;
+  z-index: 2;
+}
+
+
+page {
+  background: #f6f6f6;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Global helper for pages that need to avoid overlap with custom tabbar */
+.with-custom-tabbar {
+  padding-bottom: calc(130rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}

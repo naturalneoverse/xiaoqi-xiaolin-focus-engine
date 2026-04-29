@@ -1,0 +1,58 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <text class="task-name">{{taskName}}</text>
+
+  <view class="card">
+    <text class="desc">{{taskContent}}</text>
+  </view>
+
+  <view class="card row">
+    <text class="k">日期</text>
+    <text class="v">{{dateText}}</text>
+  </view>
+
+  <view class="card">
+    <text class="k">标签</text>
+    <view class="tags">
+      <text wx:for="{{tags}}" wx:key="*this" class="tag">{{item}}</text>
+      <text wx:if="{{!tags.length}}" class="tag">暂无标签</text>
+    </view>
+  </view>
+
+  <view class="card row">
+    <text class="k">状态</text>
+    <picker
+      mode="selector"
+      range="{{statusOptions}}"
+      value="{{statusIndex}}"
+      bindchange="onStatusChange"
+      class="status-picker"
+    >
+      <view class="status-picker-inner">
+        <text class="v status-value {{statusClass}}">{{statusText}}</text>
+        <text class="status-arrow">⌄</text>
+      </view>
+    </picker>
+  </view>
+
+  <button class="btn" bindtap="goHome">返回主页</button>
+
+  <view wx:if="{{showMascotModal}}" class="mascot-mask" bindtap="closeMascotModal">
+    <view class="mascot-modal" catchtap="noop">
+      <text class="mascot-title">提交成功</text>
+      <text class="mascot-subtitle">小麒来为您庆祝啦</text>
+      <view class="mascot-stage">
+        <view class="mascot-bubble-wrap">
+          <chat-bubble
+            text="{{mascotBubbleText}}"
+            color="#b7d6ea"
+            arrowPosition="left"
+          />
+        </view>
+        <view class="mascot-image-wrap">
+          <image class="mascot-image" src="{{xiaoqiImage}}" mode="aspectFit" />
+        </view>
+      </view>
+      <button class="mascot-btn" bindtap="closeMascotModal">知道了</button>
+    </view>
+  </view>
+</view>

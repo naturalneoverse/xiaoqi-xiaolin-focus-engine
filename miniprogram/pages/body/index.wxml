@@ -1,0 +1,31 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="card">
+    <text class="title">今天，身体怎么样？</text>
+    <view
+      wx:for="{{options}}"
+      wx:key="key"
+      class="option {{selected === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="choose"
+    >
+      <text class="main">{{item.key}}</text>
+      <text class="sub">{{item.desc}}</text>
+    </view>
+    <button class="btn" bindtap="save">保存任务</button>
+    <text class="progress">3 / 3</text>
+  </view>
+
+  <view wx:if="{{showMascotModal}}" class="mascot-modal-mask">
+    <view class="mascot-modal">
+      <view class="mascot-row">
+        <image class="mascot-image" src="/images/transparent background/xiaolin.png" mode="aspectFit" />
+        <chat-bubble
+          text="身体边界已记录完成，愿您安稳舒展。"
+          color="#b7d6ea"
+          arrowPosition="left"
+        />
+      </view>
+      <button class="mascot-btn" bindtap="confirmMascot">我知道了</button>
+    </view>
+  </view>
+</view>

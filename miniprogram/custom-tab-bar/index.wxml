@@ -1,0 +1,23 @@
+<view class="tabbar-wrap">
+  <view class="tabbar-shell">
+    <view
+      class="tab-highlight"
+      style="transform: translateX({{selected === 0 ? 0 : selected === 1 ? 238 : 476}}rpx);"
+    ></view>
+    <view
+      wx:for="{{list}}"
+      wx:key="pagePath"
+      class="tab-item"
+      data-index="{{index}}"
+      bindtap="switchTab"
+    >
+      <image
+        class="tab-icon {{selected === index ? 'tab-icon-active' : ''}}"
+        src="{{selected === index ? item.selectedIconPath : item.iconPath}}"
+        mode="aspectFit"
+      />
+      <text class="tab-text {{selected === index ? 'tab-text-active' : ''}}">{{item.text}}</text>
+      <view class="tab-underline {{selected === index ? 'tab-underline-active' : ''}}"></view>
+    </view>
+  </view>
+</view>

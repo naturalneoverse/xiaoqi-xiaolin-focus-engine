@@ -1,0 +1,113 @@
+page {
+  background: #f0f4f8;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 18rpx 24rpx 24rpx;
+  box-sizing: border-box;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.nav-btn {
+  width: 76rpx;
+  height: 56rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid rgba(184, 197, 211, 0.55);
+  background: rgba(255, 255, 255, 0.86);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon {
+  width: 40rpx;
+  height: 40rpx;
+  display: block;
+}
+
+.nav-icon-back {
+  color: #184061;
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.top-space {
+  width: 76rpx;
+  height: 56rpx;
+}
+
+.poster {
+  width: 100%;
+  max-width: 690rpx;
+  min-height: 1200rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(180deg, #eff7fd 0%, #d6ebf7 100%);
+  padding: 56rpx 34rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.brand {
+  color: #8a9cb0;
+  font-size: 26rpx;
+  letter-spacing: 4rpx;
+}
+
+.date {
+  margin-top: 18rpx;
+  color: #8a9cb0;
+  font-size: 22rpx;
+}
+
+.headline {
+  margin-top: 56rpx;
+  text-align: center;
+  font-size: 44rpx;
+  color: #184061;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.streak {
+  margin-top: 22rpx;
+  font-size: 26rpx;
+  color: #577388;
+}
+
+.quote {
+  margin-top: 70rpx;
+  font-size: 30rpx;
+  color: #184061;
+  font-style: italic;
+  text-align: center;
+  line-height: 1.8;
+}
+
+.qr {
+  margin-top: 260rpx;
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.88);
+  border: 2rpx dashed #8a9cb0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8a9cb0;
+  font-size: 22rpx;
+}
+
+.tip {
+  margin-top: 20rpx;
+  font-size: 20rpx;
+  color: #577388;
+}

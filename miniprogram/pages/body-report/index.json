@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "身体边界报告",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "chat-bubble": "/components/chat-bubble/index"
+  }
+}

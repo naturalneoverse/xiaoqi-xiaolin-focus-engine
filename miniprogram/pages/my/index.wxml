@@ -1,0 +1,117 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="setting-btn" bindtap="onTapSetting">
+      <image class="setting-icon" src="/images/transparent background/setting.svg" mode="aspectFit" />
+    </view>
+  </view>
+
+  <view class="profile-card profile-card-gradient">
+    <view class="avatar-wrap" bindtap="onTapAvatar">
+      <image wx:if="{{userProfile.avatarUrl}}" class="avatar-image" src="{{userProfile.avatarUrl}}" mode="aspectFill" />
+      <view wx:else class="avatar">👤</view>
+    </view>
+    <input
+      wx:if="{{editingName}}"
+      class="name-input"
+      value="{{editingNicknameValue}}"
+      maxlength="20"
+      focus
+      cursor-spacing="20"
+      bindinput="onNicknameInput"
+      bindblur="onNicknameBlur"
+      confirm-type="done"
+    />
+    <text wx:else class="name" bindtap="startEditNickname">{{userProfile.nickname}}</text>
+    <input
+      wx:if="{{editingSignature}}"
+      class="signature-input"
+      value="{{editingSignatureValue}}"
+      maxlength="50"
+      focus
+      cursor-spacing="20"
+      bindinput="onSignatureInput"
+      bindblur="onSignatureBlur"
+      confirm-type="done"
+    />
+    <text wx:else class="signature" bindtap="startEditSignature">{{userProfile.signature}}</text>
+  </view>
+
+  <view class="stats">
+    <view class="stat-item">
+      <view class="stat-icon-wrap">
+        <image class="stat-icon-image" src="/images/transparent background/realme.png" mode="aspectFit" />
+      </view>
+      <view class="stat-content">
+        <text class="stat-title">真我时刻</text>
+        <view class="stat-value-line">
+          <text class="stat-value">5</text>
+          <text class="stat-unit">小时</text>
+        </view>
+      </view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-icon-wrap">
+        <image class="stat-icon-image stat-icon-image-clocking" src="/images/transparent background/clocking.png" mode="aspectFit" />
+      </view>
+      <view class="stat-content">
+        <text class="stat-title">打卡记录</text>
+        <view class="stat-value-line">
+          <text class="stat-value">14</text>
+          <text class="stat-unit">天</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <text class="guide-text">让每一个真我的时刻都珍贵</text>
+
+  <button class="main-btn" hover-class="button-hover" bindtap="goCreateTask">生成真我时刻</button>
+  <view class="section-divider"></view>
+
+  <view class="group">
+    <text class="group-title">我的数据</text>
+    <view class="cell" bindtap="goTimeReport">
+      <text>时间编织报告</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="line"></view>
+    <view class="cell" bindtap="goBodyToday">
+      <text>身体边界记录</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="line"></view>
+    <view class="cell cell-disabled">
+      <text class="cell-disabled-text">关系边界记录</text>
+      <view class="cell-disabled-right">
+        <text class="lock-icon">🔒</text>
+        <text class="disabled-tip">敬请期待</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="group">
+    <text class="group-title">设置</text>
+    <view class="cell">
+      <text>消息提醒</text>
+      <switch
+        class="notify-switch"
+        checked="{{notifyOn}}"
+        color="#12598f"
+        bindchange="onNotifyChange"
+      />
+    </view>
+    <view class="line"></view>
+    <view class="cell" bindtap="goHelp">
+      <text>帮助与支持</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="line"></view>
+    <view class="cell" bindtap="goAbout">
+      <text>关于我们</text>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <text class="slogan">用智慧爱自己 用行动爱世界</text>
+  <view class="tab-safe-space"></view>
+</view>
