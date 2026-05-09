@@ -3,15 +3,31 @@
     <view class="nav-btn tap-target" bindtap="goBack">
       <image class="nav-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
-    <view class="top-space"></view>
+    <text class="nav-title">真我时刻海报</text>
+    <view class="nav-space"></view>
   </view>
-  <view class="poster">
-    <text class="brand">小麒小麟专注引擎</text>
-    <text class="date">3.10 - 3.16</text>
-    <text class="headline">这一周，我有 5 次真我时刻</text>
-    <text class="streak">已连续打卡 14 天</text>
-    <text class="quote">你编织的，不是时间，是自己。</text>
-    <view class="qr">二维码</view>
-    <text class="tip">看看你有多少真我时刻</text>
+
+  <view wx:if="{{generating}}" class="loading-wrap">
+    <text class="loading-text">正在生成...</text>
+  </view>
+
+  <view wx:if="{{previewSrc}}" class="preview-wrap">
+    <image class="preview-img" src="{{previewSrc}}" mode="widthFix" show-menu-by-longpress />
+  </view>
+
+  <canvas
+    type="2d"
+    id="posterCanvas"
+    class="poster-canvas-offscreen"
+    style="width: 1080px; height: 1920px; background: transparent"
+  ></canvas>
+  <!-- 与主画布同源的 type=2d，用于 Logo 像素处理；真机上 createOffScreenCanvas 常不可用或 getImageData 异常 -->
+  <canvas type="2d" id="posterLogoWork" class="poster-logo-work"></canvas>
+
+  <view class="toolbar grid">
+    <button class="tool-cell" bindtap="onRegenerate" disabled="{{generating}}">换一句</button>
+    <button class="tool-cell" bindtap="onSaveAlbum" disabled="{{generating}}">存相册</button>
+    <button class="tool-cell tool-primary" open-type="share" disabled="{{generating}}">发朋友</button>
+    <button class="tool-cell" bindtap="onShareMoment" disabled="{{generating}}">朋友圈</button>
   </view>
 </view>
