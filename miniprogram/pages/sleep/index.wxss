@@ -4,7 +4,7 @@ page {
 
 .page {
   min-height: 100vh;
-  padding: 2rpx 30rpx 48rpx;
+  padding: 16rpx 30rpx 48rpx;
   box-sizing: border-box;
 }
 
@@ -13,6 +13,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 12rpx;
 }
 
 .add-btn {
@@ -33,7 +34,7 @@ page {
 }
 
 .title-row {
-  margin-top: 2rpx;
+  margin-top: 12rpx;
 }
 
 .main-title {
@@ -58,13 +59,16 @@ page {
 
 .meta-date-icon {
   color: #9fb0c3;
-  font-size: 26rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .meta-date {
   color: #95a6bb;
   font-size: 30rpx;
   font-weight: 500;
+  line-height: 1.35;
 }
 
 .meta-progress {

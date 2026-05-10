@@ -40,6 +40,25 @@ const SPORT_PHRASES = {
   动过头了: "明天记得缓一缓",
 };
 
+/** 从记录 createdAt 取小时；无则按当前设备时间（兜底） */
+function hourFromCreatedAt(createdAt) {
+  if (!createdAt) return new Date().getHours();
+  const s = String(createdAt).trim().replace(/\//g, "-");
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+  if (!m) return new Date().getHours();
+  return m[4] != null ? +m[4] : 0;
+}
+
+/** 晚间/凌晨：不宜再建议外出散步等 */
+function isNightContext(hour) {
+  return hour >= 21 || hour < 6;
+}
+
+/** 早晨：可与「昨晚睡眠」衔接表述 */
+function isMorningContext(hour) {
+  return hour >= 6 && hour < 12;
+}
+
 const SCORE_MAP = {
   sleep: {
     睡得香: 40,
@@ -96,9 +115,24 @@ const WEEK_CARE_TEXT = {
 };
 
 function buildInstantFeedback(payload) {
+  const hour = hourFromCreatedAt(payload.createdAt);
+  const night = isNightContext(hour);
+  const morning = isMorningContext(hour);
+
   const body = BODY_PHRASES[payload.signal] || "状态还在调整";
-  const sleep = SLEEP_PHRASES[payload.sleep] || "睡眠节奏慢慢找回";
-  const sport = SPORT_PHRASES[payload.sport] || "先照顾好自己";
+
+  let sleep = SLEEP_PHRASES[payload.sleep] || "睡眠节奏慢慢找回";
+  if (morning && payload.sleep === "睡不着") {
+    sleep = "昨晚没睡好，今天午间小憩一下";
+  }
+
+  let sport = SPORT_PHRASES[payload.sport] || "先照顾好自己";
+  if (night && payload.sport === "没咋动") {
+    sport = "今天没动没关系，明天散个步就行";
+  } else if (night && payload.sport === "动过头了") {
+    sport = "感觉到累了吧，今晚早点休息";
+  }
+
   return `你今天${body}，${sleep}；${sport}。`;
 }
 

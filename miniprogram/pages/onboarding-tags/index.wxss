@@ -1,0 +1,185 @@
+.page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: #f0f7ff;
+}
+
+.scroll {
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.hero {
+  padding: 32rpx 40rpx 40rpx;
+  text-align: center;
+}
+
+.hero-gr {
+  display: block;
+  font-size: 34rpx;
+  color: #184061;
+  letter-spacing: 2rpx;
+  margin-bottom: 16rpx;
+}
+
+.hero-cn {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12rpx;
+}
+
+.hero-author {
+  display: block;
+  font-size: 26rpx;
+  color: #7f8c8d;
+}
+
+.section {
+  padding: 0 40rpx 36rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #2c3e50;
+  margin-bottom: 20rpx;
+}
+
+.row-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx 24rpx;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 14rpx 22rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid rgba(24, 64, 97, 0.22);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.chip-on {
+  border-color: #184061;
+  background: rgba(24, 64, 97, 0.08);
+}
+
+.chip-dot {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #adb5bd;
+  margin-right: 10rpx;
+  line-height: 1;
+}
+
+.chip-dot-sel {
+  color: #184061;
+}
+
+.chip-t {
+  font-size: 28rpx;
+  color: #2c3e50;
+}
+
+.col-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.row-opt {
+  display: flex;
+  align-items: flex-start;
+  padding: 18rpx 20rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid rgba(24, 64, 97, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.row-opt-on {
+  border-color: #184061;
+  background: rgba(24, 64, 97, 0.06);
+}
+
+.row-opt-t {
+  flex: 1;
+  font-size: 28rpx;
+  color: #34495e;
+  line-height: 1.45;
+}
+
+.role-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx 16rpx;
+}
+
+.role-cell {
+  display: inline-flex;
+  align-items: center;
+  padding: 12rpx 18rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(24, 64, 97, 0.2);
+  background: rgba(255, 255, 255, 0.88);
+  max-width: 100%;
+}
+
+.role-on {
+  border-color: #184061;
+  background: rgba(24, 64, 97, 0.07);
+}
+
+.role-mark {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #adb5bd;
+  margin-right: 8rpx;
+  line-height: 1;
+}
+
+.role-mark-sel {
+  color: #184061;
+}
+
+.role-t {
+  font-size: 26rpx;
+  color: #2c3e50;
+}
+
+.submit {
+  margin: 24rpx 40rpx 0;
+  height: 96rpx;
+  line-height: 96rpx;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #f5f9fc;
+  background: linear-gradient(135deg, #184061, #2563a8);
+  border: none;
+}
+
+.submit::after {
+  border: none;
+}
+
+.submit-disabled {
+  opacity: 0.38;
+  color: #f5f9fc;
+}
+
+.footer-line {
+  display: block;
+  text-align: center;
+  font-size: 24rpx;
+  color: #95a5a6;
+  margin-top: 36rpx;
+  padding: 0 48rpx 48rpx;
+}
+
+.scroll-pad {
+  height: 48rpx;
+}

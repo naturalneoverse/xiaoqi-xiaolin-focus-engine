@@ -14,6 +14,7 @@ function parsePayload(payload) {
 }
 
 const STORAGE_KEYS = require("../../config/storageKeys");
+const dailyCheckIn = require("../../utils/dailyCheckIn");
 const TASK_NAME_MAX = 30;
 
 function formatDateTime(date) {
@@ -112,9 +113,23 @@ Page({
       reminderFrequency: mergedPayload.reminderFrequency || "不重复",
       tags: buildTags(mergedPayload, selected),
     };
-    const tasks = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
-    const nextTasks = Array.isArray(tasks) ? [task, ...tasks] : [task];
-    wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
+    let prevTasks = [];
+    try {
+      const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
+      prevTasks = Array.isArray(raw) ? raw : [];
+    } catch (e) {
+      console.error("saveTask getStorageSync", e);
+      prevTasks = [];
+    }
+    const nextTasks = [task, ...prevTasks];
+    try {
+      wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
+      dailyCheckIn.recordDailyCheckIn();
+    } catch (e) {
+      console.error("saveTask setStorageSync", e);
+      wx.showToast({ title: "保存失败", icon: "none" });
+      return;
+    }
 
     const nextPayload = encodeURIComponent(
       JSON.stringify({

@@ -6,6 +6,14 @@ page {
   min-height: 100vh;
   padding: 18rpx 24rpx 36rpx;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.time-report-main {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
 }
 
 .top-bar {
@@ -26,9 +34,14 @@ page {
 }
 
 .page-title {
+  flex: 1;
+  text-align: center;
   color: #184061;
-  font-size: 48rpx;
-  font-weight: 700;
+  font-size: 32rpx;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .top-space {
@@ -115,6 +128,21 @@ page {
   font-weight: 700;
 }
 
+.metric-status-muted {
+  color: #8a9cb0;
+  font-size: 40rpx;
+}
+
+.presence-hint {
+  display: block;
+  text-align: center;
+  margin-top: 16rpx;
+  padding: 0 12rpx;
+  color: #577388;
+  font-size: 24rpx;
+  line-height: 1.5;
+}
+
 .metric-divider {
   width: 1rpx;
   height: 74rpx;
@@ -141,7 +169,8 @@ page {
 }
 
 .history-row {
-  height: 92rpx;
+  min-height: 92rpx;
+  padding: 14rpx 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -162,9 +191,21 @@ page {
   gap: 8rpx;
 }
 
+.history-right-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6rpx;
+}
+
 .history-right {
   color: #577388;
   font-size: 28rpx;
+}
+
+.history-presence {
+  color: #577388;
+  font-size: 24rpx;
 }
 
 .history-arrow {
@@ -234,4 +275,35 @@ page {
 
 .row-hover {
   opacity: 0.85;
+}
+
+.presence-quote-block {
+  flex-shrink: 0;
+  text-align: center;
+  padding: 28rpx 20rpx 8rpx;
+  margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.presence-plain {
+  display: block;
+  color: #577388;
+  font-size: 26rpx;
+  line-height: 1.65;
+  margin-bottom: 20rpx;
+}
+
+.presence-classic {
+  display: block;
+  color: #8a9cb0;
+  font-size: 22rpx;
+  line-height: 1.7;
+  margin-bottom: 10rpx;
+}
+
+.presence-attrib {
+  display: block;
+  color: #a3b6c8;
+  font-size: 22rpx;
 }

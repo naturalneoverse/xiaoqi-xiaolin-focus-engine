@@ -2,6 +2,7 @@
   "entryPagePath": "pages/login/index",
   "pages": [
     "pages/login/index",
+    "pages/onboarding-tags/index",
     "pages/sleep/index",
     "pages/index/index",
     "pages/body-sleep/index",

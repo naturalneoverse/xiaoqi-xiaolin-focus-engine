@@ -1,5 +1,12 @@
+const STORAGE_KEYS = require("../../config/storageKeys");
+const momentScore = require("../../utils/momentScore");
+const dailyCheckIn = require("../../utils/dailyCheckIn");
+const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
+
 Page({
   data: {
+    momentWeekScore: 0,
+    streakDays: 0,
     notifyOn: true,
     userProfile: {
       avatarUrl: "",
@@ -13,10 +20,39 @@ Page({
   },
 
   onShow() {
-    this.syncUserProfile();
-    this.tryOpenPendingProfileEdit();
-    if (typeof this.getTabBar === "function" && this.getTabBar()) {
-      this.getTabBar().setData({ selected: 2 });
+    ensureUserTagsOrLeave().then((ok) => {
+      if (!ok) return;
+      this.syncUserProfile();
+      this.loadTaskStats();
+      this.syncNotifyFromApp();
+      this.tryOpenPendingProfileEdit();
+      if (typeof this.getTabBar === "function" && this.getTabBar()) {
+        this.getTabBar().setData({ selected: 2 });
+      }
+    });
+  },
+
+  loadTaskStats() {
+    let tasks = [];
+    try {
+      const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
+      tasks = Array.isArray(raw) ? raw : [];
+    } catch (e) {
+      console.error("my loadTaskStats getStorageSync", e);
+      tasks = [];
+    }
+    const cur = momentScore.getCurrentWeekSummary(tasks, new Date());
+    const streak = dailyCheckIn.getCheckInStreakDays(new Date());
+    this.setData({
+      momentWeekScore: cur.momentScore,
+      streakDays: streak,
+    });
+  },
+
+  syncNotifyFromApp() {
+    const app = getApp();
+    if (app && app.globalData && app.globalData.settings && typeof app.globalData.settings.reminderEnabled === "boolean") {
+      this.setData({ notifyOn: app.globalData.settings.reminderEnabled });
     }
   },
 
@@ -76,6 +112,7 @@ Page({
               avatarUrl: fileID,
             });
             if (!ok) throw new Error("avatar_save_failed");
+            dailyCheckIn.recordDailyCheckIn();
             wx.showToast({ title: "头像已更新", icon: "success" });
           } catch (e) {
             app.setUserProfile({ avatarUrl: previousAvatar });
@@ -153,6 +190,8 @@ Page({
         [fieldName]: nextValue,
       },
     });
+    dailyCheckIn.recordDailyCheckIn();
+    this.loadTaskStats();
   },
 
   onTapSetting() {
@@ -168,14 +207,16 @@ Page({
   },
 
   goCreateTask() {
+    const key = momentScore.weekMondayKey(momentScore.getIsoWeekMonday(new Date()));
     wx.navigateTo({
-      url: "/pages/poster/index",
+      url: `/pages/poster/index?weekStart=${encodeURIComponent(key)}`,
     });
   },
 
   goTimeReport() {
+    const key = momentScore.weekMondayKey(momentScore.getIsoWeekMonday(new Date()));
     wx.navigateTo({
-      url: "/pages/weekly-report/index?source=latest&status=状态平稳",
+      url: `/pages/weekly-report/index?weekStart=${encodeURIComponent(key)}`,
     });
   },
 

@@ -29,8 +29,8 @@ page {
 }
 
 .title {
-  font-size: 34rpx;
-  font-weight: 700;
+  font-size: 32rpx;
+  font-weight: 500;
   color: #184061;
 }
 

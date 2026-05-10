@@ -1,4 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 
 function getTodayKey() {
   const now = new Date();
@@ -6,6 +7,13 @@ function getTodayKey() {
   const m = String(now.getMonth() + 1).padStart(2, "0");
   const d = String(now.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+function formatMetaDateChinese(date) {
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  return `${y}年${m}月${d}日`;
 }
 
 function formatDateTime(date) {
@@ -91,54 +99,8 @@ function getTaskTypeClass(tags) {
 Page({
   data: {
     allTasks: [],
-    tasks: [
-      {
-        id: "t1",
-        title: "晨间冥想",
-        timeText: "2024/05/20 09:15",
-        done: true,
-        tags: [
-          { text: "重要紧急", className: "tag-red" },
-          { text: "自我", className: "tag-gray" },
-          { text: "真我", className: "tag-green" },
-        ],
-        statusText: "已完成",
-      },
-      {
-        id: "t2",
-        title: "核心代码重构",
-        timeText: "2024/05/20 10:30",
-        done: false,
-        tags: [
-          { text: "高优先", className: "tag-blue-light" },
-          { text: "技术影", className: "tag-blue" },
-          { text: "生产力", className: "tag-blue-light" },
-        ],
-        statusText: "进行中",
-      },
-      {
-        id: "t3",
-        title: "阅读《高效能人士》",
-        timeText: "2024/05/20 14:00",
-        done: true,
-        tags: [
-          { text: "重要不紧急", className: "tag-amber" },
-          { text: "个人成长", className: "tag-gray" },
-        ],
-        statusText: "已完成",
-      },
-      {
-        id: "t4",
-        title: "晚间瑜伽拉伸",
-        timeText: "2024/05/20 21:00",
-        done: false,
-        tags: [
-          { text: "身心平衡", className: "tag-green" },
-          { text: "日常", className: "tag-gray" },
-        ],
-        statusText: "进行中",
-      },
-    ],
+    tasks: [],
+    metaDate: formatMetaDateChinese(new Date()),
     suppressTapOnce: false,
     doneCount: 0,
     totalCount: 0,
@@ -149,23 +111,29 @@ Page({
   },
 
   onShow() {
-    this.loadTasks();
-    if (typeof this.getTabBar === "function" && this.getTabBar()) {
-      this.getTabBar().setData({ selected: 0 });
-    }
+    ensureUserTagsOrLeave().then((ok) => {
+      if (!ok) return;
+      this.loadTasks();
+      if (typeof this.getTabBar === "function" && this.getTabBar()) {
+        this.getTabBar().setData({ selected: 0 });
+      }
+    });
   },
 
   loadTasks() {
-    const storedTasks = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
-    let normalized = [];
-    if (Array.isArray(storedTasks) && storedTasks.length) {
-      normalized = storedTasks.map(normalizeTask);
-    } else {
-      normalized = [];
+    let storedTasks = [];
+    try {
+      const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
+      storedTasks = Array.isArray(raw) ? raw : [];
+    } catch (e) {
+      console.error("loadTasks getStorageSync", e);
+      storedTasks = [];
     }
+    const normalized = storedTasks.length ? storedTasks.map(normalizeTask) : [];
     const today = getTodayKey();
     const visibleTasks = normalized.filter((task) => {
-      if (task.statusText === "进行中") return true;
+      if (task.statusText === "已取消") return false;
+      if (task.statusText === "进行中" || task.statusText === "已延期") return true;
       if (task.statusText !== "已完成") return false;
       const completedDay = (task.completedAt || "").slice(0, 10).replace(/\//g, "-");
       return completedDay === today;
@@ -177,6 +145,7 @@ Page({
       tasks: visibleTasks,
       doneCount,
       totalCount,
+      metaDate: formatMetaDateChinese(new Date()),
     });
   },
 
@@ -234,7 +203,13 @@ Page({
       success: (res) => {
         if (!res.confirm) return;
         allTasks.splice(index, 1);
-        wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, allTasks);
+        try {
+          wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, allTasks);
+        } catch (err) {
+          console.error("delete task setStorageSync", err);
+          wx.showToast({ title: "删除失败", icon: "none" });
+          return;
+        }
         this.loadTasks();
         wx.showToast({
           title: "已删除",

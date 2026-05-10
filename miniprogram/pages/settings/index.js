@@ -135,6 +135,7 @@ Page({
         try {
           wx.removeStorageSync(STORAGE_KEYS.TASKS_DATA);
           wx.removeStorageSync(STORAGE_KEYS.BODY_RECORDS);
+          wx.removeStorageSync(STORAGE_KEYS.DAILY_CHECK_INS);
           wx.showToast({
             title: "记录已清除",
             icon: "success",

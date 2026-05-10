@@ -16,8 +16,7 @@
         <text class="card-tag">ACTIVE</text>
       </view>
       <text class="card-title">身体</text>
-      <text class="card-desc">能量状态：充足</text>
-      <text wx:if="{{showBodyHint}}" class="card-hint">戳我，聆听身体</text>
+      <text class="card-desc">能量状态：{{bodyEnergyLabel}}</text>
     </view>
 
     <view class="card card-muted">
@@ -57,11 +56,12 @@
           <image class="progress-icon-image" src="/images/transparent background/sleep.png" mode="aspectFit" binderror="onImageError" />
           <text class="progress-label">睡眠质量</text>
         </view>
-        <text class="progress-status">很好</text>
+        <text class="progress-status">{{sleepSevenLabel}}</text>
       </view>
       <view class="progress-track">
-        <view class="progress-fill" style="width: 84%;"></view>
+        <view class="progress-fill" style="{{sleepSevenBar}}"></view>
       </view>
+      <text wx:if="{{sleepSevenWarn}}" class="progress-warn">{{sleepSevenWarn}}</text>
     </view>
     <view class="progress-item">
       <view class="progress-head">
@@ -69,11 +69,12 @@
           <image class="progress-icon-image" src="/images/transparent background/sport.png" mode="aspectFit" binderror="onImageError" />
           <text class="progress-label">运动消耗</text>
         </view>
-        <text class="progress-status">一般</text>
+        <text class="progress-status">{{sportSevenLabel}}</text>
       </view>
       <view class="progress-track">
-        <view class="progress-fill" style="width: 58%;"></view>
+        <view class="progress-fill" style="{{sportSevenBar}}"></view>
       </view>
+      <text wx:if="{{sportSevenWarn}}" class="progress-warn">{{sportSevenWarn}}</text>
     </view>
     <view class="progress-item progress-item-last">
       <view class="progress-head">
@@ -81,11 +82,12 @@
           <image class="progress-icon-image" src="/images/transparent background/singnal.png" mode="aspectFit" binderror="onImageError" />
           <text class="progress-label">身体信号</text>
         </view>
-        <text class="progress-status">很好</text>
+        <text class="progress-status">{{signalSevenLabel}}</text>
       </view>
       <view class="progress-track">
-        <view class="progress-fill" style="width: 89%;"></view>
+        <view class="progress-fill" style="{{signalSevenBar}}"></view>
       </view>
+      <text wx:if="{{signalSevenWarn}}" class="progress-warn">{{signalSevenWarn}}</text>
     </view>
     <button class="record-btn" hover-class="record-btn-hover" bindtap="goBodyReport">查看身体边界记录＞</button>
     </view>

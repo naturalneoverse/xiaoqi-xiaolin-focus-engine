@@ -1,7 +1,11 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
-  <view class="top-bar">
-    <view class="setting-btn tap-target" bindtap="onTapSetting">
-      <image class="setting-icon" src="/images/transparent background/setting.svg" mode="aspectFit" binderror="onImageError" />
+  <view class="my-nav">
+    <view class="my-nav-inner">
+      <view class="setting-btn tap-target" bindtap="onTapSetting">
+        <image class="setting-icon" src="/images/transparent background/setting.svg" mode="aspectFit" binderror="onImageError" />
+      </view>
+      <text class="my-nav-title">我的中心</text>
+      <view class="my-nav-spacer"></view>
     </view>
   </view>
 
@@ -44,8 +48,8 @@
       <view class="stat-content">
         <text class="stat-title">真我时刻</text>
         <view class="stat-value-line">
-          <text class="stat-value">5</text>
-          <text class="stat-unit">小时</text>
+          <text class="stat-value">{{momentWeekScore}}</text>
+          <text class="stat-unit">次</text>
         </view>
       </view>
     </view>
@@ -56,7 +60,7 @@
       <view class="stat-content">
         <text class="stat-title">打卡记录</text>
         <view class="stat-value-line">
-          <text class="stat-value">14</text>
+          <text class="stat-value">{{streakDays}}</text>
           <text class="stat-unit">天</text>
         </view>
       </view>

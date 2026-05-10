@@ -66,13 +66,51 @@ Page({
         } else {
           wx.setStorageSync(STORAGE_KEYS.HAS_LOGGED_IN, true);
         }
+        let tagsComplete = result.tagsComplete === true;
+        if (wx.cloud && typeof wx.cloud.callFunction === "function") {
+          try {
+            const cf = await wx.cloud.callFunction({
+              name: "quickstartFunctions",
+              data: { type: "getUserTags" },
+            });
+            const tr = (cf && cf.result) || {};
+            if (tr.success) {
+              tagsComplete = !!tr.tagsComplete;
+            }
+          } catch (e) {
+            console.warn("getUserTags after login", e);
+            try {
+              tagsComplete = !!wx.getStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
+            } catch (e2) {
+              tagsComplete = false;
+            }
+          }
+        }
+        if (app && app.globalData) {
+          app.globalData.userTagsComplete = tagsComplete;
+        }
+        try {
+          if (tagsComplete) {
+            wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
+          } else {
+            wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
+          }
+        } catch (e) {
+          /* ignore */
+        }
         this.setData({
           isFirstLogin: false,
           agree: true,
         });
-        wx.switchTab({
-          url: "/pages/sleep/index",
-        });
+        if (!tagsComplete) {
+          wx.redirectTo({
+            url: "/pages/onboarding-tags/index",
+          });
+        } else {
+          wx.switchTab({
+            url: "/pages/sleep/index",
+          });
+        }
       } catch (e) {
         const errMsg = (e && (e.errMsg || e.message)) || "";
         let toastTitle = "登录失败，请重试";

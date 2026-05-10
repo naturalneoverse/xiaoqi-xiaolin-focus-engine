@@ -4,53 +4,24 @@ page {
 
 .page {
   min-height: 100vh;
-  padding: 24rpx 22rpx 46rpx;
+  /* 竖向留白由 _globalSafeAreaStyle 与安全区负责，避免与内联 padding 叠出过大顶距 */
+  padding-left: 22rpx;
+  padding-right: 22rpx;
   box-sizing: border-box;
-}
-
-.top-bar {
-  height: 74rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28rpx;
-}
-
-.back-wrap {
-  width: 124rpx;
-  height: 56rpx;
-  border-radius: 999rpx;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.page-title {
-  color: #184061;
-  font-size: 48rpx;
-  font-weight: 700;
-}
-
-.top-space {
-  width: 124rpx;
-  height: 56rpx;
-}
-
-.close-icon {
-  width: 40rpx;
-  height: 40rpx;
-  display: block;
 }
 
 .range-wrap {
   text-align: center;
+  margin-top: 10rpx;
   margin-bottom: 26rpx;
 }
 
 .range-text {
-  color: rgba(18, 89, 143, 0.6);
-  font-size: 20rpx;
-  letter-spacing: 2rpx;
+  color: rgba(18, 89, 143, 0.72);
+  font-size: 28rpx;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 1rpx;
 }
 
 .card {
@@ -283,6 +254,7 @@ page {
 
 .actions {
   margin-top: 24rpx;
+  margin-bottom: 40rpx;
   display: flex;
   flex-direction: column;
   gap: 16rpx;

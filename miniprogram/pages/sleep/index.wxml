@@ -10,7 +10,7 @@
     <view class="meta-wrap">
       <view class="meta-date-wrap">
         <text class="meta-date-icon">◷</text>
-        <text class="meta-date">2024年5月20日</text>
+        <text class="meta-date">{{metaDate}}</text>
       </view>
       <view class="meta-progress">
         <text class="meta-text">已完成任务：{{doneCount}}/{{totalCount}}</text>

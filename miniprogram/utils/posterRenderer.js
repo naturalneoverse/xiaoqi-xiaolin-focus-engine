@@ -11,21 +11,25 @@ const POSTER_H = 1920;
 const MARGIN_X = 60;
 const TEXT_W = POSTER_W - MARGIN_X * 2;
 
-/** 纵向方案 A：链式间距；金句→码区间距由底部留白目标动态计算 */
-const SP_BRAND_TO_STATUS = 64;
-const SP_STATUS_TO_DATA = 56;
-const SP_BRAND_TO_DATA_COLLAPSED = 56;
-const SP_DATA_TO_QUOTE = 88;
-/** 金句→引导小字 最小间距；实际取值不低于此，并按底部留白目标加大 */
-const SP_QUOTE_TO_QR_MIN = 48;
-/** 顶部首行（Logo 带上缘）距画布顶：60~80px 取中 */
-const TOP_PAD = 76;
-/** 画布底至内容收束后的留白：100~120px 取中 */
+/** 顶组内相邻块最小间距 */
+const TOP_GROUP_GAP_MIN = 8;
+/** 底组：引导 ↔ 码、码 ↔ CTA 固定间距 */
+const BOTTOM_GROUP_GAP = 10;
+/** 顶部首行（Logo 带上缘）距画布顶；略大以整体下移顶组 */
+const TOP_PAD = 100;
+/** 画布底至底组最下沿留白 */
 const BOTTOM_SAFE = 110;
+/** 中间带 M 内：上留白 10%、中间带目标区 80%、下留白 10%（与 M_TOP_FR + M_MID_FR 互补） */
+const M_TOP_FR = 0.1;
+const M_MID_FR = 0.8;
+/** 中间正文区相对卡片占位的高度边距（无底块时保持 0） */
+const CARD_PAD_X = 0;
+const CARD_PAD_Y = 0;
+/** 金句与上一块间距（取代原 SP_DATA_TO_QUOTE） */
+const GAP_BEFORE_QUOTE = 8;
 
 const COLOR_BRAND = "#2C3E50";
 const COLOR_CYCLE = "#8A9CB0";
-const COLOR_LINE = "#E0E0E0";
 const COLOR_STATUS = "#4A4A4A";
 const COLOR_LABEL = "#7F8C8D";
 const COLOR_SECONDARY = "#95A5A6";
@@ -73,15 +77,11 @@ const QR_INNER = 220;
 const QR_RADIUS = 20;
 const QR_INNER_RADIUS = 12;
 
-/**
- * 金句结束 y 至画布底：引导(44) + 码区 + CTA 约 50；须放在 QR_OUTER 定义之后
- */
-const TAIL_AFTER_QUOTE = 44 + QR_OUTER + 24 + 50;
+/** 底组总高：引导块 + 间距 + 码外框 + 间距 + CTA 块 */
+const BOTTOM_BLOCK_H = 44 + BOTTOM_GROUP_GAP + QR_OUTER + BOTTOM_GROUP_GAP + 48;
 
 const LOGO_BOX = 80;
 const BRAND_GAP = 16;
-const DECO_LINE_W = 120;
-const DECO_LINE_H = 2;
 
 function rollBlindBox() {
   return {
@@ -214,6 +214,39 @@ function drawQuoteSectionFixed(ctx, cx, yStart, innerText, fontStyle) {
   ctx.fillText("」", blockStart + qwL + innerGap + bodyBlockW + innerGap, lastBaseline);
 
   return quoteTop + 56 + bodyLines.length * lh + 28;
+}
+
+/** 不绘制，仅量金句块高度（与 drawQuoteSectionFixed 一致，行高 1.5） */
+function measureQuoteBlockHeight(ctx, innerText, fontStyle) {
+  const markFont =
+    '400 68px "Songti SC", STSong, STKaiti, "Kaiti SC", Georgia, "Times New Roman", serif';
+  const sizePx = quoteBodyFontSize(innerText);
+  const lh = sizePx * 1.5;
+  const bodyFont = bodyFontForStyle(fontStyle, sizePx);
+  const innerGap = 10;
+  const bodyMaxW = TEXT_W - 140;
+
+  ctx.font = markFont;
+  ctx.font = bodyFont;
+  const bodyLines = wrapLines(ctx, innerText, bodyMaxW);
+  const topPad = Math.max(0, (bodyLines.length * lh - 68) / 2);
+  return topPad + 56 + bodyLines.length * lh + 28;
+}
+
+/** 有分：中间卡片内正文区高度（不含卡片上下 CARD_PAD_Y） */
+function measureScoreCardBodyHeight(ctx, streakDays, innerText, fontStyle) {
+  const streakH = streakDays > 0 ? 36 : 0;
+  const quoteH = measureQuoteBlockHeight(ctx, innerText, fontStyle);
+  return 180 + streakH + GAP_BEFORE_QUOTE + quoteH;
+}
+
+/** 零分：中间卡片内正文区高度（32px 字、行高 1.5） */
+function measureZeroCardBodyHeight(ctx) {
+  ctx.font = "400 32px PingFang SC, sans-serif";
+  const innerW = TEXT_W - 2 * CARD_PAD_X;
+  const lines = wrapLines(ctx, ZERO_COPY, innerW);
+  const lh = 32 * 1.5;
+  return 28 + lines.length * lh + 24;
 }
 
 function loadImage(createImage, src) {
@@ -467,12 +500,12 @@ function drawLogoInSlot(ctx, img, x, y, w, h, _radius, accent, bgGradient, palet
   ctx.restore();
 }
 
-/** B1：Logo + 品牌名 + 装饰线整体水平居中（仅 Logo 用 accent，字与装饰线不变） */
+/** B1：Logo + 品牌名整体水平居中（仅 Logo 用 accent） */
 function drawBrandStripCentered(ctx, cx, yTop, logoImg, accent, bgGradient, palette, logoProcessCanvas) {
   const brandText = "小麒小麟专注引擎";
   ctx.font = "600 40px PingFang SC, Helvetica Neue, sans-serif";
   const tw = ctx.measureText(brandText).width;
-  const rowW = LOGO_BOX + BRAND_GAP + tw + BRAND_GAP + DECO_LINE_W;
+  const rowW = LOGO_BOX + BRAND_GAP + tw;
   let rowStart = cx - rowW / 2;
   if (rowStart < MARGIN_X) rowStart = MARGIN_X;
   if (rowStart + rowW > POSTER_W - MARGIN_X) rowStart = POSTER_W - MARGIN_X - rowW;
@@ -493,12 +526,6 @@ function drawBrandStripCentered(ctx, cx, yTop, logoImg, accent, bgGradient, pale
   ctx.fillStyle = COLOR_BRAND;
   const brandBaseline = yTop + 52;
   ctx.fillText(brandText, x, brandBaseline);
-  x += tw + BRAND_GAP;
-
-  ctx.fillStyle = COLOR_LINE;
-  const lineY = yTop + 39;
-  roundRectPath(ctx, x, lineY, DECO_LINE_W, DECO_LINE_H, 1);
-  ctx.fill();
 }
 
 /**
@@ -533,34 +560,48 @@ async function drawPosterFrame(ctx, opt) {
   const yBrand = TOP_PAD;
   drawBrandStripCentered(ctx, cx, yBrand, logoImg, accent, g, palette, logoProcessCanvas);
 
-  const cycleTop = TOP_PAD + LOGO_BOX + 12;
+  const cycleTop = TOP_PAD + LOGO_BOX + TOP_GROUP_GAP_MIN;
   ctx.font = "400 28px PingFang SC, sans-serif";
   ctx.fillStyle = COLOR_CYCLE;
   drawTextCenterInWidth(ctx, weekRangeText || "", MARGIN_X, TEXT_W, cycleTop + 22, COLOR_CYCLE);
+  const yAfterTop = cycleTop + 32;
 
-  const brandBottom = cycleTop + 32;
+  const yBottomTop = POSTER_H - BOTTOM_SAFE - BOTTOM_BLOCK_H;
+  const hM = Math.max(120, yBottomTop - yAfterTop);
 
-  let cursor = brandBottom;
-  const hasStatusOnlyZero = momentScore <= 0;
-  if (hasStatusOnlyZero) {
-    cursor += SP_BRAND_TO_STATUS;
-    ctx.font = "400 32px PingFang SC, sans-serif";
-    ctx.fillStyle = COLOR_STATUS;
-    const lh = 32 * 1.4;
-    const lines = wrapLines(ctx, ZERO_COPY, TEXT_W);
-    lines.forEach((ln, i) => {
-      drawTextCenterInWidth(ctx, ln, MARGIN_X, TEXT_W, cursor + 28 + i * lh, COLOR_STATUS);
-    });
-    cursor += lines.length * lh + SP_STATUS_TO_DATA;
+  const inner = getQuoteInnerText(streakDays, blind.quoteIndex);
+  const bodyH =
+    momentScore <= 0
+      ? measureZeroCardBodyHeight(ctx)
+      : measureScoreCardBodyHeight(ctx, streakDays, inner, blind.fontStyle);
+  const hContent = bodyH + 2 * CARD_PAD_Y;
+  const hSlot = M_MID_FR * hM;
+  const ySlotTop = yAfterTop + M_TOP_FR * hM;
+  let yCard;
+  if (hContent <= hSlot) {
+    yCard = ySlotTop + (hSlot - hContent) / 2;
+  } else if (hContent <= hM) {
+    yCard = yAfterTop + (hM - hContent) / 2;
   } else {
-    cursor += SP_BRAND_TO_DATA_COLLAPSED;
+    yCard = yAfterTop;
   }
 
-  if (momentScore >= 1) {
+  const innerTop = yCard + CARD_PAD_Y;
+  if (momentScore <= 0) {
+    ctx.font = "400 32px PingFang SC, sans-serif";
+    ctx.fillStyle = COLOR_STATUS;
+    const innerW = TEXT_W - 2 * CARD_PAD_X;
+    const lines = wrapLines(ctx, ZERO_COPY, innerW);
+    const zlh = 32 * 1.5;
+    lines.forEach((ln, i) => {
+      drawTextCenterInWidth(ctx, ln, MARGIN_X, innerW, innerTop + 28 + i * zlh, COLOR_STATUS);
+    });
+  } else {
+    let cur = innerTop;
     ctx.font = "400 32px PingFang SC, sans-serif";
     ctx.fillStyle = COLOR_LABEL;
-    drawTextCenterInWidth(ctx, "这一周，真我时刻", MARGIN_X, TEXT_W, cursor + 28, COLOR_LABEL);
-    cursor += 40 + 16;
+    drawTextCenterInWidth(ctx, "这一周，真我时刻", MARGIN_X, TEXT_W, cur + 28, COLOR_LABEL);
+    cur += 56;
     const numStr = String(momentScore);
     const unit = "次";
     ctx.font = "700 88px DIN Alternate, PingFang SC, sans-serif";
@@ -570,69 +611,59 @@ async function drawPosterFrame(ctx, opt) {
     const gapU = 8;
     const groupW = wn + gapU + wu;
     const startX = cx - groupW / 2;
-    const numBaseline = cursor + 72;
+    const numBaseline = cur + 72;
     ctx.font = "700 88px DIN Alternate, PingFang SC, sans-serif";
     ctx.fillStyle = accent;
     ctx.fillText(numStr, startX, numBaseline);
     ctx.font = "400 36px PingFang SC, sans-serif";
     ctx.fillStyle = hexToRgba(accent, 0.3);
     ctx.fillText(unit, startX + wn + gapU, numBaseline);
-    cursor += 100 + 24;
+    cur += 124;
+    if (streakDays > 0) {
+      ctx.font = "400 28px PingFang SC, sans-serif";
+      ctx.fillStyle = COLOR_SECONDARY;
+      const streakText = `● 已连续记录 ${streakDays} 天`;
+      drawTextCenterInWidth(ctx, streakText, MARGIN_X, TEXT_W, cur + 22, COLOR_SECONDARY);
+      cur += 36;
+    }
+    cur += GAP_BEFORE_QUOTE;
+    drawQuoteSectionFixed(ctx, cx, cur, inner, blind.fontStyle);
   }
 
-  if (streakDays > 0) {
-    ctx.font = "400 28px PingFang SC, sans-serif";
-    ctx.fillStyle = COLOR_SECONDARY;
-    const streakText = `● 已连续记录 ${streakDays} 天`;
-    drawTextCenterInWidth(ctx, streakText, MARGIN_X, TEXT_W, cursor + 22, COLOR_SECONDARY);
-    cursor += 36;
-  }
-
-  cursor += SP_DATA_TO_QUOTE;
-
-  const inner = getQuoteInnerText(streakDays, blind.quoteIndex);
-  cursor = drawQuoteSectionFixed(ctx, cx, cursor, inner, blind.fontStyle);
-
-  const gapQuoteToQr = Math.max(
-    SP_QUOTE_TO_QR_MIN,
-    POSTER_H - BOTTOM_SAFE - TAIL_AFTER_QUOTE - cursor
-  );
-  cursor += gapQuoteToQr;
-
+  let yBot = yBottomTop;
   ctx.font = "400 24px PingFang SC, sans-serif";
   ctx.fillStyle = COLOR_GUIDE;
-  drawTextCenterInWidth(ctx, GUIDE_ABOVE_QR, MARGIN_X, TEXT_W, cursor + 22, COLOR_GUIDE);
-  cursor += 28 + 16;
+  drawTextCenterInWidth(ctx, GUIDE_ABOVE_QR, MARGIN_X, TEXT_W, yBot + 22, COLOR_GUIDE);
+  yBot += 44 + BOTTOM_GROUP_GAP;
 
   const qrLeft = (POSTER_W - QR_OUTER) / 2;
   const pad = (QR_OUTER - QR_INNER) / 2;
   const ix = qrLeft + pad;
-  const iy = cursor + pad;
+  const iyQr = yBot + pad;
   if (qrImg && qrImg.width) {
     ctx.save();
-    roundRectPath(ctx, ix, iy, QR_INNER, QR_INNER, QR_INNER_RADIUS);
+    roundRectPath(ctx, ix, iyQr, QR_INNER, QR_INNER, QR_INNER_RADIUS);
     ctx.clip();
-    ctx.drawImage(qrImg, ix, iy, QR_INNER, QR_INNER);
+    ctx.drawImage(qrImg, ix, iyQr, QR_INNER, QR_INNER);
     ctx.restore();
   } else {
     ctx.strokeStyle = "rgba(173, 181, 189, 0.65)";
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 4]);
-    roundRectPath(ctx, ix + 6, iy + 6, QR_INNER - 12, QR_INNER - 12, QR_INNER_RADIUS - 2);
+    roundRectPath(ctx, ix + 6, iyQr + 6, QR_INNER - 12, QR_INNER - 12, QR_INNER_RADIUS - 2);
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = COLOR_SECONDARY;
     ctx.font = "400 22px PingFang SC, sans-serif";
     const t = "码";
     const wm = ctx.measureText(t).width;
-    ctx.fillText(t, ix + (QR_INNER - wm) / 2, iy + QR_INNER / 2 + 8);
+    ctx.fillText(t, ix + (QR_INNER - wm) / 2, iyQr + QR_INNER / 2 + 8);
   }
-
-  cursor += QR_OUTER + 24;
+  yBot += QR_OUTER + BOTTOM_GROUP_GAP;
 
   ctx.font = "500 30px PingFang SC, sans-serif";
   ctx.fillStyle = COLOR_CTA;
-  drawTextCenterInWidth(ctx, CTA_TEXT, MARGIN_X, TEXT_W, cursor + 26, COLOR_CTA);
+  drawTextCenterInWidth(ctx, CTA_TEXT, MARGIN_X, TEXT_W, yBot + 26, COLOR_CTA);
 }
 
 module.exports = {

@@ -8,37 +8,6 @@ page {
   box-sizing: border-box;
 }
 
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18rpx;
-  height: 72rpx;
-}
-
-.back-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  min-width: 96rpx;
-}
-
-.close-icon {
-  width: 40rpx;
-  height: 40rpx;
-  display: block;
-}
-
-.page-title {
-  color: #184061;
-  font-size: 34rpx;
-  font-weight: 700;
-}
-
-.top-space {
-  width: 96rpx;
-}
-
 .card {
   background: rgba(255, 255, 255, 0.92);
   border-radius: 30rpx;
@@ -49,7 +18,7 @@ page {
 }
 
 .section-title {
-  font-size: 38rpx;
+  font-size: 34rpx;
   font-weight: 700;
   color: #184061;
 }
@@ -89,7 +58,7 @@ page {
 
 .guide-q {
   color: #184061;
-  font-size: 38rpx;
+  font-size: 30rpx;
   font-weight: 600;
 }
 
@@ -107,8 +76,8 @@ page {
 
 .guide-answer {
   color: #577388;
-  font-size: 34rpx;
-  line-height: 1.7;
+  font-size: 28rpx;
+  line-height: 1.65;
 }
 
 .faq-cell {
@@ -131,7 +100,7 @@ page {
 
 .faq-text {
   color: #184061;
-  font-size: 38rpx;
+  font-size: 30rpx;
   font-weight: 500;
 }
 
@@ -161,14 +130,14 @@ page {
   display: block;
   margin-top: 16rpx;
   color: #577388;
-  font-size: 32rpx;
+  font-size: 28rpx;
   line-height: 1.5;
 }
 
 .contact {
   display: block;
   margin-top: 8rpx;
-  font-size: 40rpx;
+  font-size: 32rpx;
   color: #577388;
 }
 
@@ -176,7 +145,7 @@ page {
   display: block;
   margin-top: 8rpx;
   color: #577388;
-  font-size: 32rpx;
+  font-size: 28rpx;
 }
 
 .brand-wrap {

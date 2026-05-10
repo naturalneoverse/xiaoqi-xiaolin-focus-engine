@@ -1,12 +1,4 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
-  <view class="top-bar">
-    <view class="back-wrap tap-target" bindtap="goBack">
-      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
-    </view>
-    <text class="page-title">关于我们</text>
-    <view class="top-space"></view>
-  </view>
-
   <view class="brand">
     <view class="logo">
       <image class="logo-image" src="/images/transparent background/logo.png" mode="aspectFit" binderror="onImageError" />

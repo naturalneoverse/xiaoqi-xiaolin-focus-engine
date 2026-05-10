@@ -30,9 +30,14 @@ page {
 }
 
 .nav-title {
-  color: #12598f;
-  font-size: 48rpx;
-  font-weight: 700;
+  flex: 1;
+  text-align: center;
+  color: #184061;
+  font-size: 32rpx;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav-space {

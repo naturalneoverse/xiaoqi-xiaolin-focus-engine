@@ -14,12 +14,12 @@
     "useLanDebug": false,
     "showES6CompileOption": false,
     "checkInvalidKey": true,
-    "ignoreDevUnusedFiles": true,
+    "ignoreDevUnusedFiles": false,
     "bigPackageSizeSupport": false,
     "useIsolateContext": true
   },
   "condition": {},
   "description": "项目私有配置文件。此文件中的内容将覆盖 project.config.json 中的相同字段。项目的改动优先同步到此文件中。详见文档：https://developers.weixin.qq.com/miniprogram/dev/devtools/projectconfig.html",
-  "projectname": "%E5%B0%8F%E9%BA%92%E5%B0%8F%E9%BA%9F%E4%B8%93%E6%B3%A8%E5%BC%95%E6%93%8E",
+  "projectname": "xiaoqi-xiaolin-focus-engine",
   "libVersion": "3.15.2"
 }

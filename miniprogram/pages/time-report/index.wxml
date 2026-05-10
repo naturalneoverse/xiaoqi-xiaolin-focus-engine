@@ -1,4 +1,5 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="time-report-main">
   <view class="top-bar">
     <view class="back-wrap tap-target" bindtap="goBack" hover-class="row-hover">
       <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
@@ -31,11 +32,12 @@
       </view>
       <view class="metric-divider"></view>
       <view class="metric">
-        <text class="metric-status">{{latest.status}}</text>
-        <text class="metric-label">心流水平</text>
+        <text class="metric-status {{latest.presenceName === '暂无' ? 'metric-status-muted' : ''}}">{{latest.presenceName}}</text>
+        <text class="metric-label">当下质地</text>
       </view>
       <text class="chevron">›</text>
     </view>
+    <text wx:if="{{latest.presenceHint}}" class="presence-hint">{{latest.presenceHint}}</text>
   </view>
 
   <view class="card">
@@ -43,7 +45,7 @@
     <view class="line"></view>
     <view
       wx:for="{{historyReports}}"
-      wx:key="range"
+      wx:key="weekMondayKey"
       class="history-row {{index < historyReports.length - 1 ? 'history-row-border' : ''}}"
       data-index="{{index}}"
       bindtap="goHistoryReport"
@@ -51,7 +53,10 @@
     >
       <text class="history-left">{{item.range}}</text>
       <view class="history-right-wrap">
-        <text class="history-right">真我时刻 {{item.moments}}次</text>
+        <view class="history-right-col">
+          <text class="history-right">真我时刻 {{item.moments}}次</text>
+          <text class="history-presence">当下质地 {{item.presenceName}}</text>
+        </view>
         <text class="history-arrow">›</text>
       </view>
     </view>
@@ -80,5 +85,12 @@
         </view>
       </view>
     </view>
+  </view>
+  </view>
+
+  <view class="presence-quote-block">
+    <text class="presence-plain">时间不是钟表，而是你真正沉浸在此刻的厚度。</text>
+    <text class="presence-classic">感知有一个流动的原初自身亲临的点，除此之外还有一个刚才曾是（原滞留）的视域，以及一个即将来临（原前摄）的视域。</text>
+    <text class="presence-attrib">—— 胡塞尔</text>
   </view>
 </view>

@@ -1,12 +1,4 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
-  <view class="top-bar">
-    <view class="back-wrap tap-target" bindtap="goBack" hover-class="row-hover">
-      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
-    </view>
-    <text class="page-title">身体边界报告</text>
-    <view class="top-space"></view>
-  </view>
-
   <view class="range-wrap">
     <text class="range-text">{{rangeText}}</text>
   </view>
@@ -28,6 +20,7 @@
           <view class="bar"><view class="fill" style="{{item.widthStyle}}"></view></view>
         </view>
       </view>
+      <text wx:if="{{sleepNarrative}}" class="dim-narrative">{{sleepNarrative}}</text>
     </view>
 
     <view class="group">
@@ -41,6 +34,7 @@
           <view class="bar"><view class="fill" style="{{item.widthStyle}}"></view></view>
         </view>
       </view>
+      <text wx:if="{{sportNarrative}}" class="dim-narrative">{{sportNarrative}}</text>
     </view>
 
     <view class="group">
@@ -54,6 +48,7 @@
           <view class="bar"><view class="fill" style="{{item.widthStyle}}"></view></view>
         </view>
       </view>
+      <text wx:if="{{signalNarrative}}" class="dim-narrative">{{signalNarrative}}</text>
     </view>
 
     <view class="status-card">
@@ -64,6 +59,7 @@
           <image class="status-icon-image" src="{{statusIcon}}" mode="aspectFit" binderror="onImageError" />
         </view>
         <text class="status-desc">{{statusDesc}}</text>
+        <text wx:if="{{extremeLine}}" class="extreme-line">{{extremeLine}}</text>
       </view>
     </view>
 
@@ -76,6 +72,7 @@
           text="{{careText}}"
           color="#b7d6ea"
           arrowPosition="left"
+          maxLength="{{200}}"
         />
       </view>
     </view>

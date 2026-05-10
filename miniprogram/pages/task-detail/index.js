@@ -7,6 +7,7 @@ function parsePayload(payload) {
 }
 
 const STORAGE_KEYS = require("../../config/storageKeys");
+const dailyCheckIn = require("../../utils/dailyCheckIn");
 const STATUS_OPTIONS = ["进行中", "已完成", "已延期", "已取消"];
 
 function getStatusClass(statusText) {
@@ -71,33 +72,49 @@ Page({
   onStatusChange(e) {
     const index = Number(e.detail.value);
     const nextStatus = STATUS_OPTIONS[index] || STATUS_OPTIONS[0];
+    const hadReminder = !!(this.data.reminderDate && this.data.reminderTime);
+    const clearReminder = nextStatus === "已完成" || nextStatus === "已取消";
+    const nextReminderDate = clearReminder ? "" : this.data.reminderDate;
+    const nextReminderTime = clearReminder ? "" : this.data.reminderTime;
+    const nextReminderFrequency = clearReminder ? "不重复" : this.data.reminderFrequency;
+
     this.setData({
       statusText: nextStatus,
       statusIndex: index,
       statusClass: getStatusClass(nextStatus),
+      reminderDate: nextReminderDate,
+      reminderTime: nextReminderTime,
+      reminderFrequency: nextReminderFrequency,
     });
-    if (nextStatus === "已完成" || nextStatus === "已取消") {
-      const hasReminder = this.data.reminderDate && this.data.reminderTime;
-      this.setData({
-        reminderDate: "",
-        reminderTime: "",
-        reminderFrequency: "不重复",
+    if (clearReminder && hadReminder) {
+      wx.showToast({
+        title: "任务已结束，提醒已停止",
+        icon: "none",
       });
-      if (hasReminder) {
-        wx.showToast({
-          title: "任务已结束，提醒已停止",
-          icon: "none",
-        });
-      }
     }
-    this.persistStatus(nextStatus);
+    this.persistStatus(nextStatus, {
+      reminderDate: nextReminderDate,
+      reminderTime: nextReminderTime,
+      reminderFrequency: nextReminderFrequency,
+    });
   },
 
-  persistStatus(nextStatus) {
+  persistStatus(nextStatus, reminderFields) {
     const { taskId } = this.data;
     if (!taskId) return;
-    const tasks = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
-    if (!Array.isArray(tasks)) return;
+    const rf = reminderFields || {
+      reminderDate: this.data.reminderDate,
+      reminderTime: this.data.reminderTime,
+      reminderFrequency: this.data.reminderFrequency,
+    };
+    let tasks = [];
+    try {
+      const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
+      tasks = Array.isArray(raw) ? raw : [];
+    } catch (err) {
+      console.error("persistStatus getStorageSync", err);
+      return;
+    }
     const nextTasks = tasks.map((task) =>
       task.id === taskId
         ? {
@@ -105,13 +122,19 @@ Page({
             statusText: nextStatus,
             done: nextStatus === "已完成",
             completedAt: nextStatus === "已完成" ? toCompletedAt() : "",
-            reminderDate: this.data.reminderDate,
-            reminderTime: this.data.reminderTime,
-            reminderFrequency: this.data.reminderFrequency,
+            reminderDate: rf.reminderDate,
+            reminderTime: rf.reminderTime,
+            reminderFrequency: rf.reminderFrequency,
           }
         : task,
     );
-    wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
+    try {
+      wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
+      dailyCheckIn.recordDailyCheckIn();
+    } catch (err) {
+      console.error("persistStatus setStorageSync", err);
+      wx.showToast({ title: "保存失败", icon: "none" });
+    }
   },
 
   closeMascotModal() {

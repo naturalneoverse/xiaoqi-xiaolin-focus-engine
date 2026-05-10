@@ -48,6 +48,7 @@ Page({
   },
 
   onLoad() {
+    wx.setNavigationBarTitle({ title: "创建新任务" });
     const today = this.getToday();
     this.setData({
       startDate: today,
@@ -88,11 +89,21 @@ Page({
   },
 
   openDateModal() {
-    this.setData({
-      showDateModal: true,
-      draftStartDate: this.data.startDate || this.getToday(),
-      draftEndDate: this.data.endDate || "",
-    });
+    const show = () => {
+      this.setData({
+        showDateModal: true,
+        draftStartDate: this.data.startDate || this.getToday(),
+        draftEndDate: this.data.endDate || "",
+      });
+    };
+    if (typeof wx.hideKeyboard === "function") {
+      wx.hideKeyboard({
+        complete: show,
+        fail: show,
+      });
+    } else {
+      show();
+    }
   },
 
   closeDateModal() {
@@ -166,9 +177,19 @@ Page({
   },
 
   openReminderModal() {
-    this.setData({
-      showReminderModal: true,
-    });
+    const show = () => {
+      this.setData({
+        showReminderModal: true,
+      });
+    };
+    if (typeof wx.hideKeyboard === "function") {
+      wx.hideKeyboard({
+        complete: show,
+        fail: show,
+      });
+    } else {
+      show();
+    }
   },
 
   closeReminderModal() {

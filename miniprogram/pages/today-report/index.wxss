@@ -8,40 +8,6 @@ page {
   box-sizing: border-box;
 }
 
-.top-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16rpx;
-}
-
-.nav-btn {
-  width: 76rpx;
-  height: 76rpx;
-  border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.82);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-icon {
-  width: 40rpx;
-  height: 40rpx;
-  display: block;
-}
-
-.nav-icon-back {
-  color: #184061;
-  font-size: 42rpx;
-  line-height: 1;
-}
-
-.top-space {
-  width: 76rpx;
-  height: 76rpx;
-}
-
 .card {
   background: rgba(255, 255, 255, 0.92);
   border-radius: 28rpx;
@@ -55,6 +21,33 @@ page {
   font-size: 32rpx;
   font-weight: 700;
   margin-bottom: 14rpx;
+}
+
+.record-list {
+  margin-top: 4rpx;
+}
+
+.record-block {
+  padding-top: 8rpx;
+}
+
+.record-time {
+  display: block;
+  color: #8a9cb0;
+  font-size: 22rpx;
+  margin-bottom: 8rpx;
+}
+
+.record-divider {
+  height: 2rpx;
+  background: #e8eef4;
+  margin: 20rpx 0 12rpx;
+}
+
+.muted {
+  color: #8a9cb0;
+  font-size: 26rpx;
+  padding: 12rpx 0;
 }
 
 .row {

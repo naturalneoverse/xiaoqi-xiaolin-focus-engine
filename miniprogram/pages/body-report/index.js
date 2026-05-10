@@ -6,35 +6,12 @@ const STATUS_ICON_MAP = {
 };
 
 const STORAGE_KEYS = require("../../config/storageKeys");
-const { getRecordScore, getWeekStatus, WEEK_CARE_TEXT } = require("../../config/bodyFeedback");
+const bodyStats = require("../../utils/bodyStats");
+const momentScore = require("../../utils/momentScore");
 
-const SLEEP_OPTIONS = ["睡得香", "做梦了", "睡不实", "睡不着"];
-const SPORT_OPTIONS = ["动够了", "动了点", "没咋动", "动过头了"];
-const SIGNAL_OPTIONS = ["没事", "有劲", "累了", "疼了"];
-
-function getCurrentWeekRange() {
-  const now = new Date();
-  const currentDay = now.getDay();
-  const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
-  const start = new Date(now);
-  start.setDate(now.getDate() - distanceToMonday);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
-  return { start, end };
-}
-
-function parseDateKeyToDate(dateKey) {
-  if (!dateKey || !/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return null;
-  const date = new Date(`${dateKey}T00:00:00`);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function formatRangeText(start, end) {
-  return `${start.getMonth() + 1}月${start.getDate()}日 — ${end.getMonth() + 1}月${end.getDate()}日`;
-}
+const SLEEP_OPTIONS = bodyStats.SLEEP_OPTIONS;
+const SPORT_OPTIONS = bodyStats.SPORT_OPTIONS;
+const SIGNAL_OPTIONS = bodyStats.SIGNAL_OPTIONS;
 
 function buildStatRows(records, field, options) {
   const total = records.length || 1;
@@ -49,32 +26,26 @@ function buildStatRows(records, field, options) {
   });
 }
 
-function resolveCareText(records, averageScore) {
-  if (averageScore >= 70) return WEEK_CARE_TEXT.overallGood;
-  const signalWorst = records.filter((item) => item.signal === "累了" || item.signal === "疼了").length;
-  const sleepWorst = records.filter((item) => item.sleep === "睡不着" || item.sleep === "睡不实").length;
-  const sportLeast = records.filter((item) => item.sport === "没咋动").length;
-  const maxCount = Math.max(signalWorst, sleepWorst, sportLeast);
-  if (maxCount === signalWorst) return WEEK_CARE_TEXT.signalWorst;
-  if (maxCount === sleepWorst) return WEEK_CARE_TEXT.sleepWorst;
-  return WEEK_CARE_TEXT.sportLeast;
-}
-
 Page({
   data: {
     hasRecords: false,
     rangeText: "",
-    reviewText: "本周暂无身体记录，先去完成一次身体问答吧。",
+    reviewText: "",
     sleepStats: [],
     sportStats: [],
     signalStats: [],
     statusTitle: "待生成",
-    statusDesc: "完成本周记录后会自动生成身体边界状态。",
+    statusDesc: "",
     statusIcon: "/images/transparent background/good.png",
-    careText: "先记录一次今天的身心状态，我们再一起看趋势。",
+    careText: "",
+    extremeLine: "",
+    sleepNarrative: "",
+    sportNarrative: "",
+    signalNarrative: "",
   },
 
   onLoad() {
+    wx.setNavigationBarTitle({ title: "身体边界报告" });
     this.loadWeeklyReport();
   },
 
@@ -83,47 +54,54 @@ Page({
   },
 
   loadWeeklyReport() {
-    const { start, end } = getCurrentWeekRange();
-    const rangeText = formatRangeText(start, end);
-    const saved = wx.getStorageSync(STORAGE_KEYS.BODY_RECORDS);
-    const allRecords = Array.isArray(saved) ? saved : [];
-    const weekRecords = allRecords.filter((item) => {
-      const date = parseDateKeyToDate(item && item.dateKey);
-      return date && date >= start && date <= end;
-    });
+    const { start, end } = bodyStats.getWeekRangeContaining(new Date());
+    const rangeText = momentScore.formatCalendarRangeChinese(start, end);
+    let allRecords = [];
+    try {
+      const saved = wx.getStorageSync(STORAGE_KEYS.BODY_RECORDS);
+      allRecords = Array.isArray(saved) ? saved : [];
+    } catch (e) {
+      console.error("body-report getStorageSync", e);
+      allRecords = [];
+    }
 
-    if (!weekRecords.length) {
+    const rep = bodyStats.buildWeekReportPayload(allRecords, start, end);
+
+    if (!rep.hasRecords) {
       this.setData({
         hasRecords: false,
         rangeText,
-        reviewText: "本周暂无记录，先去完成一次身体问答吧。",
+        reviewText: "本周尚未记录身体边界，开始第一次记录吧。",
         sleepStats: buildStatRows([], "sleep", SLEEP_OPTIONS),
         sportStats: buildStatRows([], "sport", SPORT_OPTIONS),
         signalStats: buildStatRows([], "signal", SIGNAL_OPTIONS),
         statusTitle: "待生成",
         statusDesc: "完成本周记录后会自动生成身体边界状态。",
-        careText: "先记录一次今天的状态，慢慢建立你的身体节奏。",
+        careText: "先记录一次今天的身心状态，我们再一起看趋势。",
+        extremeLine: "",
+        sleepNarrative: "",
+        sportNarrative: "",
+        signalNarrative: "",
       });
       this.syncStatusIcon();
       return;
     }
 
-    const totalScore = weekRecords.reduce((sum, item) => sum + getRecordScore(item), 0);
-    const averageScore = Math.round(totalScore / weekRecords.length);
-    const status = getWeekStatus(averageScore);
-    const dayCount = new Set(weekRecords.map((item) => item.dateKey)).size;
-    const reviewText = `这周你记录了 ${dayCount} 天，共 ${weekRecords.length} 次。`;
-
+    const deduped = rep.deduped;
     this.setData({
       hasRecords: true,
       rangeText,
-      reviewText,
-      sleepStats: buildStatRows(weekRecords, "sleep", SLEEP_OPTIONS),
-      sportStats: buildStatRows(weekRecords, "sport", SPORT_OPTIONS),
-      signalStats: buildStatRows(weekRecords, "signal", SIGNAL_OPTIONS),
-      statusTitle: status.title,
-      statusDesc: status.desc,
-      careText: resolveCareText(weekRecords, averageScore),
+      reviewText: `这周你记录了 ${rep.dayCount} 天，共提交 ${rep.totalSubmits} 次。`,
+      sleepStats: buildStatRows(deduped, "sleep", SLEEP_OPTIONS),
+      sportStats: buildStatRows(deduped, "sport", SPORT_OPTIONS),
+      signalStats: buildStatRows(deduped, "signal", SIGNAL_OPTIONS),
+      statusTitle: rep.finalStatusTitle,
+      statusDesc: rep.statusDesc,
+      careText: rep.careText,
+      extremeLine: rep.extremeLine || "",
+      sleepNarrative: rep.sleepNarrative,
+      sportNarrative: rep.sportNarrative,
+      signalNarrative: rep.signalNarrative,
     });
     this.syncStatusIcon();
   },
@@ -132,12 +110,6 @@ Page({
     const { statusTitle } = this.data;
     this.setData({
       statusIcon: STATUS_ICON_MAP[statusTitle] || STATUS_ICON_MAP["状态平稳"],
-    });
-  },
-
-  goBack() {
-    wx.switchTab({
-      url: "/pages/index/index",
     });
   },
 

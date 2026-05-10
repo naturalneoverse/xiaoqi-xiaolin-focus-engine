@@ -1,6 +1,15 @@
 // app.js
 const TAB_PAGE_ROUTES = new Set(["pages/sleep/index", "pages/index/index", "pages/my/index"]);
-const NO_TOP_SAFE_AREA_ROUTES = new Set(["pages/login/index"]);
+const NO_TOP_SAFE_AREA_ROUTES = new Set(["pages/login/index", "pages/onboarding-tags/index"]);
+/** 仅这些页为自定义导航，需顶部安全区 padding；其余使用系统导航，由微信留出标题栏，不再叠加 top padding */
+const CUSTOM_NAV_ROUTES = new Set([
+  "pages/my/index",
+  "pages/task-create/index",
+  "pages/time-report/index",
+  "pages/poster/index",
+  "pages/settings/index",
+  "pages/privacy/index",
+]);
 const STORAGE_KEYS = require("./config/storageKeys");
 const DEFAULT_USER_PROFILE = {
   avatarUrl: "/images/transparent background/avatar.png",
@@ -63,8 +72,20 @@ function getTabBarExtraBottom(route, windowWidth) {
 function buildSafeAreaStyle(route) {
   const insets = computeSafeAreaInsets();
   const bottom = insets.bottom + getTabBarExtraBottom(route, insets.windowWidth);
-  const top = NO_TOP_SAFE_AREA_ROUTES.has(route) ? 0 : insets.top;
-  return `padding-top:${top}px;padding-bottom:${bottom}px;box-sizing:border-box;`;
+  let topPx = 0;
+  if (NO_TOP_SAFE_AREA_ROUTES.has(route)) {
+    topPx = 0;
+  } else if (CUSTOM_NAV_ROUTES.has(route)) {
+    topPx = insets.top;
+  } else {
+    const win = getWindowInfoSafe();
+    const ww = win.windowWidth || 375;
+    // 系统导航页：默认约 24rpx；时间首页「今日任务」与 + 需更疏朗
+    let r = 24;
+    if (route === "pages/sleep/index") r = 44;
+    topPx = Math.ceil((r / 750) * ww);
+  }
+  return `padding-top:${topPx}px;padding-bottom:${bottom}px;box-sizing:border-box;`;
 }
 
 const rawPage = Page;
@@ -142,6 +163,13 @@ App({
     const localProfile = this.loadLocalUserProfile();
     const localSettings = this.loadLocalSettings();
     const hasLoggedIn = this.loadHasLoggedIn();
+    const tagsCache = (() => {
+      try {
+        return !!wx.getStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
+      } catch (e) {
+        return false;
+      }
+    })();
     this.globalData = {
       // env 参数说明：
       // env 参数决定接下来小程序发起的云开发调用（wx.cloud.xxx）会请求到哪个云环境的资源
@@ -156,6 +184,8 @@ App({
       userProfile: localProfile,
       settings: localSettings,
       hasLoggedIn,
+      /** 首次用户标签是否已在云端填写完成（换机后由云拉取更新） */
+      userTagsComplete: hasLoggedIn ? tagsCache : false,
       safeAreaInsets: computeSafeAreaInsets(),
       pendingProfileEditField: "",
     };
@@ -166,6 +196,45 @@ App({
         env: this.globalData.env,
         traceUser: true,
       });
+      if (this.globalData.hasLoggedIn) {
+        wx.cloud
+          .callFunction({
+            name: "quickstartFunctions",
+            data: { type: "getUserTags" },
+          })
+          .then((res) => {
+            const r = (res && res.result) || {};
+            if (!r.success) return;
+            if (r.tagsComplete) {
+              this.globalData.userTagsComplete = true;
+              try {
+                wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
+                wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_LOCAL);
+              } catch (e) {
+                /* ignore */
+              }
+            } else {
+              let localPending = false;
+              try {
+                const lo = wx.getStorageSync(STORAGE_KEYS.USER_TAGS_LOCAL);
+                localPending = !!(lo && lo.gender && lo.lifeStage && Array.isArray(lo.roles) && lo.roles.length >= 2);
+              } catch (e) {
+                localPending = false;
+              }
+              if (localPending) {
+                this.globalData.userTagsComplete = true;
+              } else {
+                this.globalData.userTagsComplete = false;
+                try {
+                  wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
+                } catch (e) {
+                  /* ignore */
+                }
+              }
+            }
+          })
+          .catch(() => {});
+      }
     }
   },
 

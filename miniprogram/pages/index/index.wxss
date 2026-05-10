@@ -171,12 +171,6 @@ page {
   white-space: nowrap;
 }
 
-.card-hint {
-  margin-top: 8rpx;
-  color: #8ea1b6;
-  font-size: 24rpx;
-}
-
 .card-desc-muted {
   display: block;
   margin-top: 12rpx;
@@ -235,6 +229,14 @@ page {
 
 .progress-item-last {
   margin-bottom: 42rpx;
+}
+
+.progress-warn {
+  display: block;
+  margin-top: 8rpx;
+  color: #b45309;
+  font-size: 22rpx;
+  line-height: 1.4;
 }
 
 .progress-head {

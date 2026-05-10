@@ -1,5 +1,7 @@
 // index.js
 const STORAGE_KEYS = require("../../config/storageKeys");
+const bodyStats = require("../../utils/bodyStats");
+const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 
 function getTodayKey() {
   const now = new Date();
@@ -97,15 +99,28 @@ Page({
     content: "",
     hasBodyHistory: false,
     hasTodayBodyRecord: false,
-    showBodyHint: true,
+    /** 今日是否已记身体边界：是→感知中，否（含从未记录）→待唤醒 */
+    bodyEnergyLabel: "待唤醒",
+    sleepSevenLabel: "—",
+    sportSevenLabel: "—",
+    signalSevenLabel: "—",
+    sleepSevenWarn: "",
+    sportSevenWarn: "",
+    signalSevenWarn: "",
+    sleepSevenBar: "width: 0%;",
+    sportSevenBar: "width: 0%;",
+    signalSevenBar: "width: 0%;",
   },
 
   onShow() {
-    this.syncUserProfile();
-    this.syncBodyRecordState();
-    if (typeof this.getTabBar === "function" && this.getTabBar()) {
-      this.getTabBar().setData({ selected: 1 });
-    }
+    ensureUserTagsOrLeave().then((ok) => {
+      if (!ok) return;
+      this.syncUserProfile();
+      this.syncBodyRecordState();
+      if (typeof this.getTabBar === "function" && this.getTabBar()) {
+        this.getTabBar().setData({ selected: 1 });
+      }
+    });
   },
 
   syncBodyRecordState() {
@@ -115,16 +130,36 @@ Page({
       const today = getTodayKey();
       const hasBodyHistory = records.length > 0;
       const hasTodayBodyRecord = records.some((item) => item && item.dateKey === today);
+      const bodyEnergyLabel = hasTodayBodyRecord ? "感知中" : "待唤醒";
+      const seven = bodyStats.buildSevenDaySummary(records, new Date());
       this.setData({
         hasBodyHistory,
         hasTodayBodyRecord,
-        showBodyHint: !hasTodayBodyRecord,
+        bodyEnergyLabel,
+        sleepSevenLabel: seven.sleepSevenLabel,
+        sportSevenLabel: seven.sportSevenLabel,
+        signalSevenLabel: seven.signalSevenLabel,
+        sleepSevenWarn: seven.sleepSevenWarn || "",
+        sportSevenWarn: seven.sportSevenWarn || "",
+        signalSevenWarn: seven.signalSevenWarn || "",
+        sleepSevenBar: seven.sleepSevenBar,
+        sportSevenBar: seven.sportSevenBar,
+        signalSevenBar: seven.signalSevenBar,
       });
     } catch (e) {
       this.setData({
         hasBodyHistory: false,
         hasTodayBodyRecord: false,
-        showBodyHint: true,
+        bodyEnergyLabel: "待唤醒",
+        sleepSevenLabel: "—",
+        sportSevenLabel: "—",
+        signalSevenLabel: "—",
+        sleepSevenWarn: "",
+        sportSevenWarn: "",
+        signalSevenWarn: "",
+        sleepSevenBar: "width: 0%;",
+        sportSevenBar: "width: 0%;",
+        signalSevenBar: "width: 0%;",
       });
     }
   },

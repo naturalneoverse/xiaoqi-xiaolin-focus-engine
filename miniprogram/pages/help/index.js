@@ -20,6 +20,11 @@ Page({
     guideOpen: [false, false, false],
     faqList: [
       {
+        question: "真我时刻怎么算的？",
+        answer:
+          "本周仍在清单里的每条任务（含进行中和已完成，延期）按标签计分：真我+1、不二+3、合一+3，生计和职责不计分。分值可叠加，1分=1次。",
+      },
+      {
         question: "怎么修改昵称和签名？",
         answer:
           "点击'我的'页面顶部的头像区域，进入编辑个人信息页面，修改昵称和签名后点击右上角'保存'即可。",
@@ -42,10 +47,10 @@ Page({
       {
         question: "打卡中断了能补吗？",
         answer:
-          "目前打卡记录不可补签。连续打卡天数为自然连续天数，中断后重新开始计算。坚持21天会有惊喜哦。",
+          "「我的」里的打卡记录：需在已登录的前提下，当日至少保存过一次任务、身体记录或个人信息等，自然日内计为打卡一日，同一天多次保存也只计一次；不可补签过往日期。连续天数从今天往前数自然连续有打卡的日子，中断后重新计算。坚持21天会有惊喜哦。",
       },
     ],
-    faqOpen: [false, false, false, false, false],
+    faqOpen: [false, false, false, false, false, false],
   },
 
   toggleGuide(e) {
@@ -61,36 +66,11 @@ Page({
   toggleFaq(e) {
     const { index } = e.currentTarget.dataset;
     const idx = Number(index);
-    const next = [false, false, false, false, false];
+    const len = this.data.faqList.length;
+    const next = new Array(len).fill(false);
     next[idx] = !this.data.faqOpen[idx];
     this.setData({
       faqOpen: next,
-    });
-  },
-
-  goBack() {
-    this.closeToMy();
-  },
-
-  goHome() {
-    this.closeToMy();
-  },
-
-  closeToMy() {
-    const pages = getCurrentPages();
-    const targetRoute = "pages/my/index";
-    const targetIndex = pages.findIndex((page) => page.route === targetRoute);
-
-    if (targetIndex >= 0) {
-      const delta = pages.length - targetIndex - 1;
-      if (delta > 0) {
-        wx.navigateBack({ delta });
-        return;
-      }
-    }
-
-    wx.switchTab({
-      url: "/pages/my/index",
     });
   },
 });

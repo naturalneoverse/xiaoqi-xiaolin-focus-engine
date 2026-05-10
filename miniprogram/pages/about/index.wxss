@@ -8,41 +8,6 @@ page {
   box-sizing: border-box;
 }
 
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18rpx;
-  height: 72rpx;
-}
-
-.back-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  min-width: 96rpx;
-}
-
-.close-icon {
-  width: 40rpx;
-  height: 40rpx;
-  display: block;
-}
-
-.page-title {
-  color: #184061;
-  font-size: 34rpx;
-  font-weight: 700;
-}
-
-.top-space {
-  min-width: 96rpx;
-  text-align: right;
-  color: #184061;
-  font-size: 30rpx;
-  font-weight: 700;
-}
-
 .brand {
   display: flex;
   flex-direction: column;

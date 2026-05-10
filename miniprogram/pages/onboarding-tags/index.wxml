@@ -1,0 +1,79 @@
+<wxs module="rtag">
+module.exports.has = function (roles, id) {
+  if (!roles || !roles.length) return false;
+  var i = 0;
+  var len = roles.length;
+  for (i = 0; i < len; i++) {
+    if (roles[i] === id) return true;
+  }
+  return false;
+};
+</wxs>
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <scroll-view class="scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="hero">
+      <text class="hero-gr">γνῶθι σεαυτόν</text>
+      <text class="hero-cn">认识你自己</text>
+      <text class="hero-author">——苏格拉底</text>
+    </view>
+
+    <view class="section">
+      <text class="section-title">性别（必填）</text>
+      <view class="row-group">
+        <view
+          wx:for="{{genderOptions}}"
+          wx:key="id"
+          class="chip {{gender === item.id ? 'chip-on' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onPickGender"
+        >
+          <text class="chip-dot {{gender === item.id ? 'chip-dot-sel' : ''}}">{{gender === item.id ? '✓' : '☐'}}</text>
+          <text class="chip-t">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <text class="section-title">你处在哪个阶段？（必填）</text>
+      <view class="col-group">
+        <view
+          wx:for="{{lifeStageOptions}}"
+          wx:key="id"
+          class="row-opt {{lifeStage === item.id ? 'row-opt-on' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onPickStage"
+        >
+          <text class="chip-dot {{lifeStage === item.id ? 'chip-dot-sel' : ''}}">{{lifeStage === item.id ? '✓' : '☐'}}</text>
+          <text class="row-opt-t">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <text class="section-title">你的角色（必填，至少选 2 个）</text>
+      <view class="role-grid">
+        <view
+          wx:for="{{roleOptions}}"
+          wx:key="id"
+          class="role-cell {{rtag.has(roles, item.id) ? 'role-on' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onToggleRole"
+        >
+          <text class="role-mark {{rtag.has(roles, item.id) ? 'role-mark-sel' : ''}}">{{rtag.has(roles, item.id) ? '✓' : '☐'}}</text>
+          <text class="role-t">{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <button
+      class="submit {{canSubmit ? '' : 'submit-disabled'}}"
+      disabled="{{!canSubmit || submitting}}"
+      bindtap="onSubmit"
+    >
+      进入小麒小麟
+    </button>
+
+    <text class="footer-line">你填写，你定义，你不必解释。</text>
+    <view class="scroll-pad"></view>
+  </scroll-view>
+</view>
