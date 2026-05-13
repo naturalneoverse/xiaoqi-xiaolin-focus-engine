@@ -4,14 +4,14 @@ const CLEAR_OPTIONS = ["清除图片缓存", "清除全部记录"];
 Page({
   data: {
     notifyOn: true,
-    version: "1.1.5",
+    version: "1.1.6",
   },
 
   onLoad() {
     this.loadSettings();
     const app = getApp();
     const v = app && app.globalData && app.globalData.APP_VERSION;
-    this.setData({ version: v || "1.1.5" });
+    this.setData({ version: v || "1.1.6" });
   },
 
   loadSettings() {

@@ -6,6 +6,27 @@ const posterRenderer = require("../../utils/posterRenderer");
  * 将 getTempFileURL 得到的 HTTPS 落到本地供 canvas 使用。
  * 常见失败：未在公众平台配置该 URL 的 downloadFile 合法域名 → downloadFile 失败 → 只能画渐变。
  */
+/** 与当前运行版本一致生成太阳码；正式版开启 check_path 以校验落地页已发布 */
+function buildPosterSunCodeCloudPayload(lineColor) {
+  let envVersion = "release";
+  try {
+    const info = wx.getAccountInfoSync && wx.getAccountInfoSync();
+    const ev = info && info.miniProgram && info.miniProgram.envVersion;
+    if (ev === "develop" || ev === "trial" || ev === "release") {
+      envVersion = ev;
+    }
+  } catch (e) {
+    /* ignore */
+  }
+  const checkPath = envVersion === "release";
+  return {
+    type: "getUnlimitedPosterQr",
+    lineColor,
+    envVersion,
+    checkPath,
+  };
+}
+
 async function downloadPosterBgToLocal(tempFileURL, fileID) {
   if (!tempFileURL) return "";
   const localFromDownload = await new Promise((resolve) => {
@@ -73,6 +94,14 @@ Page({
   },
 
   onLoad(options) {
+    try {
+      const shareRef = require("../../utils/shareReferrer");
+      if (shareRef.gateUnauthenticatedShareEntry(options)) {
+        return;
+      }
+    } catch (e) {
+      /* ignore */
+    }
     const raw = options && options.weekStart ? decodeURIComponent(options.weekStart) : "";
     this.__weekMondayKey = raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
     this.__blind = posterRenderer.rollBlindBox();
@@ -190,7 +219,7 @@ Page({
       if (wx.cloud) {
         const cf = await wx.cloud.callFunction({
           name: "quickstartFunctions",
-          data: { type: "getUnlimitedPosterQr", lineColor },
+          data: buildPosterSunCodeCloudPayload(lineColor),
         });
         const result = (cf && cf.result) || {};
         if (result.success && result.fileID) {
@@ -278,17 +307,26 @@ Page({
     });
   },
 
-  onShareMoment() {
+  async onShareMoment() {
     const src = this.__lastTempPath || this.data.previewSrc;
     if (!src) {
       wx.showToast({ title: "请稍候", icon: "none" });
       return;
     }
+    let entrancePath = "/pages/login/index";
+    try {
+      const shareRef = require("../../utils/shareReferrer");
+      if (shareRef && typeof shareRef.resolveLoginEntrancePath === "function") {
+        entrancePath = await shareRef.resolveLoginEntrancePath();
+      }
+    } catch (e) {
+      /* ignore */
+    }
     // 直接调起系统「分享图片」面板（含发朋友/朋友圈等），避免必须先存相册；失败或低版本无接口时回退存相册引导
     if (typeof wx.showShareImageMenu === "function") {
       wx.showShareImageMenu({
         path: src,
-        entrancePath: "/pages/sleep/index",
+        entrancePath,
         fail: (err) => {
           console.warn("[poster] showShareImageMenu fail", err);
           this._savePosterThenMomentHint(src);
@@ -322,17 +360,29 @@ Page({
   },
 
   onShareAppMessage() {
+    const shareRef = require("../../utils/shareReferrer");
+    const title = "扫我，看看你有多少真我时刻";
+    const imageUrl = this.__lastTempPath || this.data.previewSrc || "";
     return {
-      title: "扫我，看看你有多少真我时刻",
-      path: "/pages/sleep/index",
+      title,
+      promise: shareRef.resolveLoginEntrancePath().then((path) => ({
+        title,
+        path: path || "/pages/login/index",
+        imageUrl,
+      })),
     };
   },
 
   onShareTimeline() {
     const p = this.__lastTempPath || this.data.previewSrc;
+    const shareRef = require("../../utils/shareReferrer");
+    const query =
+      shareRef && typeof shareRef.buildTimelineShareQuerySync === "function"
+        ? shareRef.buildTimelineShareQuerySync()
+        : "";
     return {
       title: "扫我，看看你有多少真我时刻",
-      query: "",
+      query: query || "",
       imageUrl: p || "",
     };
   },

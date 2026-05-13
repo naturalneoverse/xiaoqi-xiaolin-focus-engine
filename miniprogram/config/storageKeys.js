@@ -17,6 +17,13 @@ const STORAGE_KEYS = {
   LAST_SYNC_TASK_AT: "last_sync_task_at",
   /** 身体记录增量游标，语义同 LAST_SYNC_TASK_AT */
   LAST_SYNC_BODY_AT: "last_sync_body_at",
+  /** 海报扫码：待上报的分享者 openid（scene 解码后写入，登录成功后上报云端并清除） */
+  PENDING_REFERRER_OPENID: "pending_referrer_openid",
+  PENDING_REFERRER_TS: "pending_referrer_ts",
+  /** 待上报归因来源：poster_qr | friend_share */
+  PENDING_REFERRER_SOURCE: "pending_referrer_source",
+  /** 当前用户 openid（登录后写入，用于「转朋友」path 带 shareUid） */
+  USER_OPENID: "user_openid",
 };
 
 module.exports = STORAGE_KEYS;

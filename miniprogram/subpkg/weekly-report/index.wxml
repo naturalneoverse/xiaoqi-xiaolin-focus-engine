@@ -56,6 +56,6 @@
 
   <view class="actions">
     <button class="action-btn action-btn-primary" bindtap="goPoster">生成真我时刻海报</button>
-    <button class="action-btn action-btn-ghost" bindtap="onShareToFriend">分享给朋友</button>
+    <button class="action-btn action-btn-ghost" open-type="share">分享给朋友</button>
   </view>
 </view>

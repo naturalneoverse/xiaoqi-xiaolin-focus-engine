@@ -33,7 +33,7 @@ const DEFAULT_SETTINGS = {
 };
 
 /** 产品版本：关于页、设置页展示；与 miniprogram/package.json 的 version 同步 */
-const APP_VERSION = "1.1.5";
+const APP_VERSION = "1.1.6";
 
 function getWindowInfoSafe() {
   try {
@@ -221,6 +221,13 @@ App({
         return false;
       }
     })();
+    let userOpenId = "";
+    try {
+      const oid = wx.getStorageSync(STORAGE_KEYS.USER_OPENID);
+      if (typeof oid === "string" && oid) userOpenId = oid;
+    } catch (e) {
+      /* ignore */
+    }
     this.globalData = {
       // env 参数说明：
       // env 参数决定接下来小程序发起的云开发调用（wx.cloud.xxx）会请求到哪个云环境的资源
@@ -234,6 +241,8 @@ App({
       },
       userProfile: localProfile,
       settings: localSettings,
+      /** 当前用户 openid，供分享 path 拼接 shareUid（登录后写入） */
+      userOpenId,
       hasLoggedIn,
       /** 首次用户标签是否已在云端填写完成（换机后由云拉取更新） */
       userTagsComplete: hasLoggedIn ? tagsCache : false,
@@ -316,6 +325,14 @@ App({
           }
         }, 1400);
       }
+    }
+    try {
+      const shareRef = require("./utils/shareReferrer");
+      if (shareRef && typeof shareRef.handleColdLaunchForQr === "function") {
+        shareRef.handleColdLaunchForQr(hasLoggedIn);
+      }
+    } catch (e) {
+      console.warn("[App] shareReferrer cold launch", e);
     }
   },
 

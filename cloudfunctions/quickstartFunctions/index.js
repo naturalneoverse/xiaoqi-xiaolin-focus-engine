@@ -288,23 +288,76 @@ const getMiniProgramCode = async () => {
   return upload.fileID;
 };
 
-/** 海报用太阳码：scene 取 OPENID 前 8 位（≤32）；line_color 对齐海报 accent */
+const REFERRAL_COLL = "referral_attributions";
+
+function isValidPosterReferrerSceneId(s) {
+  return typeof s === "string" && s.length >= 10 && s.length <= 32 && /^[a-zA-Z0-9_-]+$/.test(s);
+}
+
+function normalizeReferralSource(event) {
+  const s = event && event.source;
+  if (s === "friend_share") return "friend_share";
+  return "poster_qr";
+}
+
+/** 海报/转朋友归因：首种渠道各记一条；写库失败不阻塞登录（success 仍 true） */
+const recordReferralAttribution = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const invitee = String(wxContext.OPENID || "");
+  const referrer = String((event && event.referrerOpenid) || "").trim();
+  const source = normalizeReferralSource(event);
+  if (!invitee) {
+    return { success: false, errMsg: "no openid" };
+  }
+  if (!isValidPosterReferrerSceneId(referrer) || referrer === invitee) {
+    return { success: true, skipped: true };
+  }
+  try {
+    const existed = await db
+      .collection(REFERRAL_COLL)
+      .where({ inviteeOpenid: invitee, source })
+      .limit(1)
+      .get();
+    if (existed.data && existed.data.length) {
+      return { success: true, deduped: true };
+    }
+    await db.collection(REFERRAL_COLL).add({
+      data: {
+        referrerOpenid: referrer,
+        inviteeOpenid: invitee,
+        source,
+        createdAt: db.serverDate(),
+      },
+    });
+    return { success: true };
+  } catch (e) {
+    console.warn("[recordReferralAttribution]", e && e.message ? e.message : e);
+    return { success: true, softFail: true, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+/** 海报用太阳码：scene 为分享者 OPENID（≤32）；落地页为登录页；env_version 由客户端按运行版本传入 */
 const getUnlimitedPosterQr = async (event) => {
   const wxContext = cloud.getWXContext();
   const openid = String(wxContext.OPENID || "");
-  const pad = "________";
-  const scene = (openid + pad).slice(0, 8);
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  const scene = openid.length <= 32 ? openid : openid.slice(0, 32);
   const lineColor = (event && event.lineColor) || { r: "24", g: "64", b: "97" };
   const r = String(lineColor.r);
   const g = String(lineColor.g);
   const b = String(lineColor.b);
+  const allowedEnv = new Set(["develop", "trial", "release"]);
+  const envVersion = allowedEnv.has(event && event.envVersion) ? event.envVersion : "release";
+  const check_path = !!(event && event.checkPath);
   try {
     const resp = await cloud.openapi.wxacode.getUnlimited({
       scene,
-      page: "pages/sleep/index",
+      page: "pages/login/index",
       width: 640,
-      check_path: false,
-      env_version: "release",
+      check_path,
+      env_version: envVersion,
       line_color: { r, g, b },
     });
     if (resp && resp.errCode !== undefined && resp.errCode !== 0) {
@@ -498,6 +551,8 @@ exports.main = async (event, context) => {
       return await getMiniProgramCode();
     case "getUnlimitedPosterQr":
       return await getUnlimitedPosterQr(event);
+    case "recordReferralAttribution":
+      return await recordReferralAttribution(event);
     case "createCollection":
       return await createCollection();
     case "selectRecord":

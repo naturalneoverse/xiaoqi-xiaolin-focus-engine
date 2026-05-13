@@ -19,6 +19,14 @@ Page({
   },
 
   onLoad(options) {
+    try {
+      const shareRef = require("../../utils/shareReferrer");
+      if (shareRef.gateUnauthenticatedShareEntry(options)) {
+        return;
+      }
+    } catch (e) {
+      /* ignore */
+    }
     wx.setNavigationBarTitle({ title: "时间编织报告" });
     const raw = options && options.weekStart ? decodeURIComponent(options.weekStart) : "";
     this.__weekMondayKey = raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
@@ -107,11 +115,31 @@ Page({
     });
   },
 
-  onShareToFriend() {
-    wx.showToast({
-      title: "请使用微信分享",
-      icon: "none",
-      duration: 1400,
-    });
+  /** 与海报「转朋友」一致：卡片打开登录页并带 shareUid，登录后走既有归因 */
+  onShareAppMessage() {
+    const shareRef = require("../../utils/shareReferrer");
+    const title = "分享我的时间编织报告";
+    const imageUrl = "/images/transparent background/logo.png";
+    return {
+      title,
+      promise: shareRef.resolveLoginEntrancePath().then((path) => ({
+        title,
+        path: path || "/pages/login/index",
+        imageUrl,
+      })),
+    };
+  },
+
+  onShareTimeline() {
+    const shareRef = require("../../utils/shareReferrer");
+    const query =
+      shareRef && typeof shareRef.buildTimelineShareQuerySync === "function"
+        ? shareRef.buildTimelineShareQuerySync()
+        : "";
+    return {
+      title: "分享我的时间编织报告",
+      query: query || "",
+      imageUrl: "/images/transparent background/logo.png",
+    };
   },
 });

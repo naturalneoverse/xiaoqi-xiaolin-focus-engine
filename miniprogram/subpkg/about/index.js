@@ -1,6 +1,6 @@
 Page({
   data: {
-    appVersion: "1.1.5",
+    appVersion: "1.1.6",
     copyrightYear: "2026",
   },
 

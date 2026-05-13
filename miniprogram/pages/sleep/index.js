@@ -62,7 +62,15 @@ Page({
     totalCount: 0,
   },
 
-  onLoad() {
+  onLoad(options) {
+    try {
+      const shareRef = require("../../utils/shareReferrer");
+      if (shareRef.gateUnauthenticatedShareEntry(options)) {
+        return;
+      }
+    } catch (e) {
+      /* ignore */
+    }
     this.loadTasks();
   },
 

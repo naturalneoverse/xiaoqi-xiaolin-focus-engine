@@ -10,6 +10,21 @@ Page({
     agreementFontRpx: 26,
   },
 
+  onLoad(options) {
+    if (!options || typeof options !== "object") return;
+    try {
+      const shareRef = require("../../utils/shareReferrer");
+      if (options.scene != null && options.scene !== "") {
+        shareRef.persistReferrerFromScene(options.scene);
+      }
+      if (options.shareUid != null && options.shareUid !== "") {
+        shareRef.persistReferrerFromShareUid(options.shareUid);
+      }
+    } catch (e) {
+      /* ignore */
+    }
+  },
+
   onShow() {
     const hasLoggedIn = this.getHasLoggedIn();
     this.setData({
@@ -54,6 +69,28 @@ Page({
     });
   },
 
+  /** 海报扫码待上报的分享者 ID：上报失败也不阻塞后续跳转 */
+  async reportPendingReferralIfAny() {
+    const shareRef = require("../../utils/shareReferrer");
+    const referrer = shareRef.getPendingReferrerOpenid();
+    if (!referrer) return;
+    if (!wx.cloud || typeof wx.cloud.callFunction !== "function") {
+      shareRef.clearPendingReferrer();
+      return;
+    }
+    const source = shareRef.getPendingReferrerSource();
+    try {
+      await wx.cloud.callFunction({
+        name: "quickstartFunctions",
+        data: { type: "recordReferralAttribution", referrerOpenid: referrer, source },
+      });
+    } catch (e) {
+      console.warn("recordReferralAttribution", e);
+    } finally {
+      shareRef.clearPendingReferrer();
+    }
+  },
+
   onHide() {
     this.stopLoadingAnimation();
   },
@@ -96,6 +133,17 @@ Page({
             app.globalData.hasLoggedIn = true;
           }
         }
+        const oid = result.openid && typeof result.openid === "string" ? result.openid.trim() : "";
+        if (oid) {
+          try {
+            wx.setStorageSync(STORAGE_KEYS.USER_OPENID, oid);
+            if (app && app.globalData) {
+              app.globalData.userOpenId = oid;
+            }
+          } catch (e) {
+            /* ignore */
+          }
+        }
         let tagsComplete = result.tagsComplete === true;
         if (wx.cloud && typeof wx.cloud.callFunction === "function") {
           try {
@@ -132,6 +180,7 @@ Page({
           isFirstLogin: false,
           agree: true,
         });
+        await this.reportPendingReferralIfAny();
         if (!tagsComplete) {
           wx.redirectTo({
             url: "/pages/onboarding-tags/index",
