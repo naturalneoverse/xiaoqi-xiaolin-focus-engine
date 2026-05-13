@@ -1,0 +1,32 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="card">
+    <text class="title">今日记录已保存</text>
+    <view wx:if="{{todayRecords.length}}" class="record-list">
+      <view class="record-block" wx:for="{{todayRecords}}" wx:key="id">
+        <text class="record-time">{{item.createdAt}}</text>
+        <view class="row"><text class="k">睡眠</text><text class="v">{{item.sleep}}</text></view>
+        <view class="row"><text class="k">运动</text><text class="v">{{item.sport}}</text></view>
+        <view class="row"><text class="k">身体信号</text><text class="v">{{item.signal}}</text></view>
+        <view wx:if="{{index < todayRecords.length - 1}}" class="record-divider"></view>
+      </view>
+    </view>
+    <view wx:else class="row muted">今日暂无多条记录</view>
+  </view>
+
+  <view class="card">
+    <text class="title">小麟建议</text>
+    <view class="advice-row">
+      <image class="advice-mascot" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+      <chat-bubble
+        text="{{adviceText}}"
+        color="#b7d6ea"
+        arrowPosition="left"
+        maxLength="{{120}}"
+      />
+    </view>
+  </view>
+
+  <view class="btn tap-target" bindtap="backHome" hover-class="row-hover">
+    <text class="btn-text">返回身心页面</text>
+  </view>
+</view>

@@ -1,6 +1,6 @@
 ---
 description: 真我时刻海报 Logo 像素处理与预览（真机已验证，勿随意简化）
-globs: miniprogram/pages/poster/**/*,miniprogram/utils/posterRenderer.js
+globs: miniprogram/subpkg/poster/**/*,miniprogram/utils/posterRenderer.js
 alwaysApply: false
 ---
 
@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## 必须保留的结构
 
-1. **页内辅助画布** `pages/poster/index.wxml` 中的 `#posterLogoWork`（`type="2d"`），与主 `#posterCanvas` 一起在 `onReady` 里 `createSelectorQuery` 取 `node`，并在 `drawPosterFrame` 选项中传入 **`logoProcessCanvas`**。
+1. **页内辅助画布** `subpkg/poster/index.wxml` 中的 `#posterLogoWork`（`type="2d"`），与主 `#posterCanvas` 一起在 `onReady` 里 `createSelectorQuery` 取 `node`，并在 `drawPosterFrame` 选项中传入 **`logoProcessCanvas`**。
 2. **`posterRenderer.js` 绘制顺序**：Logo 槽内先 `clip` + 铺与海报一致的纵向渐变，再 **`drawLogoViaPixelCanvas`（优先）** → 失败时再 `wx.createOffScreenCanvas` → 最后再 `destination-in` fallback。
 3. **`tintLogoImageData`**：底图用与渐变一致的**不透明 RGB** 填实，避免依赖「真透明」像素（相册/系统图库与 `<image>` 对 Alpha 表现不一致）。BFS 从四边扩展；浅灰平 / 深灰平 / 近白阈勿随意删窄，否则常见素材会回退方框。
 

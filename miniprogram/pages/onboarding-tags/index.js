@@ -1,5 +1,6 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const { GENDER_OPTIONS, LIFE_STAGE_OPTIONS, ROLE_OPTIONS } = require("../../config/userTags");
+const { goSleepHome } = require("../../utils/goTabHome");
 
 /** 云函数未部署 / 环境未连上 / -501 等基础设施错误 */
 function isCloudInfraError(err, result) {
@@ -43,7 +44,7 @@ Page({
       return;
     }
     if (app.globalData.userTagsComplete === true) {
-      wx.switchTab({ url: "/pages/sleep/index" });
+      goSleepHome();
       return;
     }
     if (!wx.cloud) {
@@ -63,7 +64,7 @@ Page({
           } catch (e) {
             /* ignore */
           }
-          wx.switchTab({ url: "/pages/sleep/index" });
+          goSleepHome();
         }
       })
       .catch(() => {});
@@ -109,7 +110,7 @@ Page({
     if (!wx.cloud) {
       saveTagsLocalAndMarkDone(app, gender, lifeStage, roles);
       wx.showToast({ title: "已本机保存，可继续使用", icon: "none" });
-      wx.switchTab({ url: "/pages/sleep/index" });
+      setTimeout(() => goSleepHome(), 320);
       return;
     }
     this.setData({ submitting: true });
@@ -135,7 +136,7 @@ Page({
           /* ignore */
         }
         wx.showToast({ title: "欢迎进入", icon: "success" });
-        wx.switchTab({ url: "/pages/sleep/index" });
+        setTimeout(() => goSleepHome(), 450);
         return;
       }
       if (isCloudInfraError(null, r) || /collection|database|Db|不存在/i.test(r.errMsg || "")) {
@@ -146,7 +147,7 @@ Page({
           duration: 3200,
         });
         setTimeout(() => {
-          wx.switchTab({ url: "/pages/sleep/index" });
+          goSleepHome();
         }, 400);
         return;
       }
@@ -164,7 +165,7 @@ Page({
           duration: 3200,
         });
         setTimeout(() => {
-          wx.switchTab({ url: "/pages/sleep/index" });
+          goSleepHome();
         }, 400);
         return;
       }

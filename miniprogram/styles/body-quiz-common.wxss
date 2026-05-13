@@ -60,12 +60,17 @@ page {
 .btn {
   margin-top: 20rpx;
   width: 100%;
+  max-width: 100%;
+  min-width: 360rpx;
   height: 84rpx;
   line-height: 84rpx;
   border-radius: 999rpx;
   background: #12598f;
   color: #fff;
   font-size: 28rpx;
+  box-sizing: border-box;
+  padding: 0 20rpx;
+  white-space: nowrap;
 }
 
 .progress {

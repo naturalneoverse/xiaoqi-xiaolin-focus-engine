@@ -13,6 +13,8 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+  z-index: 20;
 }
 
 .close-btn {
@@ -21,6 +23,8 @@ page {
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  position: relative;
+  z-index: 21;
 }
 
 .close-icon {
@@ -244,10 +248,18 @@ page {
 .mascot-btn {
   margin-top: 18rpx;
   width: 100%;
+  max-width: 100%;
+  min-width: 280rpx;
   height: 80rpx;
   line-height: 80rpx;
   border-radius: 999rpx;
   background: #12598f;
   color: #ffffff;
   font-size: 28rpx;
+  box-sizing: border-box;
+  padding: 0 20rpx;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

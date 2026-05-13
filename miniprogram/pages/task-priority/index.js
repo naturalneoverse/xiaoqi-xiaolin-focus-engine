@@ -5,13 +5,7 @@ const OPTIONS = [
   { key: "不重要不紧急", desc: "这件事，真的需要做吗？" },
 ];
 
-function parsePayload(payload) {
-  try {
-    return payload ? JSON.parse(decodeURIComponent(payload)) : {};
-  } catch (e) {
-    return {};
-  }
-}
+const { parsePayload } = require("../../utils/parsePayload");
 
 Page({
   data: {

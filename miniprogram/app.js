@@ -3,13 +3,25 @@ const TAB_PAGE_ROUTES = new Set(["pages/sleep/index", "pages/index/index", "page
 const NO_TOP_SAFE_AREA_ROUTES = new Set(["pages/login/index", "pages/onboarding-tags/index"]);
 /** 仅这些页为自定义导航，需顶部安全区 padding；其余使用系统导航，由微信留出标题栏，不再叠加 top padding */
 const CUSTOM_NAV_ROUTES = new Set([
+  "pages/agreement/index",
   "pages/my/index",
   "pages/task-create/index",
-  "pages/time-report/index",
-  "pages/poster/index",
+  "subpkg/time-report/index",
+  "subpkg/poster/index",
   "pages/settings/index",
   "pages/privacy/index",
+  /** navigationStyle: custom，与设置页共用顶栏样式，须与 settings 同等 top inset，否则会顶到状态栏、关闭难点 */
+  "pages/profile-edit-menu/index",
+  "pages/profile-nickname/index",
+  "pages/profile-signature/index",
 ]);
+
+/** 与 app.json、Page.route 对齐；个别运行环境 route 带前导 /，Set 匹配须归一化 */
+function normalizeRoute(route) {
+  if (typeof route !== "string") return "";
+  const t = route.trim();
+  return t.startsWith("/") ? t.slice(1) : t;
+}
 const STORAGE_KEYS = require("./config/storageKeys");
 const DEFAULT_USER_PROFILE = {
   avatarUrl: "/images/transparent background/avatar.png",
@@ -19,6 +31,9 @@ const DEFAULT_USER_PROFILE = {
 const DEFAULT_SETTINGS = {
   reminderEnabled: true,
 };
+
+/** 产品版本：关于页、设置页展示；与 miniprogram/package.json 的 version 同步 */
+const APP_VERSION = "1.1.5";
 
 function getWindowInfoSafe() {
   try {
@@ -51,10 +66,21 @@ function computeSafeAreaInsets() {
   } catch (e) {
     // Keep status bar fallback.
   }
+  // 少数机型 menuRect / 安全区异常会把顶距算得极大，与 min-height:100vh 叠加后正文区被压没（与底边异常同类）。
+  const MAX_SANE_TOP_INSET = 160;
+  if (topInset > MAX_SANE_TOP_INSET) {
+    topInset = Math.min(Math.max(statusBarHeight, 24) + 44, MAX_SANE_TOP_INSET);
+  }
 
   let bottomInset = 0;
   if (windowHeight && safeAreaBottom) {
     bottomInset = Math.max(windowHeight - safeAreaBottom, 0);
+    // 部分机型 safeArea.bottom 异常偏小，差值会接近整屏高度；配合全页 min-height:100vh
+    // 与 box-sizing:border-box 时，极大 padding-bottom 会把正文可用高度压成 0（任务详情/报告类页共性空白）。
+    const MAX_SANE_BOTTOM_INSET = 120;
+    if (bottomInset > MAX_SANE_BOTTOM_INSET) {
+      bottomInset = 34;
+    }
   }
   return {
     top: Math.max(topInset, 0),
@@ -64,26 +90,33 @@ function computeSafeAreaInsets() {
 }
 
 function getTabBarExtraBottom(route, windowWidth) {
-  if (!TAB_PAGE_ROUTES.has(route)) return 0;
+  const r = normalizeRoute(route);
+  if (!TAB_PAGE_ROUTES.has(r)) return 0;
   const unit = windowWidth / 750;
   return Math.ceil(unit * 160);
 }
 
 function buildSafeAreaStyle(route) {
+  const r = normalizeRoute(route);
   const insets = computeSafeAreaInsets();
-  const bottom = insets.bottom + getTabBarExtraBottom(route, insets.windowWidth);
+  let bottom = insets.bottom + getTabBarExtraBottom(r, insets.windowWidth);
+  const MAX_TOTAL_BOTTOM_PADDING = TAB_PAGE_ROUTES.has(r) ? 220 : 160;
+  if (bottom > MAX_TOTAL_BOTTOM_PADDING) {
+    bottom = Math.min(insets.bottom, 80) + getTabBarExtraBottom(r, insets.windowWidth);
+    if (bottom > MAX_TOTAL_BOTTOM_PADDING) bottom = 34;
+  }
   let topPx = 0;
-  if (NO_TOP_SAFE_AREA_ROUTES.has(route)) {
+  if (NO_TOP_SAFE_AREA_ROUTES.has(r)) {
     topPx = 0;
-  } else if (CUSTOM_NAV_ROUTES.has(route)) {
+  } else if (CUSTOM_NAV_ROUTES.has(r)) {
     topPx = insets.top;
   } else {
     const win = getWindowInfoSafe();
     const ww = win.windowWidth || 375;
     // 系统导航页：默认约 24rpx；时间首页「今日任务」与 + 需更疏朗
-    let r = 24;
-    if (route === "pages/sleep/index") r = 44;
-    topPx = Math.ceil((r / 750) * ww);
+    let rpx = 24;
+    if (r === "pages/sleep/index") rpx = 44;
+    topPx = Math.ceil((rpx / 750) * ww);
   }
   return `padding-top:${topPx}px;padding-bottom:${bottom}px;box-sizing:border-box;`;
 }
@@ -111,15 +144,20 @@ if (!wx.__GLOBAL_SAFE_AREA_PATCHED__) {
       });
     };
 
-    options.__safeNavigateBack = function safeNavigateBack(fallbackTabPath = "/pages/sleep/index") {
+    options.__safeNavigateBack = function safeNavigateBack(fallbackTabPath = "pages/sleep/index") {
       const pages = getCurrentPages();
+      const fallback = fallbackTabPath || "pages/sleep/index";
+      const { switchTabRobust } = require("./utils/goTabHome");
       if (pages.length > 1) {
-        wx.navigateBack();
+        wx.navigateBack({
+          fail: (err) => {
+            console.warn("[__safeNavigateBack] navigateBack fail, use tab fallback", err);
+            switchTabRobust(fallback.startsWith("/") ? fallback.slice(1) : fallback);
+          },
+        });
         return;
       }
-      wx.switchTab({
-        url: fallbackTabPath,
-      });
+      switchTabRobust(fallback.startsWith("/") ? fallback.slice(1) : fallback);
     };
 
     options.__withSubmitting = function withSubmitting(key, task) {
@@ -159,6 +197,19 @@ if (!wx.__GLOBAL_SAFE_AREA_PATCHED__) {
 }
 
 App({
+  onError(err) {
+    const msg = typeof err === "string" ? err : err && (err.message || err.errMsg);
+    console.error("[App.onError]", msg || err);
+    try {
+      const text = String(msg || err || "unknown").slice(0, 800);
+      wx.setStorageSync("__app_last_error", { at: Date.now(), msg: text });
+    } catch (e) {
+      /* ignore */
+    }
+  },
+  onPageNotFound(res) {
+    console.error("[App.onPageNotFound]", res && (res.path || res));
+  },
   onLaunch: function () {
     const localProfile = this.loadLocalUserProfile();
     const localSettings = this.loadLocalSettings();
@@ -187,54 +238,95 @@ App({
       /** 首次用户标签是否已在云端填写完成（换机后由云拉取更新） */
       userTagsComplete: hasLoggedIn ? tagsCache : false,
       safeAreaInsets: computeSafeAreaInsets(),
-      pendingProfileEditField: "",
+      APP_VERSION,
+      /** wx.cloud.init 成功前勿调 callFunction；仅在为 true 时允许数据同步 */
+      cloudInitOk: false,
     };
     if (!wx.cloud) {
       console.error("请使用 2.2.3 或以上的基础库以使用云能力");
+      this.globalData.cloudInitOk = false;
     } else {
-      wx.cloud.init({
-        env: this.globalData.env,
-        traceUser: true,
-      });
-      if (this.globalData.hasLoggedIn) {
-        wx.cloud
-          .callFunction({
-            name: "quickstartFunctions",
-            data: { type: "getUserTags" },
-          })
-          .then((res) => {
-            const r = (res && res.result) || {};
-            if (!r.success) return;
-            if (r.tagsComplete) {
-              this.globalData.userTagsComplete = true;
-              try {
-                wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
-                wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_LOCAL);
-              } catch (e) {
-                /* ignore */
-              }
-            } else {
-              let localPending = false;
-              try {
-                const lo = wx.getStorageSync(STORAGE_KEYS.USER_TAGS_LOCAL);
-                localPending = !!(lo && lo.gender && lo.lifeStage && Array.isArray(lo.roles) && lo.roles.length >= 2);
-              } catch (e) {
-                localPending = false;
-              }
-              if (localPending) {
+      try {
+        wx.cloud.init({
+          env: this.globalData.env,
+          traceUser: true,
+        });
+        this.globalData.cloudInitOk = true;
+      } catch (e) {
+        console.error("[App.onLaunch] wx.cloud.init failed", e);
+        this.globalData.cloudInitOk = false;
+      }
+      if (this.globalData.cloudInitOk && this.globalData.hasLoggedIn) {
+        setTimeout(() => {
+          wx.cloud
+            .callFunction({
+              name: "quickstartFunctions",
+              data: { type: "getUserTags" },
+            })
+            .then((res) => {
+              const r = (res && res.result) || {};
+              if (!r.success) return;
+              if (r.tagsComplete) {
                 this.globalData.userTagsComplete = true;
-              } else {
-                this.globalData.userTagsComplete = false;
                 try {
-                  wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
+                  wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
+                  wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_LOCAL);
                 } catch (e) {
                   /* ignore */
                 }
+              } else {
+                let localPending = false;
+                try {
+                  const lo = wx.getStorageSync(STORAGE_KEYS.USER_TAGS_LOCAL);
+                  localPending = !!(lo && lo.gender && lo.lifeStage && Array.isArray(lo.roles) && lo.roles.length >= 2);
+                } catch (e) {
+                  localPending = false;
+                }
+                let storageTagsComplete = false;
+                try {
+                  storageTagsComplete = !!wx.getStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
+                } catch (e) {
+                  storageTagsComplete = false;
+                }
+                // 云端未部署 / save 未落库时，getUserTags 会返回 tagsComplete:false。
+                // 若此时本机已标记完成（问卷兜底或上次会话），不得清存储，否则 ensureUserTagsOrLeave
+                // 会反复 reLaunch 问卷，表现为「身心/我的进不去」、关闭键看似失灵。
+                if (localPending || storageTagsComplete) {
+                  this.globalData.userTagsComplete = true;
+                } else {
+                  this.globalData.userTagsComplete = false;
+                  try {
+                    wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
+                  } catch (e) {
+                    /* ignore */
+                  }
+                }
               }
+            })
+            .catch(() => {});
+        }, 200);
+        setTimeout(() => {
+          try {
+            const m = require("./utils/cloudDataSync");
+            if (m && typeof m.runStartupSync === "function") {
+              m.runStartupSync();
             }
-          })
-          .catch(() => {});
+          } catch (e) {
+            console.warn("[App] cloudDataSync startup", e);
+          }
+        }, 1400);
       }
+    }
+  },
+
+  onShow() {
+    try {
+      const m = require("./utils/cloudDataSync");
+      if (m && typeof m.runIncrementalDebounced === "function") {
+        m.runIncrementalDebounced();
+      }
+    } catch (e) {
+      /* ignore */
     }
   },
 
@@ -291,6 +383,16 @@ App({
     try {
       wx.setStorageSync(STORAGE_KEYS.HAS_LOGGED_IN, value);
       this.globalData.hasLoggedIn = value;
+      if (value && this.globalData && this.globalData.cloudInitOk === true) {
+        try {
+          const m = require("./utils/cloudDataSync");
+          if (m && typeof m.runStartupSync === "function") {
+            m.runStartupSync();
+          }
+        } catch (e) {
+          console.warn("[App] cloudDataSync after login", e);
+        }
+      }
       return true;
     } catch (e) {
       return false;
@@ -304,13 +406,25 @@ App({
     page.setData({
       [stateKey]: true,
     });
+    const clearSubmitting = () => {
+      try {
+        page.setData({ [stateKey]: false });
+      } catch (e) {
+        /* ignore */
+      }
+    };
     return Promise.resolve()
       .then(task)
-      .finally(() => {
-        page.setData({
-          [stateKey]: false,
-        });
-      });
+      .then(
+        (v) => {
+          clearSubmitting();
+          return v;
+        },
+        (err) => {
+          clearSubmitting();
+          throw err;
+        }
+      );
   },
 
   getUserProfile() {

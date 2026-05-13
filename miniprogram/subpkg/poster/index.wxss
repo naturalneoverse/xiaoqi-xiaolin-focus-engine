@@ -1,0 +1,154 @@
+page {
+  background: #f0f4f8;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 18rpx 24rpx 32rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 700rpx;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16rpx;
+}
+
+.nav-btn {
+  width: 76rpx;
+  height: 56rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid rgba(184, 197, 211, 0.55);
+  background: rgba(255, 255, 255, 0.86);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon {
+  width: 40rpx;
+  height: 40rpx;
+  display: block;
+}
+
+.nav-title {
+  flex: 1;
+  text-align: center;
+  color: #184061;
+  font-size: 32rpx;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-space {
+  width: 76rpx;
+  height: 56rpx;
+  flex-shrink: 0;
+}
+
+.loading-wrap {
+  width: 700rpx;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 400rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  font-size: 30rpx;
+  color: #577388;
+}
+
+/* 与海报同宽一列，避免 flex 子项 min-width:auto 被 button 撑破 max-width */
+.poster-column {
+  box-sizing: border-box;
+  width: 700rpx;
+  max-width: 100%;
+  min-width: 0;
+  align-self: center;
+  overflow: hidden;
+}
+
+.preview-wrap {
+  width: 100%;
+  border-radius: 24rpx;
+  overflow: hidden;
+  /* 避免透明 PNG 在预览里被衬成「白边」误判为导出故障 */
+  background: transparent;
+  box-shadow: 0 8rpx 32rpx rgba(24, 64, 97, 0.08);
+}
+
+.preview-img {
+  width: 100%;
+  display: block;
+  vertical-align: top;
+}
+
+.poster-canvas-offscreen {
+  position: fixed;
+  left: -3000px;
+  top: 0;
+  width: 1080px;
+  height: 1920px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.toolbar.grid {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 24rpx;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 12rpx;
+  row-gap: 12rpx;
+}
+
+.tool-cell {
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 12rpx 8rpx;
+  min-height: 72rpx;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.25;
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #2c3e50;
+  background: #f5f5f5;
+  border-radius: 14rpx;
+  border: none;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tool-cell::after {
+  border: none;
+}
+
+.tool-cell.tool-primary {
+  background: #184061;
+  color: #f5f9fc;
+}
+
+.tool-cell[disabled] {
+  opacity: 0.45;
+}

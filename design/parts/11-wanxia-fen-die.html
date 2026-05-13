@@ -1,0 +1,62 @@
+<!-- 真我时刻海报背景 - 晚霞粉 (蝶) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Minimalist Zen Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Styling -->
+<style data-purpose="background-gradient">
+    /* 
+       Applying a vertical gradient from #FDF5F5 at the top to #F5E0E0 at the bottom 
+       to create a soft, romantic atmosphere as requested.
+    */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden; /* Prevent scrolling for a full-screen experience */
+      background: linear-gradient(to bottom, #FDF5F5 0%, #F5E0E0 100%);
+    }
+  </style>
+<style data-purpose="layout-positioning">
+    /* 
+       Container for the background image to ensure it covers the screen 
+       and maintains aspect ratio if needed.
+    */
+    .full-screen-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 
+       Optimizing the butterfly image presentation. 
+       Using object-fit: cover to ensure it feels like a wallpaper.
+    */
+    .background-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
+<!-- END: Custom Styling -->
+</head>
+<body class="antialiased">
+<!-- BEGIN: MainContent -->
+<main class="full-screen-container" data-purpose="wallpaper-container">
+<!-- 
+       The image provided contains the misty mountain landscape and the glowing butterfly.
+       It is placed as the primary visual element. 
+    -->
+<img alt="Glowing butterfly in a misty pink mountain landscape" class="background-image" data-purpose="hero-image" src="https://lh3.googleusercontent.com/aida/ADBb0uhuK1MYQOStAWHBqM8sHTiGnnJw1KrVu7xBo0XE6yhqV-CJbzQdGYIY24ktgdF9wtmDnDL_c9b1GDW06XlfIw800cm-hrH4ct2Lrge1RyHK8ZTwe5AV0XBMrcubgd3c3MbLN5e08jOxTXaG9I--C_tiizRJTbeAQrQMu2_LWmpzemPBvIiXKYXIlLoimatEWKDbZlL6GR9qxUtL6PeE_xlcW43mj3OB7xwgmVZ2ZpmiBnh7yctKlWKBZAo"/>
+</main>
+<!-- END: MainContent -->
+</body></html>

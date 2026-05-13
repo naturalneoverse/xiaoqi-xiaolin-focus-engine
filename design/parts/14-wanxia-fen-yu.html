@@ -1,0 +1,61 @@
+<!-- 真我时刻海报背景 - 晚霞粉 (羽) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artistic Background Screen</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Styling -->
+<style data-purpose="layout-optimizations">
+    /* Ensure the body takes up the full viewport and centers the content */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000; /* Black background to frame the 9:16 screen if viewed on wider displays */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Force the 9:16 aspect ratio for the mobile screen container */
+    .aspect-9-16 {
+      aspect-ratio: 9 / 16;
+      width: auto;
+      height: 100vh;
+      max-width: 100vw;
+    }
+  </style>
+<style data-purpose="background-rendering">
+    /* High-fidelity background rendering to ensure the feather is correctly positioned */
+    .poster-background {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0ugvwIehdcGaQVbE_nHlydw9cOh5SbLMBzk8b0zzfH2rUuN29dpcCgvTEk2Jlbt90JhmrATAxSlhOnozwS5HctRM_0Cra9zB8C2BxHwMdiLDYNbzsjNmxtsLhVGX5tewgCM5ulnIQc8s2KxBJMOnAVvf9UCTD7BmnN2s9K9AJTvw8vD4WmyF4cX7REO4QmS-cIGsK4vbCoBRXk0cXK4rPAMJryG3YXRiCbKd8J-kWc1WqcL2_GPgF6rtYVY');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+<!-- END: Custom Styling -->
+</head>
+<body>
+<!-- BEGIN: MainContainer -->
+<main class="aspect-9-16 relative overflow-hidden shadow-2xl" data-purpose="mobile-viewport-container" id="screen-root">
+<!-- BEGIN: PosterScreen -->
+<!-- 
+      This section acts as the primary visual layer. 
+      It uses the provided image as a full-page background to maintain the artistic 
+      composition including the pink gradient and the floating feather in the lower third.
+    -->
+<div class="poster-background w-full h-full" data-purpose="artistic-background-layer">
+<!-- 
+        The background image itself contains the feather element in the lower third.
+        No additional UI elements or text are added per the request.
+      -->
+</div>
+<!-- END: PosterScreen -->
+</main>
+<!-- END: MainContainer -->
+</body></html>

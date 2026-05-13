@@ -304,16 +304,34 @@ page {
 
 .report-card {
   margin-top: 24rpx;
-  border-radius: 28rpx;
+  border-radius: 20px;
   padding: 30rpx 30rpx;
-  background: rgba(205, 222, 239, 0.5);
-  border: 2rpx solid rgba(174, 198, 219, 0.35);
+  background: rgba(205, 222, 239, 0.52);
+  border: none;
   position: relative;
   min-height: 124rpx;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
+  /* 多层柔和外阴影 + 1px 白色内高光描边 */
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 16px 32px rgba(0, 0, 0, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.92);
+  transform: translateY(-2px);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.report-card--pressed {
+  transform: translateY(2px);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 4px 10px rgba(0, 0, 0, 0.06),
+    0 8px 20px rgba(0, 0, 0, 0.07),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.88);
 }
 
 .section-divider {

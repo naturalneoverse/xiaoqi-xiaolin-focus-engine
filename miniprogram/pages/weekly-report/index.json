@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "时间编织报告",
-  "usingComponents": {
-    "chat-bubble": "/components/chat-bubble/index"
-  }
-}

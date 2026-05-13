@@ -1,0 +1,57 @@
+<!-- 真我时刻海报背景 - 清晨露 (蝶) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artistic Background Screen</title>
+<!-- Load Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Configuration -->
+<style data-purpose="layout-styles">
+    /* Ensure the body and html take up the full height */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: #f0f4f0; /* Fallback color matching the image theme */
+    }
+
+    /* Container to maintain 9:16 aspect ratio on larger screens */
+    .aspect-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: calc(100vh * 9 / 16);
+      margin: 0 auto;
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uglKxrjpevgkrj-3paR1KsmBuXY5v4rwRLA52KpDgF6nCdggIJ64j0DDD2pMyUxhW4G1_g6BTxwd9GpTWj4jZBVNyLHB1Z9fZd-i90s23qGdL_z-hxE4oo_5nFN7sFVrAKRmnjYCkz845WNl9u8CsuX3l6zDAVIDxoNS0yTJzlRh0fuxojl2FM4Kx0GdtWwrm6AANyOx2i2VNTzwDytRhY-YTLbnp1vbxEQRcSrYhgGPqquzrE0UA03Fg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* Handle specific device aspect ratio if needed, but for Mobile iOS typical fill is preferred */
+    @media (max-aspect-ratio: 9/16) {
+      .aspect-container {
+        max-width: 100%;
+      }
+    }
+  </style>
+<!-- END: Custom Configuration -->
+</head>
+<body class="flex items-center justify-center bg-black">
+<!-- BEGIN: Main Screen Content -->
+<!-- 
+    The requested design is a pure artistic background based on the provided image.
+    The butterfly is part of the provided image assets, specifically positioned 
+    in the lower third, which is handled by the background-size: cover/center logic.
+  -->
+<main aria-label="Artistic background showing mountains and a glowing butterfly" class="aspect-container shadow-2xl" data-purpose="artistic-background-viewer" id="main-screen">
+<!-- 
+      No additional UI elements or text are added per the instructions 
+      to maintain the clean artistic look of the background image.
+    -->
+</main>
+<!-- END: Main Screen Content -->
+</body></html>

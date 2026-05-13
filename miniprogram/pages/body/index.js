@@ -5,13 +5,7 @@ const OPTIONS = [
   { key: "疼了", desc: "哪儿疼，身体在喊你" },
 ];
 
-function parsePayload(payload) {
-  try {
-    return payload ? JSON.parse(decodeURIComponent(payload)) : {};
-  } catch (e) {
-    return {};
-  }
-}
+const { parsePayload } = require("../../utils/parsePayload");
 
 Page({
   data: {
@@ -58,7 +52,7 @@ Page({
       showMascotModal: false,
     });
     wx.redirectTo({
-      url: `/pages/today-report/index?payload=${nextPayload}`,
+      url: `/subpkg/today-report/index?payload=${nextPayload}`,
     });
   },
 });

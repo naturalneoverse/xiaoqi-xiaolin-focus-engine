@@ -1,17 +1,31 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-bar">
     <view class="back-wrap tap-target" bindtap="goBack">
-      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
+      <image class="back-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
-    <text class="page-title">隐私协议</text>
+    <text class="page-title">隐私政策</text>
     <view class="top-space"></view>
   </view>
 
-  <view class="card">
-    <text class="title">用户隐私与协议说明</text>
-    <text class="p">1. 我们仅在必要范围内收集并使用您的基础信息，用于账号展示、任务记录与服务优化。</text>
-    <text class="p">2. 您在小程序内提交的任务与记录数据，仅用于本产品功能展示与统计分析，不会在未经授权情况下向第三方公开。</text>
-    <text class="p">3. 您可通过“设置-清除缓存”删除本地缓存数据。清除后需要重新确认首次协议状态。</text>
-    <text class="p">4. 如有隐私相关问题，请通过“帮助与支持”中的联系方式与我们联系。</text>
+  <view class="doc-panel">
+    <view class="content">
+      <text class="doc-title">小麒小麟专注引擎隐私政策</text>
+      <text class="doc-p">本隐私政策由天成新宇（北京）文化科技有限公司（以下简称“我们”）制定，旨在保护您的个人信息安全与合法权益。</text>
+      <text class="doc-heading">1. 个人信息收集范围与用途</text>
+      <text class="doc-p">我们仅收集微信昵称、头像（用于展示个人信息）、用户标签信息（用于个性化推荐）以及任务与身体记录数据（用于生成报告）。我们承诺不会将您的个人信息用于任何未经同意的商业用途。</text>
+      <text class="doc-heading">2. 个人信息存储与保护</text>
+      <text class="doc-p">您的信息将在使用期间持续存储。我们采用加密存储与权限管控保障安全。信息仅存储于中国大陆境内服务器。</text>
+      <text class="doc-heading">3. 个人信息使用规则</text>
+      <text class="doc-p">我们不会将您的信息出售或共享给第三方。仅在为您提供核心服务、响应咨询或法律要求时使用。</text>
+      <text class="doc-heading">4. 用户权利与操作方式</text>
+      <text class="doc-p">您有权查询、修改、导出或注销您的个人信息。操作路径：我的-设置。我们将在3个工作日内响应您的请求。</text>
+      <text class="doc-heading">5. 政策更新与通知</text>
+      <text class="doc-p">政策更新时将在小程序首页弹窗提示。继续使用即视为同意更新。</text>
+      <text class="doc-heading">6. 联系方式</text>
+      <text class="doc-p">公司名称：天成新宇（北京）文化科技有限公司</text>
+      <text class="doc-p">联系电话：13691551848</text>
+      <text class="doc-p">联系邮箱：info@naturenw.cn</text>
+      <text class="doc-date">生效日期：2026年05月13日</text>
+    </view>
   </view>
 </view>

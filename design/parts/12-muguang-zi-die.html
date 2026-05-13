@@ -1,0 +1,38 @@
+<!-- 真我时刻海报背景 - 暮光紫 (蝶) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artistic Poster Background</title>
+<!-- Tailwind CSS v3 CDN with necessary plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Style Overrides -->
+<style data-purpose="background-styles">
+    /* 
+       Ensuring the background image covers the entire viewport 
+       while maintaining the artistic composition of the source image.
+    */
+    .bg-poster-main {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0ugdwyetWiqxuOT_aYaPJtoFgrsH6k3ngU_QHmD6w6rqN2T09w6w26PYEqyykuWXy-27_vrbFjEhqUCiC4DDAiN1sAqTR3fvmJfaw_aLGRJJY4ukM1gKPSLkQcjfkLw3-M5Q2PFx9UJbjVZv89j5cqrCmiqqs3HPQszpoeix4r7toPQS60S-5BfZAODA2Z6TQKE839GqzzlKrAVIjPh736tdMe-kC2CjNNSNS_xeg0ex4BiPk6eVJbeEdz4');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+<!-- END: Custom Style Overrides -->
+</head>
+<body class="h-full m-0 p-0 overflow-hidden bg-slate-900">
+<!-- BEGIN: Main Container -->
+<main class="relative h-full w-full bg-poster-main flex flex-col justify-end" data-purpose="full-bleed-mobile-background" id="poster-container">
+<!-- 
+      The layout is intentionally kept clean without UI elements 
+      to serve as a code-accessible high-fidelity background.
+      The butterfly from the source image is naturally positioned 
+      in the lower third through the 'background-position: center' property.
+    -->
+<!-- Invisible overlay to handle potential safe-area-inset for iOS devices -->
+<div class="pb-[env(safe-area-inset-bottom)]" data-purpose="ios-safe-area-spacer"></div>
+</main>
+<!-- END: Main Container -->
+</body></html>

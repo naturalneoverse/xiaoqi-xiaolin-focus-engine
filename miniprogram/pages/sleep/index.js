@@ -1,28 +1,14 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
-
-function getTodayKey() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+const { getTodayKey } = require("../../utils/dateKeys");
+const { formatDateTime } = require("../../utils/dateFormat");
+const { mapTagClassByText } = require("../../utils/taskTagStyles");
 
 function formatMetaDateChinese(date) {
   const y = date.getFullYear();
   const m = date.getMonth() + 1;
   const d = date.getDate();
   return `${y}年${m}月${d}日`;
-}
-
-function formatDateTime(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  const hh = String(date.getHours()).padStart(2, "0");
-  const mm = String(date.getMinutes()).padStart(2, "0");
-  return `${y}/${m}/${d} ${hh}:${mm}`;
 }
 
 function normalizeStatus(task) {
@@ -35,36 +21,6 @@ function formatListTitle(title) {
   const chars = Array.from(text);
   if (chars.length <= 10) return text || "未命名任务";
   return `${chars.slice(0, 10).join("")}...`;
-}
-
-function getPriorityTagClass(text) {
-  if (text === "重要且紧急") return "tag-red";
-  if (text === "重要不紧急") return "tag-orange";
-  if (text === "紧急不重要") return "tag-blue";
-  if (text === "不重要不紧急") return "tag-gray";
-  return "";
-}
-
-function getForWhomTagClass(text) {
-  if (text === "自己") return "tag-berry";
-  if (text === "至亲") return "tag-lavender";
-  if (text === "外缘") return "tag-sky";
-  if (text === "不二") return "tag-violet";
-  return "";
-}
-
-function getWhyTagClass(text) {
-  if (text === "生计") return "tag-amber";
-  if (text === "职责") return "tag-teal";
-  if (text === "真我") return "tag-gold";
-  if (text === "合一") return "tag-deep";
-  return "";
-}
-
-function mapTagClassByText(text, fallbackClassName) {
-  const mappedClassName =
-    getPriorityTagClass(text) || getForWhomTagClass(text) || getWhyTagClass(text);
-  return mappedClassName || fallbackClassName || "tag";
 }
 
 function normalizeTask(task) {
@@ -157,7 +113,7 @@ Page({
 
   goTimeReport() {
     wx.navigateTo({
-      url: "/pages/time-report/index",
+      url: "/subpkg/time-report/index",
     });
   },
 
@@ -169,23 +125,9 @@ Page({
     const taskId = e.currentTarget.dataset.id;
     const task = this.data.allTasks.find((item) => item.id === taskId);
     if (!task) return;
-    const payload = encodeURIComponent(
-      JSON.stringify({
-        taskId: task.id,
-        taskName: task.title,
-        taskContent: task.content || "暂无描述",
-        dateValue: task.dateValue || (task.timeText ? task.timeText.split(" ")[0].replace(/\//g, "-") : ""),
-        priority: task.tags[0] && task.tags[0].text,
-        forWhom: task.tags[1] && task.tags[1].text,
-        why: task.tags[2] && task.tags[2].text,
-        statusText: task.statusText || normalizeStatus(task),
-        reminderDate: task.reminderDate || "",
-        reminderTime: task.reminderTime || "",
-        reminderFrequency: task.reminderFrequency || "不重复",
-      }),
-    );
+    /** 与 task-why 一致：用 taskId 从本地读详情，避免长描述导致 URL 超限 */
     wx.navigateTo({
-      url: `/pages/task-detail/index?payload=${payload}`,
+      url: `/pages/task-detail/index?taskId=${encodeURIComponent(task.id)}`,
     });
   },
 

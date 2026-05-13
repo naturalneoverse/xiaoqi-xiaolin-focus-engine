@@ -1,0 +1,23 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="back-wrap tap-target" bindtap="goBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
+    </view>
+    <text class="page-title">修改昵称</text>
+    <view class="top-space"></view>
+  </view>
+
+  <view class="group">
+    <input
+      class="field-input"
+      maxlength="20"
+      placeholder="请输入昵称"
+      value="{{value}}"
+      bindinput="onInput"
+    />
+  </view>
+
+  <view class="save-wrap tap-target" bindtap="save" hover-class="cell-hover">
+    <text class="save-text">保存</text>
+  </view>
+</view>

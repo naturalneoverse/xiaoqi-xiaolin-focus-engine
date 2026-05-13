@@ -1,0 +1,81 @@
+<!-- 真我时刻海报背景 - 以太蓝 (羽) - 1080x1920 -->
+<!DOCTYPE html>
+
+<html class="h-full w-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Social Media Poster Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration for custom 9:16 aspect ratio and sizing -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          aspectRatio: {
+            '9/16': '9 / 16',
+          },
+          spacing: {
+            'poster-w': '1080px',
+            'poster-h': '1920px',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom styles for layout resets and background-specific high-fidelity rendering -->
+<style data-purpose="global-resets">
+    /* Remove any default browser spacing and ensure the body fills the viewport exactly */
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      background-color: #000; /* Dark fallback background */
+    }
+
+    /* Target the canvas container to maintain 9:16 aspect ratio logic if needed */
+    #poster-canvas {
+      width: 100vw;
+      height: 100vh;
+      /* Ensures the background image is rendered with high quality */
+      image-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+<style data-purpose="poster-background">
+    /* Applying the specific background image provided in the prompt */
+    .bg-custom-poster {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uh7BvgX7DiE_SYxX9MnVKovhI2vs0cmKZtFbDmvWibFQafvM7vzhmmBpezz6c8RwxmXWXtiJiSaOoRKwcSI6MLfXoMkmlgya3aDOChycMllAPMz2CPgLLXiomNYISoUicAl13YHbMxQAvp3lwsVGiWVQal7DKDv9Usi7-nuVRxmvStXf6Q3jbX8Oa3DlV2zXNiRhNrKKgTKkaJSBCFJLf5Y5aeUq43BXRa2NITmVlgbAMjqxrBIwySV1w');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center">
+<!-- BEGIN: PosterBackground -->
+<!-- 
+    This container represents the main canvas. 
+    Requirements: 1080px x 1920px (9:16 aspect ratio).
+    It fills the viewport on mobile devices to act as a high-fidelity sharing background.
+  -->
+<div class="bg-custom-poster relative flex flex-col justify-between" data-purpose="social-media-background" id="poster-canvas">
+<!-- 
+      Empty content container. 
+      This is designed as a base layer for a social media sharing poster. 
+      The 'bg-custom-poster' class handles the image rendering at 'cover' scale.
+    -->
+<!-- Top Padding/Buffer for System UI (Mobile iOS) -->
+<div class="h-12 w-full" data-purpose="safe-area-top"></div>
+<!-- Main Workspace Area (Can be used for overlaying text/graphics later) -->
+<main class="flex-grow flex items-center justify-center">
+<!-- Logic for high-fidelity background is encapsulated in the parent div -->
+</main>
+<!-- Bottom Padding/Buffer for System UI (Mobile iOS) -->
+<div class="h-12 w-full" data-purpose="safe-area-bottom"></div>
+</div>
+<!-- END: PosterBackground -->
+</body></html>

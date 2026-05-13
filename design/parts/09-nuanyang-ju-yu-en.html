@@ -1,0 +1,53 @@
+<!-- 真我时刻海报背景 - 暖阳橘 (羽) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artistic Background Screen</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Styling -->
+<style data-purpose="layout-constraints">
+    /* Ensuring the body takes up the full height of the viewport */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000; /* Black bars if the screen ratio differs from 9:16 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* 
+       Enforcing a strict 9:16 aspect ratio for the mobile screen 
+       to ensure the feather placement remains consistent with the design.
+    */
+    .mobile-screen-container {
+      aspect-ratio: 9 / 16;
+      width: 100%;
+      max-width: 56.25vh; /* 100 * (9/16) */
+      height: 100%;
+      max-height: 100vh;
+      position: relative;
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0ugieiU6sbJy2-_g5bUdyOqVCxYJVT6K-7uj7U5qRZt-V4-yP2urTKo0JMqAanCtT9XFSVF2auzFWqSp1kZP4lzLx9RPkhqXBu1M67T5LR0SU5eMc8fkMPtKuyVttt9YzrKthXhxVGD8zQ6P9UadsVnN_SKUtG7udOhbtp3nsFbmf6j7l-Cs48LihC-HuaoipI6IOGV_wNWkn_0me-8dJcPDPQ_YpRBv4mwmJ5qYhBC6XZ3mihJwBXlDDHo');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    }
+  </style>
+<!-- END: Custom Styling -->
+</head>
+<body class="h-full">
+<!-- BEGIN: Main Content Container -->
+<main class="mobile-screen-container" data-purpose="background-display" id="main-canvas">
+<!-- 
+      This section is intentionally left empty of UI elements to showcase 
+      the artistic background and the feather element positioned in the lower third. 
+    -->
+</main>
+<!-- END: Main Content Container -->
+</body></html>

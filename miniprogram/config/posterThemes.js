@@ -1,0 +1,140 @@
+/**
+ * 海报背景盲盒（多套渐变 + accent；底图走云存储 fileID）。
+ *
+ * 方案 A：`cloudFileId` 由海报页调 quickstartFunctions.getPosterBgUrl 换临时 HTTPS，
+ * 再 wx.downloadFile 落本地给 canvas。需在小程序后台配置 downloadFile 合法域名；失败时用渐变兜底。
+ */
+const POSTER_THEMES = [
+  {
+    id: "chenxi-lan-die",
+    bg0: "#EFF7FD",
+    bg1: "#D6EBF7",
+    accent: "#12598F",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/晨曦蓝蝶.png",
+  },
+  {
+    id: "chenxi-lan-yu",
+    bg0: "#EFF7FD",
+    bg1: "#D6EBF7",
+    accent: "#12598F",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/晨曦蓝羽.png",
+  },
+  {
+    id: "mu-guang-zi-die",
+    bg0: "#F5F0FA",
+    bg1: "#E8DFF5",
+    accent: "#6B4C8A",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/暮光紫蝶.png",
+  },
+  {
+    id: "mu-guang-zi-yu",
+    bg0: "#F5F0FA",
+    bg1: "#E8DFF5",
+    accent: "#6B4C8A",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/暮光紫羽.png",
+  },
+  {
+    id: "sen-lin-lv-die",
+    bg0: "#F0F7F0",
+    bg1: "#DCE8DC",
+    accent: "#3D6B4F",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/森林绿蝶.png",
+  },
+  {
+    id: "sen-lin-lv-yu",
+    bg0: "#F0F7F0",
+    bg1: "#DCE8DC",
+    accent: "#3D6B4F",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/森林绿羽.png",
+  },
+  {
+    id: "nuan-yang-ju-die",
+    bg0: "#FDF7F0",
+    bg1: "#F5E8D8",
+    accent: "#C0713B",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/暖阳橙蝶.png",
+  },
+  {
+    id: "nuan-yang-ju-yu",
+    bg0: "#FDF7F0",
+    bg1: "#F5E8D8",
+    accent: "#C0713B",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/暖阳橙羽.png",
+  },
+  {
+    id: "shen-hai-lan-die",
+    bg0: "#EDF5FA",
+    bg1: "#C5D9E8",
+    accent: "#1B4F72",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/深海蓝蝶.png",
+  },
+  {
+    id: "shen-hai-lan-yu",
+    bg0: "#EDF5FA",
+    bg1: "#C5D9E8",
+    accent: "#1B4F72",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/深海蓝羽.png",
+  },
+  {
+    id: "jing-mi-hui-die",
+    bg0: "#F5F3F0",
+    bg1: "#E8E3DC",
+    accent: "#5C4F45",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/静谧灰蝶.png",
+  },
+  {
+    id: "jing-mi-hui-yu",
+    bg0: "#F5F3F0",
+    bg1: "#E8E3DC",
+    accent: "#5C4F45",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/静谧灰羽.png",
+  },
+  {
+    id: "qing-chen-lu-die",
+    bg0: "#F2F8F2",
+    bg1: "#D8EDD8",
+    accent: "#2E6B3E",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/清晨露蝶.png",
+  },
+  {
+    id: "qing-chen-lu-yu",
+    bg0: "#F2F8F2",
+    bg1: "#D8EDD8",
+    accent: "#2E6B3E",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/清晨露羽.png",
+  },
+  {
+    id: "wan-xia-fen-die",
+    bg0: "#FDF5F5",
+    bg1: "#F5E0E0",
+    accent: "#A0525A",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/晚霞粉蝶.png",
+  },
+  {
+    id: "wan-xia-fen-yu",
+    bg0: "#FDF5F5",
+    bg1: "#F5E0E0",
+    accent: "#A0525A",
+    image: "",
+    cloudFileId: "cloud://cloud1-9goe0m7d1d397415.636c-cloud1-9goe0m7d1d397415-1397682513/poster-bg/晚霞粉羽.png",
+  },
+];
+
+module.exports = {
+  POSTER_THEMES,
+};

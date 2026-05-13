@@ -1,0 +1,7 @@
+{
+  "name": "mascot-rule-pool",
+  "version": "1.0.0",
+  "description": "Shared body_week / weekly_time rule priorities, hit resolution, and copy text",
+  "main": "index.js",
+  "license": "ISC"
+}

@@ -1,0 +1,991 @@
+<!-- 真我时刻海报背景合集（盲盒 16 套）。各段注释与 title 中的版本类后缀已删。以此文件为准。各段之间空一行分隔。 -->
+
+<!-- 真我时刻海报背景 - 深海蓝 (蝶) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Minimalist Zen Wallpaper</title>
+<!-- Load Tailwind CSS v3 with forms and container-queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="background-gradient">
+    /* 
+       Custom gradient to match the requested soft blue transition.
+       From #EDF5FA at the top to #C5D9E8 at the bottom.
+    */
+    .bg-zen-gradient {
+      background: linear-gradient(to bottom, #EDF5FA 0%, #C5D9E8 100%);
+    }
+  </style>
+<style data-purpose="layout-optimizations">
+    /* Ensure the body fills the entire viewport without scrolling */
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Container for the full-screen background image */
+    .wallpaper-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 
+       Style for the glowing butterfly image. 
+       Object-fit: cover ensures the reference image fills the screen 
+       while maintaining the zen/minimalist aesthetic.
+    */
+    .background-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-zen-gradient">
+<!-- BEGIN: MainContent -->
+<main class="wallpaper-container" data-purpose="zen-background-display">
+<!-- 
+      Reference image provided contains the misty mountains, 
+      the light rays, and the glowing butterfly with a trail.
+    -->
+<img alt="Zen background with glowing butterfly and misty mountains" class="background-image" data-purpose="hero-image" src="https://lh3.googleusercontent.com/aida/ADBb0ug-bm45QdOU2Jc1IEUSfRN5ANeRVtC0Pmh69LUhFoLOiAx4rjg4mMHhy65V6gWD8kbZHYeZyvzObDEnbgaEiY13aHXJp69KCMsBgrj4NFEkhENHa1wG6nbdXrJyFFtPCw-7rhRRwF1MCw1xiFPRYGEA7bqYGVIsjk3Lva30uP1dAy6Y1wdJYAewa64EzBpwsW6OESh8590KFyf57W5-WEXKEEiZQQqsjSHWZGGtdcx_dGtgHYgbEMCz7nA"/>
+</main>
+<!-- END: MainContent -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 深海蓝 (羽) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Zen Feather Background</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'zen-light': '#EDF5FA',
+            'zen-dark': '#C5D9E8',
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-15px) rotate(2deg)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- END: Custom Configuration -->
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="layout-styles">
+    /* Ensure the body takes up full viewport height and prevents scrolling */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      background-color: #EDF5FA;
+    }
+
+    /* Gradient overlay to match requested hex codes if the image doesn't cover perfectly */
+    .zen-gradient-bg {
+      background: linear-gradient(to bottom, #EDF5FA 0%, #C5D9E8 100%);
+    }
+
+    /* Optimization for mobile height issues (iOS Safari) */
+    .safe-height {
+      height: 100vh;
+      height: 100svh;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="safe-height flex flex-col items-center justify-center">
+<!-- BEGIN: MainContainer -->
+<main class="relative w-full h-full zen-gradient-bg flex items-center justify-center overflow-hidden" data-purpose="background-scene">
+<!-- BEGIN: BackgroundImageLayer -->
+<!-- 
+      Using the provided canvas image which contains the feather and gradient.
+      We use object-cover to ensure it fills the mobile screen gracefully.
+    -->
+<div class="absolute inset-0 z-0">
+<img alt="Soft white feather floating in a blue gradient sky" class="w-full h-full object-cover" data-purpose="zen-background-image" src="https://lh3.googleusercontent.com/aida/ADBb0uiUJ1NKYg0jJruVOlc-jtssskgC-1--vzihyGXmAl80iIPBB5uZXmSTeEtJKIElSRjNpPg87EK7dxDid7BjNFfA6-C768hGD8MAM3fNHmBxm0Jy8JQGMU9KVAV5PxWiTg7gidQpWY65KAGdRBohrGD6L8eBG4iiCS13TN0zsHvp66Tza2IPcMJTwVLPdFAwkaBHAXuMmZqCrzcA9Hi0UnQxfw3N7NI9XhXSA0nxLX0JBgBuskffYv13cg"/>
+</div>
+<!-- END: BackgroundImageLayer -->
+<!-- BEGIN: VisualOverlay -->
+<!-- 
+      Optional subtle overlay to ensure the "Zen" aesthetic and 
+      smooth the transition between image and the requested hex colors.
+    -->
+<div class="absolute inset-0 z-10 opacity-20 pointer-events-none" data-purpose="ethereal-overlay" style="background: linear-gradient(to bottom, #EDF5FA, transparent, #C5D9E8);"></div>
+<!-- END: VisualOverlay -->
+<!-- BEGIN: FloatingAnimationContainer -->
+<!-- 
+      This empty container serves as a spacer to maintain the minimalist 
+      structure while focusing purely on the background visual.
+    -->
+<div class="relative z-20 flex flex-col items-center justify-end h-full w-full pb-20">
+<!-- 
+        The feather is baked into the image provided. 
+        If interactivity were needed, an SVG or PNG feather would go here.
+      -->
+</div>
+<!-- END: FloatingAnimationContainer -->
+</main>
+<!-- END: MainContainer -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 静谧灰 (羽) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>真我时刻海报背景 - 静谧灰 (羽)</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="root-layout">
+    /* Ensure the body and html take up the full viewport height */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: #f5f5f5; /* Fallback color matching the image theme */
+    }
+  </style>
+<style data-purpose="background-styling">
+    /* Specific styling for the full-screen background image */
+    .bg-image-container {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uhjj35RpuWnji5nEiPD3wrjZwaarkuN4cypagUpxoRaSXLLLwKthGIqk2HDm-0LbDSUn3Tsb83fSHZmYwxbFzGi4y_oLibOW6kYpmmoCEgTEWW3JTAX_kBjNXwlO48vV2ZdWJ2Aic1ztAHe5DFfoM1VSyl0tiqUtT-DYxTd3oWiRa2HrprNyPmCVzW1y9jJTfvAHY8NGCJo2zjAxtx2MIyWs6bUzyWnXZSlQThl40roWwhYTRQ4zTwM6nk');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body class="h-full">
+<!-- BEGIN: MainContainer -->
+<!-- This main container serves as the viewport wrapper for the full-screen background -->
+<main class="bg-image-container flex flex-col justify-center items-center" data-purpose="full-screen-poster-container" id="poster-background">
+<!-- 
+      No other UI elements are added as per instructions. 
+      The image serves as a high-fidelity visual background for a mobile iOS device.
+    -->
+</main>
+<!-- END: MainContainer -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 森林绿 (羽) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Zen Feather Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Custom Styles for Gradient and Layout -->
+<style data-purpose="background-gradient">
+    /* 
+      Defines the specific soft vertical gradient requested. 
+      Tailwind classes can handle gradients, but for specific hex codes 
+      and vertical precision, custom CSS ensures exact match.
+    */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden; /* Prevent scrolling on mobile */
+      background: linear-gradient(to bottom, #F0F7F0 0%, #DCE8DC 100%);
+    }
+  </style>
+<style data-purpose="image-centering">
+    /* 
+       Ensures the background image fits the full screen 
+       and maintains aspect ratio while covering the area.
+    */
+    .full-screen-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none; /* Background shouldn't intercept clicks */
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-center">
+<!-- BEGIN: BackgroundContainer -->
+<main class="relative w-full h-full overflow-hidden" data-purpose="background-container">
+<!-- 
+      The requested image contains the specific soft feather floating 
+      in the lower third as per the reference description.
+    -->
+<img alt="Soft white feather floating on a green gradient background" class="full-screen-bg" data-purpose="zen-background-image" src="https://lh3.googleusercontent.com/aida/ADBb0uh4LGcYUfwXnv6W8Y-cM0fQe9qMXMAfZxELNH3jY7le0WP7ByBjAlUHG0oAFFRRvWln5xlJLGslfPXM1j8JIdrX4JJrBNzZ-nE-2A8I0Kvv4rfDz9wvyz5JqJhpO18bFiv79KNqMwoDkVKNp_lTJoNpncTURbCJAIyKLzRB79E5psnBeP-ZOe-Sqn88K1ZC3lGgqRjohKi90xP5mootRx9dSs3AmgpDdr5KMBnrQFMuugGbl2-VjkfBn10"/>
+</main>
+<!-- END: BackgroundContainer -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 静谧灰 (蝶) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Zen Butterfly Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'zen-top': '#F5F3F0',
+            'zen-bottom': '#E8E3DC',
+          }
+        }
+      }
+    }
+  </script>
+<!-- END: Custom Configuration -->
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="layout-styles">
+    /* Ensure the body takes up the full viewport height and prevents scrolling */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: #F5F3F0;
+    }
+
+    /* Container for the background elements */
+    .zen-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #F5F3F0 0%, #E8E3DC 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+    }
+  </style>
+<style data-purpose="butterfly-styling">
+    /* Container specifically for the butterfly image to handle positioning and scaling */
+    .butterfly-wrapper {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .butterfly-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Subtle breathing animation for a 'zen' feel */
+      animation: soft-pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes soft-pulse {
+      0%, 100% { opacity: 0.95; }
+      50% { opacity: 1; }
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="h-full">
+<!-- BEGIN: Main Content Area -->
+<main class="zen-container" data-purpose="main-zen-background">
+<!-- BEGIN: Butterfly Background Image -->
+<!-- 
+      Using the provided image as the primary visual element. 
+      The image contains the mountains, the light rays, and the glowing butterfly.
+    -->
+<div class="butterfly-wrapper" data-purpose="butterfly-visual-container">
+<img alt="Minimalist zen background with a glowing butterfly and misty mountains" class="butterfly-image" data-purpose="background-image-element" src="https://lh3.googleusercontent.com/aida/ADBb0ug1OOW9hBuoLPw_r-rQ8RJ4jI7ysu2t7FoMjd6zma5RyDAiN0SXi_hs1VOWJhEn2aJ4aSI2fM0LPXqK1AoWfczcEuPv6625a8eDPmNEaz8Nt-gUHC5lEN16kWO0TmYfPa_RbA-EXWxxiiZ3LR-9_Xksf2-cxdkf2uscFneE_nxIZJPEs5ZbUs1th5mweWsBIrG_XhzRKP-3iAFuwik7CBUa1uSIwGvhc8ZJdN_ewHg91AgLzQZL0UI2dA"/>
+</div>
+<!-- END: Butterfly Background Image -->
+</main>
+<!-- END: Main Content Area -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 清晨露 (蝶) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artistic Background Screen</title>
+<!-- Load Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Configuration -->
+<style data-purpose="layout-styles">
+    /* Ensure the body and html take up the full height */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: #f0f4f0; /* Fallback color matching the image theme */
+    }
+
+    /* Container to maintain 9:16 aspect ratio on larger screens */
+    .aspect-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: calc(100vh * 9 / 16);
+      margin: 0 auto;
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uglKxrjpevgkrj-3paR1KsmBuXY5v4rwRLA52KpDgF6nCdggIJ64j0DDD2pMyUxhW4G1_g6BTxwd9GpTWj4jZBVNyLHB1Z9fZd-i90s23qGdL_z-hxE4oo_5nFN7sFVrAKRmnjYCkz845WNl9u8CsuX3l6zDAVIDxoNS0yTJzlRh0fuxojl2FM4Kx0GdtWwrm6AANyOx2i2VNTzwDytRhY-YTLbnp1vbxEQRcSrYhgGPqquzrE0UA03Fg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* Handle specific device aspect ratio if needed, but for Mobile iOS typical fill is preferred */
+    @media (max-aspect-ratio: 9/16) {
+      .aspect-container {
+        max-width: 100%;
+      }
+    }
+  </style>
+<!-- END: Custom Configuration -->
+</head>
+<body class="flex items-center justify-center bg-black">
+<!-- BEGIN: Main Screen Content -->
+<!-- 
+    The requested design is a pure artistic background based on the provided image.
+    The butterfly is part of the provided image assets, specifically positioned 
+    in the lower third, which is handled by the background-size: cover/center logic.
+  -->
+<main aria-label="Artistic background showing mountains and a glowing butterfly" class="aspect-container shadow-2xl" data-purpose="artistic-background-viewer" id="main-screen">
+<!-- 
+      No additional UI elements or text are added per the instructions 
+      to maintain the clean artistic look of the background image.
+    -->
+</main>
+<!-- END: Main Screen Content -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 晨曦蓝 (蝶) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Ethereal Zen Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="layout-dimensions">
+    /* Using dynamic viewport height for mobile browsers to handle address bar shifts */
+    .h-screen-safe {
+      height: 100vh;
+      height: 100dvh;
+    }
+    
+    /* Ensure the background covers the entire area without scrolling */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #EFF7FD;
+    }
+  </style>
+<style data-purpose="background-styles">
+    /* 
+       Custom styles for the ethereal background. 
+       We use the provided image as the primary visual element.
+    */
+    .zen-background {
+      background: linear-gradient(to bottom, #EFF7FD, #D6EBF7);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .butterfly-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    /* Soft pulse animation for the ethereal glow effect */
+    @keyframes softPulse {
+      0%, 100% { opacity: 0.95; }
+      50% { opacity: 1; }
+    }
+
+    .animate-ethereal {
+      animation: softPulse 6s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="h-full">
+<!-- BEGIN: MainBackgroundContainer -->
+<main class="zen-background h-screen-safe w-full flex flex-col justify-end items-center overflow-hidden" data-purpose="ethereal-mobile-background" id="main-container">
+<!-- This image provides the delicate glowing butterfly and mountain layers from the reference -->
+<img alt="Ethereal glowing butterfly over mountains" class="butterfly-overlay animate-ethereal" data-purpose="butterfly-visual-element" src="https://lh3.googleusercontent.com/aida/ADBb0ui117rSEBPePJJCPABynWI2OzldE7bbu5fn5KxTvKD9UoArNtlH5PmZIrlgYzF9xmaTOePs3yCl3SIzBDyMTy-B3sQ5dK_ZJ4if_X2DcMVYJUDKOR-Z5BsbDCiSoAthqZenqkj38Fo7b3bDkZJe6Ra-zz80jlBjhfMOGYKTmFiawButkpRF1ZhsjQmNxK-KmwjnW3a7Wu5XHBaADMRl4gp0AnODMaub4_BrS_1gAzqfovakfZJYep6jrfM"/>
+<!-- Optional subtle overlay for texture depth -->
+<div class="absolute inset-0 opacity-20 pointer-events-none" data-purpose="lighting-effect" style="background: radial-gradient(circle at 50% 70%, rgba(255,255,255,0.4) 0%, transparent 70%);"></div>
+</main>
+<!-- END: MainBackgroundContainer -->
+<script data-purpose="ios-touch-prevention">
+    // Prevent default scrolling on mobile to maintain the full-screen background feel
+    document.addEventListener('touchmove', function(e) {
+      if (e.target.closest('#main-container')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  </script>
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 清晨露 (蝶) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zen Butterfly Background</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="custom-gradient">
+    /* Custom gradient as requested: #F2F8F2 to #D8EDD8 */
+    .bg-zen-gradient {
+      background: linear-gradient(to bottom, #F2F8F2 0%, #D8EDD8 100%);
+    }
+    
+    /* Ensure the container takes full height on mobile devices */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+<style data-purpose="image-positioning">
+    /* Styling to ensure the background image fits the screen perfectly */
+    .background-artwork {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+  </style>
+</head>
+<body class="bg-zen-gradient">
+<!-- BEGIN: MobileBackground -->
+<!-- This main container hosts the full-screen visual experience -->
+<main class="relative w-full h-screen flex flex-col items-center justify-center" data-purpose="background-container">
+<!-- 
+      The provided image already contains the soft mountains, 
+      the light rays, and the glowing butterfly in the lower third. 
+      We use object-cover to ensure it fills any mobile screen dimension.
+    -->
+<img alt="Zen Landscape with glowing butterfly" class="background-artwork" data-purpose="hero-image" src="https://lh3.googleusercontent.com/aida/ADBb0ujCLjArsECKYEsb9b3B_APb_SbivHK-S1y_S0Qq0wi_QddD2uBmMxQ8bVT2jnBiLlUCKWuytSJqhAlO3MLuLBIcfxQNNPYxD1ZRf_f_FTwy2waLGLg97HNUc_ONCHRQ_Bi4GRlalShLlAvvI1jnC7Kg3C2k6T9SrgvuZAkEhrnuj5U0owrmMvPpjVh1JpWFCfGihrhouxlKXRObVXCESdLKn4aZq1NZ75vluXGRc3MYf5gWqv3Ol5Tg_5A"/>
+<!-- 
+      Overlaying a subtle vignette or safety layer if needed, 
+      though currently keeping it minimalist as requested.
+    -->
+<div class="absolute inset-0 pointer-events-none" data-purpose="aesthetic-overlay"></div>
+</main>
+<!-- END: MobileBackground -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 暖阳橘 (羽) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artistic Background Screen</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Styling -->
+<style data-purpose="layout-constraints">
+    /* Ensuring the body takes up the full height of the viewport */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000; /* Black bars if the screen ratio differs from 9:16 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* 
+       Enforcing a strict 9:16 aspect ratio for the mobile screen 
+       to ensure the feather placement remains consistent with the design.
+    */
+    .mobile-screen-container {
+      aspect-ratio: 9 / 16;
+      width: 100%;
+      max-width: 56.25vh; /* 100 * (9/16) */
+      height: 100%;
+      max-height: 100vh;
+      position: relative;
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0ugieiU6sbJy2-_g5bUdyOqVCxYJVT6K-7uj7U5qRZt-V4-yP2urTKo0JMqAanCtT9XFSVF2auzFWqSp1kZP4lzLx9RPkhqXBu1M67T5LR0SU5eMc8fkMPtKuyVttt9YzrKthXhxVGD8zQ6P9UadsVnN_SKUtG7udOhbtp3nsFbmf6j7l-Cs48LihC-HuaoipI6IOGV_wNWkn_0me-8dJcPDPQ_YpRBv4mwmJ5qYhBC6XZ3mihJwBXlDDHo');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    }
+  </style>
+<!-- END: Custom Styling -->
+</head>
+<body class="h-full">
+<!-- BEGIN: Main Content Container -->
+<main class="mobile-screen-container" data-purpose="background-display" id="main-canvas">
+<!-- 
+      This section is intentionally left empty of UI elements to showcase 
+      the artistic background and the feather element positioned in the lower third. 
+    -->
+</main>
+<!-- END: Main Content Container -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 以太蓝 (羽) - 1080x1920 -->
+<!DOCTYPE html>
+
+<html class="h-full w-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Social Media Poster Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration for custom 9:16 aspect ratio and sizing -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          aspectRatio: {
+            '9/16': '9 / 16',
+          },
+          spacing: {
+            'poster-w': '1080px',
+            'poster-h': '1920px',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom styles for layout resets and background-specific high-fidelity rendering -->
+<style data-purpose="global-resets">
+    /* Remove any default browser spacing and ensure the body fills the viewport exactly */
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      background-color: #000; /* Dark fallback background */
+    }
+
+    /* Target the canvas container to maintain 9:16 aspect ratio logic if needed */
+    #poster-canvas {
+      width: 100vw;
+      height: 100vh;
+      /* Ensures the background image is rendered with high quality */
+      image-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+<style data-purpose="poster-background">
+    /* Applying the specific background image provided in the prompt */
+    .bg-custom-poster {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uh7BvgX7DiE_SYxX9MnVKovhI2vs0cmKZtFbDmvWibFQafvM7vzhmmBpezz6c8RwxmXWXtiJiSaOoRKwcSI6MLfXoMkmlgya3aDOChycMllAPMz2CPgLLXiomNYISoUicAl13YHbMxQAvp3lwsVGiWVQal7DKDv9Usi7-nuVRxmvStXf6Q3jbX8Oa3DlV2zXNiRhNrKKgTKkaJSBCFJLf5Y5aeUq43BXRa2NITmVlgbAMjqxrBIwySV1w');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center">
+<!-- BEGIN: PosterBackground -->
+<!-- 
+    This container represents the main canvas. 
+    Requirements: 1080px x 1920px (9:16 aspect ratio).
+    It fills the viewport on mobile devices to act as a high-fidelity sharing background.
+  -->
+<div class="bg-custom-poster relative flex flex-col justify-between" data-purpose="social-media-background" id="poster-canvas">
+<!-- 
+      Empty content container. 
+      This is designed as a base layer for a social media sharing poster. 
+      The 'bg-custom-poster' class handles the image rendering at 'cover' scale.
+    -->
+<!-- Top Padding/Buffer for System UI (Mobile iOS) -->
+<div class="h-12 w-full" data-purpose="safe-area-top"></div>
+<!-- Main Workspace Area (Can be used for overlaying text/graphics later) -->
+<main class="flex-grow flex items-center justify-center">
+<!-- Logic for high-fidelity background is encapsulated in the parent div -->
+</main>
+<!-- Bottom Padding/Buffer for System UI (Mobile iOS) -->
+<div class="h-12 w-full" data-purpose="safe-area-bottom"></div>
+</div>
+<!-- END: PosterBackground -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 晚霞粉 (蝶) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Minimalist Zen Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Styling -->
+<style data-purpose="background-gradient">
+    /* 
+       Applying a vertical gradient from #FDF5F5 at the top to #F5E0E0 at the bottom 
+       to create a soft, romantic atmosphere as requested.
+    */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden; /* Prevent scrolling for a full-screen experience */
+      background: linear-gradient(to bottom, #FDF5F5 0%, #F5E0E0 100%);
+    }
+  </style>
+<style data-purpose="layout-positioning">
+    /* 
+       Container for the background image to ensure it covers the screen 
+       and maintains aspect ratio if needed.
+    */
+    .full-screen-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 
+       Optimizing the butterfly image presentation. 
+       Using object-fit: cover to ensure it feels like a wallpaper.
+    */
+    .background-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
+<!-- END: Custom Styling -->
+</head>
+<body class="antialiased">
+<!-- BEGIN: MainContent -->
+<main class="full-screen-container" data-purpose="wallpaper-container">
+<!-- 
+       The image provided contains the misty mountain landscape and the glowing butterfly.
+       It is placed as the primary visual element. 
+    -->
+<img alt="Glowing butterfly in a misty pink mountain landscape" class="background-image" data-purpose="hero-image" src="https://lh3.googleusercontent.com/aida/ADBb0uhuK1MYQOStAWHBqM8sHTiGnnJw1KrVu7xBo0XE6yhqV-CJbzQdGYIY24ktgdF9wtmDnDL_c9b1GDW06XlfIw800cm-hrH4ct2Lrge1RyHK8ZTwe5AV0XBMrcubgd3c3MbLN5e08jOxTXaG9I--C_tiizRJTbeAQrQMu2_LWmpzemPBvIiXKYXIlLoimatEWKDbZlL6GR9qxUtL6PeE_xlcW43mj3OB7xwgmVZ2ZpmiBnh7yctKlWKBZAo"/>
+</main>
+<!-- END: MainContent -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 暮光紫 (蝶) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artistic Poster Background</title>
+<!-- Tailwind CSS v3 CDN with necessary plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Style Overrides -->
+<style data-purpose="background-styles">
+    /* 
+       Ensuring the background image covers the entire viewport 
+       while maintaining the artistic composition of the source image.
+    */
+    .bg-poster-main {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0ugdwyetWiqxuOT_aYaPJtoFgrsH6k3ngU_QHmD6w6rqN2T09w6w26PYEqyykuWXy-27_vrbFjEhqUCiC4DDAiN1sAqTR3fvmJfaw_aLGRJJY4ukM1gKPSLkQcjfkLw3-M5Q2PFx9UJbjVZv89j5cqrCmiqqs3HPQszpoeix4r7toPQS60S-5BfZAODA2Z6TQKE839GqzzlKrAVIjPh736tdMe-kC2CjNNSNS_xeg0ex4BiPk6eVJbeEdz4');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+<!-- END: Custom Style Overrides -->
+</head>
+<body class="h-full m-0 p-0 overflow-hidden bg-slate-900">
+<!-- BEGIN: Main Container -->
+<main class="relative h-full w-full bg-poster-main flex flex-col justify-end" data-purpose="full-bleed-mobile-background" id="poster-container">
+<!-- 
+      The layout is intentionally kept clean without UI elements 
+      to serve as a code-accessible high-fidelity background.
+      The butterfly from the source image is naturally positioned 
+      in the lower third through the 'background-position: center' property.
+    -->
+<!-- Invisible overlay to handle potential safe-area-inset for iOS devices -->
+<div class="pb-[env(safe-area-inset-bottom)]" data-purpose="ios-safe-area-spacer"></div>
+</main>
+<!-- END: Main Container -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 暮光紫 (羽) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Feather Poster Background</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          aspectRatio: {
+            'iphone': '9/19.5',
+          },
+        },
+      },
+    }
+  </script>
+<!-- END: Custom Configuration -->
+<!-- BEGIN: Page Styles -->
+<style data-purpose="page-layout">
+    /* Ensure the body takes up the full viewport height and prevents scrolling */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      background-color: #000; /* Fallback background */
+    }
+
+    /* Specific background positioning to maintain the artistic intent */
+    .background-poster {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uiMDmbk0HcnGjD6zNQsWN7yxp_8M7HynmzREQamHBhRtfutT2o1OiwEpZPlboc8uQb83v-P2Gt3Lsdo1nTcNFW8aDg6bIC_ejdHBv1nyHNT5wtCOQMr2evT-40Ab4jqOWomIFxWmEIWaFcEikT8vsqAkwppb5uKm7MtYEA_-oHpkHjZ7LlLWnOtjfIpzhWOu6r5s5Gufaif3_tujpFGLJdbaccc28I8rPCtKZlwYPZt1gi2_KjxtRX3Cg');
+      background-size: cover;
+      background-position: center bottom; /* Focused on bottom to ensure feather visibility in bottom third */
+      background-repeat: no-repeat;
+    }
+  </style>
+<!-- END: Page Styles -->
+</head>
+<body class="flex items-center justify-center">
+<!-- BEGIN: Main Background Container -->
+<main class="background-poster w-full h-full relative" data-purpose="background-display" id="poster-container">
+<!-- 
+      This container is purposely empty of UI elements to provide a clean, 
+      code-accessible version of the artistic background.
+      The feather is naturally positioned in the bottom third of the provided image.
+    -->
+</main>
+<!-- END: Main Background Container -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 晚霞粉 (羽) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Artistic Background Screen</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Styling -->
+<style data-purpose="layout-optimizations">
+    /* Ensure the body takes up the full viewport and centers the content */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000; /* Black background to frame the 9:16 screen if viewed on wider displays */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Force the 9:16 aspect ratio for the mobile screen container */
+    .aspect-9-16 {
+      aspect-ratio: 9 / 16;
+      width: auto;
+      height: 100vh;
+      max-width: 100vw;
+    }
+  </style>
+<style data-purpose="background-rendering">
+    /* High-fidelity background rendering to ensure the feather is correctly positioned */
+    .poster-background {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0ugvwIehdcGaQVbE_nHlydw9cOh5SbLMBzk8b0zzfH2rUuN29dpcCgvTEk2Jlbt90JhmrATAxSlhOnozwS5HctRM_0Cra9zB8C2BxHwMdiLDYNbzsjNmxtsLhVGX5tewgCM5ulnIQc8s2KxBJMOnAVvf9UCTD7BmnN2s9K9AJTvw8vD4WmyF4cX7REO4QmS-cIGsK4vbCoBRXk0cXK4rPAMJryG3YXRiCbKd8J-kWc1WqcL2_GPgF6rtYVY');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+<!-- END: Custom Styling -->
+</head>
+<body>
+<!-- BEGIN: MainContainer -->
+<main class="aspect-9-16 relative overflow-hidden shadow-2xl" data-purpose="mobile-viewport-container" id="screen-root">
+<!-- BEGIN: PosterScreen -->
+<!-- 
+      This section acts as the primary visual layer. 
+      It uses the provided image as a full-page background to maintain the artistic 
+      composition including the pink gradient and the floating feather in the lower third.
+    -->
+<div class="poster-background w-full h-full" data-purpose="artistic-background-layer">
+<!-- 
+        The background image itself contains the feather element in the lower third.
+        No additional UI elements or text are added per the request.
+      -->
+</div>
+<!-- END: PosterScreen -->
+</main>
+<!-- END: MainContainer -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 暖阳橘 (羽) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>真我时刻海报背景 - 暖阳橘 (羽)</title>
+<!-- Tailwind CSS v3 CDN with forms and container-queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="root-layout">
+    /* Ensure the body and html take up the full height of the viewport */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden; /* Prevent scrolling for a pure background display */
+    }
+  </style>
+<style data-purpose="background-styling">
+    /**
+     * Styles for the high-fidelity background image container.
+     * Uses 'cover' to ensure the image fills the screen without distortion.
+     * Uses 'center' to keep the focal point (butterfly and sunbeams) balanced.
+     */
+    .poster-background {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uh-9N6LKEjb0iT3SUr_EBydJhQ6IvhQYctJYQP-cP2-oXYXVma3u0L34nGYgS6PF9L4ClR5581uvdaJ1_kpqx2HkibBGxycMVSCr0Q4AcZmFSHDo1RAnlVPZ3la2xQxC5UXaR1l7yNEpU3-tskI5V8USnFd1RAhSh0R3DGDUfpqKfh9auHmMtT9IJZKPypQlbjihiRgdTW6pVWSSYhwpJOG15s8_-c4FFm7imYd1CgLbRHxe4rDiBzr4Oc');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-full">
+<!-- BEGIN: MainContent -->
+<main class="relative w-full h-full max-w-[768px] mx-auto shadow-2xl overflow-hidden" data-purpose="full-screen-container">
+<!-- This section acts as the primary visual layer using the provided high-fidelity image -->
+<section aria-label="暖阳橘羽翼海报背景" class="poster-background" data-purpose="hero-background-image" id="background-layer">
+<!-- 
+        No UI elements are added per user request. 
+        The focus is solely on the visual fidelity of the background.
+      -->
+</section>
+</main>
+<!-- END: MainContent -->
+</body></html>
+
+
+<!-- 真我时刻海报背景 - 清晨露 (羽) -->
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>真我时刻海报背景 - 清晨露 (羽)</title>
+<!-- Load Tailwind CSS v3 with forms and container-queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="root-layout">
+    /* Ensure the body takes up the full height of the mobile viewport */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #f0f4f2; /* Fallback background color */
+    }
+
+    /* Target the container to fill the screen and display the background perfectly */
+    .bg-full-screen {
+      width: 100%;
+      height: 100%;
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0ujEPJUx-BncFQUTyJLi2VZ5A0i21Icd1tp-oWuDlp1lxbJzwR-jaUFaA27zy5qn9sRiVZusQ_KzZncWdSpW2DHdNjv3cxmbtfWMIKavqsMhe8S7lpPTVBnq5XlouELAJJSRpO2mYvxwbwXR828t5NIuJ65fdDluJkyoMvOIuFt4ZEyG2uu6ltBtxGSg-uug4bsrJ85xXfZbfxqedQBebVjsLRcE_-DRr8lLLfAhX2ypYPvbR_21vp5mxw');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+  </style>
+</head>
+<body class="antialiased">
+<!-- BEGIN: MainBackground -->
+<main class="bg-full-screen flex flex-col justify-center items-center" data-purpose="poster-background-container" id="main-container">
+<!-- 
+      This container is intentionally left empty as per the user's request 
+      to provide a clean, high-fidelity background image for the mobile screen.
+    -->
+</main>
+<!-- END: MainBackground -->
+</body></html>

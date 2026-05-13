@@ -1,0 +1,121 @@
+page {
+  background: linear-gradient(180deg, #eff7fd 0%, #d6ebf7 100%);
+}
+
+.page {
+  min-height: 100vh;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 28rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.title {
+  display: block;
+  color: #184061;
+  font-size: 32rpx;
+  font-weight: 700;
+  margin-bottom: 14rpx;
+}
+
+.record-list {
+  margin-top: 4rpx;
+}
+
+.record-block {
+  padding-top: 8rpx;
+}
+
+.record-time {
+  display: block;
+  color: #8a9cb0;
+  font-size: 22rpx;
+  margin-bottom: 8rpx;
+}
+
+.record-divider {
+  height: 2rpx;
+  background: #e8eef4;
+  margin: 20rpx 0 12rpx;
+}
+
+.muted {
+  color: #8a9cb0;
+  font-size: 26rpx;
+  padding: 12rpx 0;
+}
+
+.row {
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.k {
+  color: #8a9cb0;
+  font-size: 24rpx;
+}
+
+.v {
+  color: #184061;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.p {
+  display: block;
+  color: #577388;
+  line-height: 1.8;
+  font-size: 25rpx;
+}
+
+.advice-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12rpx;
+}
+
+.advice-mascot {
+  width: 112rpx;
+  height: 112rpx;
+  flex-shrink: 0;
+  transform: scaleX(-1);
+}
+
+.advice-row chat-bubble {
+  flex: 1;
+  max-width: 525rpx;
+}
+
+.btn {
+  margin-top: 20rpx;
+  width: 100%;
+  max-width: 100%;
+  min-width: 400rpx;
+  height: 84rpx;
+  border-radius: 999rpx;
+  background: #12598f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 24rpx;
+  white-space: nowrap;
+}
+
+.btn-text {
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.row-hover {
+  opacity: 0.88;
+}

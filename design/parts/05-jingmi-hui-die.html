@@ -1,0 +1,91 @@
+<!-- 真我时刻海报背景 - 静谧灰 (蝶) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Zen Butterfly Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'zen-top': '#F5F3F0',
+            'zen-bottom': '#E8E3DC',
+          }
+        }
+      }
+    }
+  </script>
+<!-- END: Custom Configuration -->
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="layout-styles">
+    /* Ensure the body takes up the full viewport height and prevents scrolling */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background-color: #F5F3F0;
+    }
+
+    /* Container for the background elements */
+    .zen-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #F5F3F0 0%, #E8E3DC 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+    }
+  </style>
+<style data-purpose="butterfly-styling">
+    /* Container specifically for the butterfly image to handle positioning and scaling */
+    .butterfly-wrapper {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .butterfly-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Subtle breathing animation for a 'zen' feel */
+      animation: soft-pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes soft-pulse {
+      0%, 100% { opacity: 0.95; }
+      50% { opacity: 1; }
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="h-full">
+<!-- BEGIN: Main Content Area -->
+<main class="zen-container" data-purpose="main-zen-background">
+<!-- BEGIN: Butterfly Background Image -->
+<!-- 
+      Using the provided image as the primary visual element. 
+      The image contains the mountains, the light rays, and the glowing butterfly.
+    -->
+<div class="butterfly-wrapper" data-purpose="butterfly-visual-container">
+<img alt="Minimalist zen background with a glowing butterfly and misty mountains" class="butterfly-image" data-purpose="background-image-element" src="https://lh3.googleusercontent.com/aida/ADBb0ug1OOW9hBuoLPw_r-rQ8RJ4jI7ysu2t7FoMjd6zma5RyDAiN0SXi_hs1VOWJhEn2aJ4aSI2fM0LPXqK1AoWfczcEuPv6625a8eDPmNEaz8Nt-gUHC5lEN16kWO0TmYfPa_RbA-EXWxxiiZ3LR-9_Xksf2-cxdkf2uscFneE_nxIZJPEs5ZbUs1th5mweWsBIrG_XhzRKP-3iAFuwik7CBUa1uSIwGvhc8ZJdN_ewHg91AgLzQZL0UI2dA"/>
+</div>
+<!-- END: Butterfly Background Image -->
+</main>
+<!-- END: Main Content Area -->
+</body></html>

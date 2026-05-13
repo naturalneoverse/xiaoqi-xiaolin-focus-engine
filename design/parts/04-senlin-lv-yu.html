@@ -1,0 +1,52 @@
+<!-- 真我时刻海报背景 - 森林绿 (羽) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Zen Feather Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Custom Styles for Gradient and Layout -->
+<style data-purpose="background-gradient">
+    /* 
+      Defines the specific soft vertical gradient requested. 
+      Tailwind classes can handle gradients, but for specific hex codes 
+      and vertical precision, custom CSS ensures exact match.
+    */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden; /* Prevent scrolling on mobile */
+      background: linear-gradient(to bottom, #F0F7F0 0%, #DCE8DC 100%);
+    }
+  </style>
+<style data-purpose="image-centering">
+    /* 
+       Ensures the background image fits the full screen 
+       and maintains aspect ratio while covering the area.
+    */
+    .full-screen-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none; /* Background shouldn't intercept clicks */
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-center">
+<!-- BEGIN: BackgroundContainer -->
+<main class="relative w-full h-full overflow-hidden" data-purpose="background-container">
+<!-- 
+      The requested image contains the specific soft feather floating 
+      in the lower third as per the reference description.
+    -->
+<img alt="Soft white feather floating on a green gradient background" class="full-screen-bg" data-purpose="zen-background-image" src="https://lh3.googleusercontent.com/aida/ADBb0uh4LGcYUfwXnv6W8Y-cM0fQe9qMXMAfZxELNH3jY7le0WP7ByBjAlUHG0oAFFRRvWln5xlJLGslfPXM1j8JIdrX4JJrBNzZ-nE-2A8I0Kvv4rfDz9wvyz5JqJhpO18bFiv79KNqMwoDkVKNp_lTJoNpncTURbCJAIyKLzRB79E5psnBeP-ZOe-Sqn88K1ZC3lGgqRjohKi90xP5mootRx9dSs3AmgpDdr5KMBnrQFMuugGbl2-VjkfBn10"/>
+</main>
+<!-- END: BackgroundContainer -->
+</body></html>

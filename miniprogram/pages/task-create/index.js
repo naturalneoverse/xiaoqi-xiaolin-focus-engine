@@ -1,6 +1,8 @@
 const REMIND_FREQUENCY_OPTIONS = ["不重复", "每天", "每周", "每月"];
 const TASK_NAME_MAX = 30;
 const TASK_CONTENT_MAX = 600;
+const { TASK_SCHEDULE_REMINDER_TMPL_ID } = require("../../config/subscribeTemplates");
+const { goSleepHome } = require("../../utils/goTabHome");
 
 function formatDateRangeText(startDate, endDate) {
   if (!startDate) return "未选择";
@@ -88,22 +90,33 @@ Page({
     return `${y}-${m}-${d}`;
   },
 
-  openDateModal() {
-    const show = () => {
-      this.setData({
-        showDateModal: true,
-        draftStartDate: this.data.startDate || this.getToday(),
-        draftEndDate: this.data.endDate || "",
-      });
+  /**
+   * 弹层内只有 picker，不应再出现「文字输入法」。
+   * 先 hideKeyboard，再在延迟后打开弹层；同时 input/textarea 在弹层打开期间 disabled，强制失焦收起键盘。
+   */
+  _openOverlayAfterKeyboardClear(patch) {
+    const reveal = () => {
+      this.setData(patch);
+    };
+    const afterKb = () => {
+      setTimeout(reveal, 220);
     };
     if (typeof wx.hideKeyboard === "function") {
       wx.hideKeyboard({
-        complete: show,
-        fail: show,
+        complete: afterKb,
+        fail: afterKb,
       });
     } else {
-      show();
+      afterKb();
     }
+  },
+
+  openDateModal() {
+    this._openOverlayAfterKeyboardClear({
+      showDateModal: true,
+      draftStartDate: this.data.startDate || this.getToday(),
+      draftEndDate: this.data.endDate || "",
+    });
   },
 
   closeDateModal() {
@@ -177,19 +190,9 @@ Page({
   },
 
   openReminderModal() {
-    const show = () => {
-      this.setData({
-        showReminderModal: true,
-      });
-    };
-    if (typeof wx.hideKeyboard === "function") {
-      wx.hideKeyboard({
-        complete: show,
-        fail: show,
-      });
-    } else {
-      show();
-    }
+    this._openOverlayAfterKeyboardClear({
+      showReminderModal: true,
+    });
   },
 
   closeReminderModal() {
@@ -229,18 +232,44 @@ Page({
       return;
     }
     const reminderText = formatReminderText(reminderDate, reminderTime, reminderFrequency);
-    this.setData({
-      showReminderModal: false,
-      reminderText,
-    });
+    const finish = () => {
+      this.setData({
+        showReminderModal: false,
+        reminderText,
+      });
+    };
+    /** 仅「确定」且已选日期+时间时申请一次性订阅；拒绝/失败静默；未选满则不调订阅 */
+    const hasSchedule = !!(reminderDate && reminderTime);
+    if (hasSchedule && wx.requestSubscribeMessage && TASK_SCHEDULE_REMINDER_TMPL_ID) {
+      try {
+        wx.requestSubscribeMessage({
+          tmplIds: [TASK_SCHEDULE_REMINDER_TMPL_ID],
+          success() {},
+          fail() {},
+          complete: finish,
+        });
+      } catch (e) {
+        finish();
+      }
+    } else {
+      finish();
+    }
   },
 
   noop() {},
 
   onBack() {
-    wx.switchTab({
-      url: "/pages/sleep/index",
-    });
+    const stack = getCurrentPages();
+    if (stack.length > 1) {
+      wx.navigateBack({
+        fail: (err) => {
+          console.warn("[task-create] navigateBack fail", err);
+          goSleepHome();
+        },
+      });
+      return;
+    }
+    goSleepHome();
   },
 
   next() {

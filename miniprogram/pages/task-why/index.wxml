@@ -29,8 +29,10 @@
   </view>
 
   <view class="actions">
-    <button class="btn btn-light" bindtap="goPrev">上一步</button>
-    <button class="btn" bindtap="saveTask">保存任务</button>
+    <button class="btn btn-light" bindtap="goPrev" disabled="{{saveSubmitting}}">上一步</button>
+    <button class="btn" bindtap="saveTask" disabled="{{saveSubmitting}}" loading="{{saveSubmitting}}">
+      {{saveSubmitting ? "保存中…" : "保存任务"}}
+    </button>
   </view>
 
   <view class="progress">

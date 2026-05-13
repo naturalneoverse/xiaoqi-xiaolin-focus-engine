@@ -5,56 +5,28 @@ const OPTIONS = [
   { key: "合一", desc: "生计、职责、真我，三层合一" },
 ];
 
-function parsePayload(payload) {
-  try {
-    return payload ? JSON.parse(decodeURIComponent(payload)) : {};
-  } catch (e) {
-    return {};
-  }
-}
+const { parsePayload } = require("../../utils/parsePayload");
 
 const STORAGE_KEYS = require("../../config/storageKeys");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
+const { goSleepHome } = require("../../utils/goTabHome");
+const { formatDateTime } = require("../../utils/dateFormat");
+const {
+  getPriorityTagClass,
+  getForWhomTagClass,
+  getWhyTagClass,
+} = require("../../utils/taskTagStyles");
 const TASK_NAME_MAX = 30;
-
-function formatDateTime(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  const hh = String(date.getHours()).padStart(2, "0");
-  const mm = String(date.getMinutes()).padStart(2, "0");
-  return `${y}/${m}/${d} ${hh}:${mm}`;
-}
-
-function getPriorityTagClass(text) {
-  if (text === "重要且紧急") return "tag-red";
-  if (text === "重要不紧急") return "tag-orange";
-  if (text === "紧急不重要") return "tag-blue";
-  if (text === "不重要不紧急") return "tag-gray";
-  return "tag-gray";
-}
-
-function getForWhomTagClass(text) {
-  if (text === "自己") return "tag-berry";
-  if (text === "至亲") return "tag-lavender";
-  if (text === "外缘") return "tag-sky";
-  if (text === "不二") return "tag-violet";
-  return "tag-violet";
-}
-
-function getWhyTagClass(text) {
-  if (text === "生计") return "tag-amber";
-  if (text === "职责") return "tag-teal";
-  if (text === "真我") return "tag-gold";
-  if (text === "合一") return "tag-deep";
-  return "tag-deep";
-}
 
 function buildTags(payload, selectedWhy) {
   return [
-    payload.priority ? { text: payload.priority, className: getPriorityTagClass(payload.priority) } : null,
-    payload.forWhom ? { text: payload.forWhom, className: getForWhomTagClass(payload.forWhom) } : null,
-    selectedWhy ? { text: selectedWhy, className: getWhyTagClass(selectedWhy) } : null,
+    payload.priority
+      ? { text: payload.priority, className: getPriorityTagClass(payload.priority) || "tag-gray" }
+      : null,
+    payload.forWhom
+      ? { text: payload.forWhom, className: getForWhomTagClass(payload.forWhom) || "tag-violet" }
+      : null,
+    selectedWhy ? { text: selectedWhy, className: getWhyTagClass(selectedWhy) || "tag-deep" } : null,
   ].filter(Boolean);
 }
 
@@ -64,11 +36,20 @@ function clampTextByLength(value, maxLength) {
   return chars.slice(0, maxLength).join("");
 }
 
+/** 本地任务 id：时间戳 + 随机段，避免连点同毫秒撞号；与云 saveTask 的 string id 一致 */
+function newLocalTaskId() {
+  const r = Math.floor(Math.random() * 1e9)
+    .toString(36)
+    .padStart(6, "0");
+  return `t_${Date.now()}_${r}`;
+}
+
 Page({
   data: {
     options: OPTIONS,
     selected: "",
     payload: {},
+    saveSubmitting: false,
   },
 
   onLoad(options) {
@@ -90,21 +71,27 @@ Page({
   },
 
   saveTask() {
-    const { selected, payload } = this.data;
+    if (this._saveTaskLocked) return;
+    const { selected, payload, saveSubmitting } = this.data;
+    if (saveSubmitting) return;
     if (!selected) {
       wx.showToast({ title: "请选择一项", icon: "none" });
       return;
     }
+    this._saveTaskLocked = true;
+    this.setData({ saveSubmitting: true });
     const mergedPayload = { ...payload, why: selected };
     const now = new Date();
-    const taskId = `t_${Date.now()}`;
+    const taskId = newLocalTaskId();
     const createdAt = formatDateTime(now);
+    const nameTrim = String(mergedPayload.taskName || "").trim();
     const task = {
       id: taskId,
-      title: clampTextByLength(mergedPayload.taskName || "未命名任务", TASK_NAME_MAX),
+      title: clampTextByLength(nameTrim || "未命名任务", TASK_NAME_MAX),
       content: mergedPayload.taskContent || "暂无描述",
       timeText: createdAt,
       createdAt,
+      updatedAt: Date.now(),
       dateValue: mergedPayload.dateValue || "",
       statusText: "进行中",
       done: false,
@@ -121,28 +108,53 @@ Page({
       console.error("saveTask getStorageSync", e);
       prevTasks = [];
     }
-    const nextTasks = [task, ...prevTasks];
+    const nextTasks = [task, ...prevTasks.filter((t) => t && t.id !== taskId)];
     try {
       wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
       dailyCheckIn.recordDailyCheckIn();
     } catch (e) {
       console.error("saveTask setStorageSync", e);
+      this._saveTaskLocked = false;
+      this.setData({ saveSubmitting: false });
       wx.showToast({ title: "保存失败", icon: "none" });
       return;
     }
 
-    const nextPayload = encodeURIComponent(
-      JSON.stringify({
-        ...mergedPayload,
-        taskId,
-        taskName: task.title,
-        taskContent: task.content,
-        dateValue: task.dateValue,
-        statusText: task.statusText,
-      }),
-    );
-    wx.redirectTo({
-      url: `/pages/task-detail/index?payload=${nextPayload}&showSuccess=1`,
-    });
+    try {
+      const cloudDataSync = require("../../utils/cloudDataSync");
+      const redirectUrl = `/pages/task-detail/index?taskId=${encodeURIComponent(taskId)}&showSuccess=1`;
+      const doRedirect = () => {
+        wx.redirectTo({
+          url: redirectUrl,
+          fail: (err) => {
+            console.error("redirectTo task-detail", err);
+            wx.showToast({ title: "打开详情失败，任务已保存", icon: "none" });
+            setTimeout(() => {
+              goSleepHome();
+            }, 800);
+          },
+        });
+      };
+      /* 短 query；须等云同步结束再 redirectTo，否则卸载本页会中断未完成的 callFunction */
+      Promise.resolve(cloudDataSync.afterTaskSaved(task))
+        .catch(() => {})
+        .finally(() => {
+          doRedirect();
+        });
+    } catch (e) {
+      console.warn("[task-why] cloudDataSync", e);
+      wx.redirectTo({
+        url: `/pages/task-detail/index?taskId=${encodeURIComponent(taskId)}&showSuccess=1`,
+        fail: (err) => {
+          console.error("redirectTo task-detail", err);
+          wx.showToast({ title: "打开详情失败，任务已保存", icon: "none" });
+          setTimeout(() => {
+            goSleepHome();
+          }, 800);
+        },
+      });
+    }
+
+    return;
   },
 });

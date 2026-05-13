@@ -18,6 +18,8 @@
       value="{{taskName}}"
       maxlength="200"
       adjust-position
+      hold-keyboard="{{false}}"
+      disabled="{{showDateModal || showReminderModal}}"
       bindinput="onTaskNameInput"
     />
     <text wx:if="{{taskNameError}}" class="limit-error">{{taskNameError}}</text>
@@ -36,6 +38,10 @@
       maxlength="2000"
       auto-height
       adjust-position
+      hold-keyboard="{{false}}"
+      show-confirm-bar="{{false}}"
+      confirm-type="done"
+      disabled="{{showDateModal || showReminderModal}}"
       bindinput="onTaskContentInput"
     />
     <text wx:if="{{taskContentError}}" class="limit-error">{{taskContentError}}</text>

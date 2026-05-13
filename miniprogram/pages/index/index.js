@@ -2,14 +2,8 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const bodyStats = require("../../utils/bodyStats");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
-
-function getTodayKey() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
+const { goMyHome, goSleepHome } = require("../../utils/goTabHome");
+const { getTodayKey } = require("../../utils/dateKeys");
 
 Page({
   data: {
@@ -222,7 +216,6 @@ Page({
 
   jumpPage(e) {
     const { type, page } = e.currentTarget.dataset;
-    console.log("jump page", type, page);
     if (type) {
       wx.navigateTo({
         url: `/pages/example/index?envId=${this.data.selectedEnv?.envId}&type=${type}`,
@@ -284,14 +277,12 @@ Page({
   },
 
   goMy() {
-    wx.switchTab({
-      url: "/pages/my/index",
-    });
+    goMyHome();
   },
 
   goBodyReport() {
     wx.navigateTo({
-      url: "/pages/body-report/index?source=body-home",
+      url: "/subpkg/body-report/index?source=body-home",
     });
   },
 
@@ -302,8 +293,6 @@ Page({
   },
 
   goSleep() {
-    wx.switchTab({
-      url: "/pages/sleep/index",
-    });
+    goSleepHome();
   },
 });

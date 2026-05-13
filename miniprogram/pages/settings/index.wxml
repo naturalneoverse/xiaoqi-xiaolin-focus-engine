@@ -8,15 +8,19 @@
   </view>
 
   <view class="group">
-    <view class="cell">
+    <view class="cell cell-switch-row">
       <view class="cell-left">
         <text class="cell-title">提醒设置</text>
         <text class="cell-sub">任务与周报提醒</text>
       </view>
-      <switch class="notify-switch" checked="{{notifyOn}}" color="#12598f" bindchange="onNotifyChange" />
+      <view class="switch-hit-clip">
+        <switch class="notify-switch" checked="{{notifyOn}}" color="#12598f" bindchange="onNotifyChange" />
+      </view>
     </view>
-    <view class="line"></view>
-    <view class="cell" bindtap="goEditProfile">
+  </view>
+
+  <view class="group">
+    <view class="cell tap-target" bindtap="goProfileEditMenu" hover-class="cell-hover">
       <text class="cell-title">修改资料</text>
       <text class="arrow">></text>
     </view>

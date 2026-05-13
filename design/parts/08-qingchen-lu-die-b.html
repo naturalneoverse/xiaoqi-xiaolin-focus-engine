@@ -1,0 +1,51 @@
+<!-- 真我时刻海报背景 - 清晨露 (蝶) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Zen Butterfly Background</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="custom-gradient">
+    /* Custom gradient as requested: #F2F8F2 to #D8EDD8 */
+    .bg-zen-gradient {
+      background: linear-gradient(to bottom, #F2F8F2 0%, #D8EDD8 100%);
+    }
+    
+    /* Ensure the container takes full height on mobile devices */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+<style data-purpose="image-positioning">
+    /* Styling to ensure the background image fits the screen perfectly */
+    .background-artwork {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+  </style>
+</head>
+<body class="bg-zen-gradient">
+<!-- BEGIN: MobileBackground -->
+<!-- This main container hosts the full-screen visual experience -->
+<main class="relative w-full h-screen flex flex-col items-center justify-center" data-purpose="background-container">
+<!-- 
+      The provided image already contains the soft mountains, 
+      the light rays, and the glowing butterfly in the lower third. 
+      We use object-cover to ensure it fills any mobile screen dimension.
+    -->
+<img alt="Zen Landscape with glowing butterfly" class="background-artwork" data-purpose="hero-image" src="https://lh3.googleusercontent.com/aida/ADBb0ujCLjArsECKYEsb9b3B_APb_SbivHK-S1y_S0Qq0wi_QddD2uBmMxQ8bVT2jnBiLlUCKWuytSJqhAlO3MLuLBIcfxQNNPYxD1ZRf_f_FTwy2waLGLg97HNUc_ONCHRQ_Bi4GRlalShLlAvvI1jnC7Kg3C2k6T9SrgvuZAkEhrnuj5U0owrmMvPpjVh1JpWFCfGihrhouxlKXRObVXCESdLKn4aZq1NZ75vluXGRc3MYf5gWqv3Ol5Tg_5A"/>
+<!-- 
+      Overlaying a subtle vignette or safety layer if needed, 
+      though currently keeping it minimalist as requested.
+    -->
+<div class="absolute inset-0 pointer-events-none" data-purpose="aesthetic-overlay"></div>
+</main>
+<!-- END: MobileBackground -->
+</body></html>

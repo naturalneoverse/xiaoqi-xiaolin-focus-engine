@@ -1,0 +1,75 @@
+<!-- 真我时刻海报背景 - 晨曦蓝 (蝶) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Ethereal Zen Background</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="layout-dimensions">
+    /* Using dynamic viewport height for mobile browsers to handle address bar shifts */
+    .h-screen-safe {
+      height: 100vh;
+      height: 100dvh;
+    }
+    
+    /* Ensure the background covers the entire area without scrolling */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #EFF7FD;
+    }
+  </style>
+<style data-purpose="background-styles">
+    /* 
+       Custom styles for the ethereal background. 
+       We use the provided image as the primary visual element.
+    */
+    .zen-background {
+      background: linear-gradient(to bottom, #EFF7FD, #D6EBF7);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .butterfly-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    /* Soft pulse animation for the ethereal glow effect */
+    @keyframes softPulse {
+      0%, 100% { opacity: 0.95; }
+      50% { opacity: 1; }
+    }
+
+    .animate-ethereal {
+      animation: softPulse 6s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="h-full">
+<!-- BEGIN: MainBackgroundContainer -->
+<main class="zen-background h-screen-safe w-full flex flex-col justify-end items-center overflow-hidden" data-purpose="ethereal-mobile-background" id="main-container">
+<!-- This image provides the delicate glowing butterfly and mountain layers from the reference -->
+<img alt="Ethereal glowing butterfly over mountains" class="butterfly-overlay animate-ethereal" data-purpose="butterfly-visual-element" src="https://lh3.googleusercontent.com/aida/ADBb0ui117rSEBPePJJCPABynWI2OzldE7bbu5fn5KxTvKD9UoArNtlH5PmZIrlgYzF9xmaTOePs3yCl3SIzBDyMTy-B3sQ5dK_ZJ4if_X2DcMVYJUDKOR-Z5BsbDCiSoAthqZenqkj38Fo7b3bDkZJe6Ra-zz80jlBjhfMOGYKTmFiawButkpRF1ZhsjQmNxK-KmwjnW3a7Wu5XHBaADMRl4gp0AnODMaub4_BrS_1gAzqfovakfZJYep6jrfM"/>
+<!-- Optional subtle overlay for texture depth -->
+<div class="absolute inset-0 opacity-20 pointer-events-none" data-purpose="lighting-effect" style="background: radial-gradient(circle at 50% 70%, rgba(255,255,255,0.4) 0%, transparent 70%);"></div>
+</main>
+<!-- END: MainBackgroundContainer -->
+<script data-purpose="ios-touch-prevention">
+    // Prevent default scrolling on mobile to maintain the full-screen background feel
+    document.addEventListener('touchmove', function(e) {
+      if (e.target.closest('#main-container')) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  </script>
+</body></html>

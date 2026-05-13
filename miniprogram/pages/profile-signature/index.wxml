@@ -1,0 +1,24 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="back-wrap tap-target" bindtap="goBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
+    </view>
+    <text class="page-title">修改个性签名</text>
+    <view class="top-space"></view>
+  </view>
+
+  <view class="group">
+    <textarea
+      class="field-area"
+      maxlength="60"
+      placeholder="请输入个性签名"
+      value="{{value}}"
+      bindinput="onInput"
+      auto-height
+    />
+  </view>
+
+  <view class="save-wrap tap-target" bindtap="save" hover-class="cell-hover">
+    <text class="save-text">保存</text>
+  </view>
+</view>

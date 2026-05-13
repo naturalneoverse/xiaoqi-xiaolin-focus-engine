@@ -1,0 +1,89 @@
+/* 用户服务协议 / 隐私政策等长文页共用 */
+page {
+  background: #e2eaf7;
+  min-height: 100%;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 0 30rpx 48rpx;
+  box-sizing: border-box;
+}
+
+.top-bar {
+  height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.back-wrap,
+.top-space {
+  width: 76rpx;
+  height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  width: 30rpx;
+  height: 30rpx;
+}
+
+.page-title {
+  font-size: 34rpx;
+  color: #1f476a;
+  font-weight: 600;
+}
+
+.doc-panel {
+  background: #ffffff;
+  border-radius: 28rpx;
+  padding: 28rpx 24rpx 40rpx;
+  box-shadow: 0 8rpx 24rpx rgba(24, 64, 97, 0.06);
+  box-sizing: border-box;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.doc-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1f476a;
+  line-height: 1.45;
+  margin-bottom: 24rpx;
+  text-align: center;
+}
+
+.doc-heading {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #234e72;
+  line-height: 1.45;
+  margin-top: 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.doc-p {
+  display: block;
+  font-size: 28rpx;
+  color: #48617a;
+  line-height: 1.75;
+  margin-bottom: 24rpx;
+}
+
+.doc-date {
+  display: block;
+  font-size: 28rpx;
+  color: #334155;
+  font-weight: 500;
+  line-height: 1.6;
+  margin-top: 8rpx;
+}

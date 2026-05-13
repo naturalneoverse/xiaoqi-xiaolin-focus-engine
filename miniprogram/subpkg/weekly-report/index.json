@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "时间编织报告",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "chat-bubble": "/components/chat-bubble/index"
+  }
+}

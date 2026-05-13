@@ -44,10 +44,18 @@
 .mascot-btn {
   margin-top: 18rpx;
   width: 100%;
+  max-width: 100%;
+  min-width: 280rpx;
   height: 78rpx;
   line-height: 78rpx;
   border-radius: 999rpx;
   background: #12598f;
   color: #ffffff;
   font-size: 28rpx;
+  box-sizing: border-box;
+  padding: 0 20rpx;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

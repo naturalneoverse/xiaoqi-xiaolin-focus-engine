@@ -218,6 +218,8 @@ page {
 .btn {
   margin-top: 62rpx;
   width: 100%;
+  max-width: 100%;
+  min-width: 320rpx;
   height: 114rpx;
   line-height: 1;
   border-radius: 999rpx;
@@ -229,6 +231,9 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  padding: 0 24rpx;
+  white-space: nowrap;
 }
 
 .modal-mask {

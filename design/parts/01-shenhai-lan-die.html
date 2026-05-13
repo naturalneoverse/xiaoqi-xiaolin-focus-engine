@@ -1,0 +1,62 @@
+<!-- 真我时刻海报背景 - 深海蓝 (蝶) -->
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Minimalist Zen Wallpaper</title>
+<!-- Load Tailwind CSS v3 with forms and container-queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="background-gradient">
+    /* 
+       Custom gradient to match the requested soft blue transition.
+       From #EDF5FA at the top to #C5D9E8 at the bottom.
+    */
+    .bg-zen-gradient {
+      background: linear-gradient(to bottom, #EDF5FA 0%, #C5D9E8 100%);
+    }
+  </style>
+<style data-purpose="layout-optimizations">
+    /* Ensure the body fills the entire viewport without scrolling */
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Container for the full-screen background image */
+    .wallpaper-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 
+       Style for the glowing butterfly image. 
+       Object-fit: cover ensures the reference image fills the screen 
+       while maintaining the zen/minimalist aesthetic.
+    */
+    .background-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-zen-gradient">
+<!-- BEGIN: MainContent -->
+<main class="wallpaper-container" data-purpose="zen-background-display">
+<!-- 
+      Reference image provided contains the misty mountains, 
+      the light rays, and the glowing butterfly with a trail.
+    -->
+<img alt="Zen background with glowing butterfly and misty mountains" class="background-image" data-purpose="hero-image" src="https://lh3.googleusercontent.com/aida/ADBb0ug-bm45QdOU2Jc1IEUSfRN5ANeRVtC0Pmh69LUhFoLOiAx4rjg4mMHhy65V6gWD8kbZHYeZyvzObDEnbgaEiY13aHXJp69KCMsBgrj4NFEkhENHa1wG6nbdXrJyFFtPCw-7rhRRwF1MCw1xiFPRYGEA7bqYGVIsjk3Lva30uP1dAy6Y1wdJYAewa64EzBpwsW6OESh8590KFyf57W5-WEXKEEiZQQqsjSHWZGGtdcx_dGtgHYgbEMCz7nA"/>
+</main>
+<!-- END: MainContent -->
+</body></html>

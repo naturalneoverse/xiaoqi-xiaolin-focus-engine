@@ -228,6 +228,8 @@ page {
 .main-btn {
   margin-top: 54rpx;
   width: 82%;
+  max-width: 100%;
+  min-width: 420rpx;
   height: 88rpx;
   line-height: 88rpx;
   border-radius: 999rpx;
@@ -236,6 +238,9 @@ page {
   font-size: 34rpx;
   font-weight: 600;
   box-shadow: 0 12rpx 26rpx rgba(18, 89, 143, 0.22);
+  box-sizing: border-box;
+  padding: 0 24rpx;
+  white-space: nowrap;
 }
 
 .main-btn::after {

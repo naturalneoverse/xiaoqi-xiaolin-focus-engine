@@ -1,0 +1,55 @@
+<!-- 真我时刻海报背景 - 暮光紫 (羽) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Feather Poster Background</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          aspectRatio: {
+            'iphone': '9/19.5',
+          },
+        },
+      },
+    }
+  </script>
+<!-- END: Custom Configuration -->
+<!-- BEGIN: Page Styles -->
+<style data-purpose="page-layout">
+    /* Ensure the body takes up the full viewport height and prevents scrolling */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      background-color: #000; /* Fallback background */
+    }
+
+    /* Specific background positioning to maintain the artistic intent */
+    .background-poster {
+      background-image: url('https://lh3.googleusercontent.com/aida/ADBb0uiMDmbk0HcnGjD6zNQsWN7yxp_8M7HynmzREQamHBhRtfutT2o1OiwEpZPlboc8uQb83v-P2Gt3Lsdo1nTcNFW8aDg6bIC_ejdHBv1nyHNT5wtCOQMr2evT-40Ab4jqOWomIFxWmEIWaFcEikT8vsqAkwppb5uKm7MtYEA_-oHpkHjZ7LlLWnOtjfIpzhWOu6r5s5Gufaif3_tujpFGLJdbaccc28I8rPCtKZlwYPZt1gi2_KjxtRX3Cg');
+      background-size: cover;
+      background-position: center bottom; /* Focused on bottom to ensure feather visibility in bottom third */
+      background-repeat: no-repeat;
+    }
+  </style>
+<!-- END: Page Styles -->
+</head>
+<body class="flex items-center justify-center">
+<!-- BEGIN: Main Background Container -->
+<main class="background-poster w-full h-full relative" data-purpose="background-display" id="poster-container">
+<!-- 
+      This container is purposely empty of UI elements to provide a clean, 
+      code-accessible version of the artistic background.
+      The feather is naturally positioned in the bottom third of the provided image.
+    -->
+</main>
+<!-- END: Main Background Container -->
+</body></html>

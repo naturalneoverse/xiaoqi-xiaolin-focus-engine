@@ -152,14 +152,23 @@
 
 .submit {
   margin: 24rpx 40rpx 0;
+  width: calc(100% - 80rpx);
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 360rpx;
   height: 96rpx;
-  line-height: 96rpx;
+  line-height: 1.2;
   border-radius: 48rpx;
   font-size: 32rpx;
   font-weight: 600;
   color: #f5f9fc;
   background: linear-gradient(135deg, #184061, #2563a8);
   border: none;
+  padding: 0 24rpx;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .submit::after {

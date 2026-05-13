@@ -1,4 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { goSleepHome } = require("../../utils/goTabHome");
 
 Page({
   data: {
@@ -6,6 +7,7 @@ Page({
     agree: false,
     isLoading: false,
     loadingText: "登录中",
+    agreementFontRpx: 26,
   },
 
   onShow() {
@@ -13,7 +15,24 @@ Page({
     this.setData({
       isFirstLogin: !hasLoggedIn,
       agree: hasLoggedIn ? true : false,
+      agreementFontRpx: this.computeAgreementFontRpx(),
     });
+  },
+
+  computeAgreementFontRpx() {
+    let w = 375;
+    try {
+      const wi = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+      w = Number(wi.windowWidth || wi.screenWidth) || 375;
+    } catch (e) {
+      /* ignore */
+    }
+    if (w <= 320) return 18;
+    if (w < 360) return 20;
+    if (w < 375) return 22;
+    if (w < 390) return 24;
+    if (w < 414) return 26;
+    return 28;
   },
 
   getHasLoggedIn() {
@@ -28,6 +47,13 @@ Page({
     }
   },
 
+  toggleAgree() {
+    if (!this.data.isFirstLogin) return;
+    this.setData({
+      agree: !this.data.agree,
+    });
+  },
+
   onHide() {
     this.stopLoadingAnimation();
   },
@@ -36,11 +62,12 @@ Page({
     this.stopLoadingAnimation();
   },
 
-  toggleAgree() {
-    if (!this.data.isFirstLogin) return;
-    this.setData({
-      agree: !this.data.agree,
-    });
+  openUserAgreement() {
+    wx.navigateTo({ url: "/pages/agreement/index" });
+  },
+
+  openPrivacy() {
+    wx.navigateTo({ url: "/pages/privacy/index" });
   },
 
   async onLoginTap() {
@@ -65,6 +92,9 @@ Page({
           app.setHasLoggedIn(true);
         } else {
           wx.setStorageSync(STORAGE_KEYS.HAS_LOGGED_IN, true);
+          if (app && app.globalData) {
+            app.globalData.hasLoggedIn = true;
+          }
         }
         let tagsComplete = result.tagsComplete === true;
         if (wx.cloud && typeof wx.cloud.callFunction === "function") {
@@ -107,9 +137,7 @@ Page({
             url: "/pages/onboarding-tags/index",
           });
         } else {
-          wx.switchTab({
-            url: "/pages/sleep/index",
-          });
+          goSleepHome();
         }
       } catch (e) {
         const errMsg = (e && (e.errMsg || e.message)) || "";

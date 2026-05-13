@@ -1,0 +1,33 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-nav">
+    <view class="nav-btn tap-target" bindtap="goBack">
+      <image class="nav-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
+    </view>
+    <text class="nav-title">真我时刻海报</text>
+    <view class="nav-space"></view>
+  </view>
+
+  <view wx:if="{{generating}}" class="loading-wrap">
+    <text class="loading-text">正在生成...</text>
+  </view>
+
+  <view class="poster-column">
+    <view wx:if="{{previewSrc}}" class="preview-wrap">
+      <image class="preview-img" src="{{previewSrc}}" mode="widthFix" show-menu-by-longpress />
+    </view>
+
+    <canvas
+      type="2d"
+      id="posterCanvas"
+      class="poster-canvas-offscreen"
+      style="width: 1080px; height: 1920px; background: transparent"
+    ></canvas>
+
+    <view class="toolbar grid">
+      <button class="tool-cell tool-primary" bindtap="onShareMoment" disabled="{{generating}}">朋友圈</button>
+      <button class="tool-cell" bindtap="onSaveAlbum" disabled="{{generating}}">存相册</button>
+      <button class="tool-cell" open-type="share" disabled="{{generating}}">转朋友</button>
+      <button class="tool-cell" bindtap="onRegenerate" disabled="{{generating}}">换一张</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,26 @@
+@import "../settings/index.wxss";
+
+.field-input {
+  width: 100%;
+  min-height: 88rpx;
+  padding: 24rpx 0;
+  font-size: 32rpx;
+  color: #334155;
+  box-sizing: border-box;
+}
+
+.save-wrap {
+  margin-top: 32rpx;
+  background: #12598f;
+  border-radius: 28rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.save-text {
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: 600;
+}

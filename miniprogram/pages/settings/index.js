@@ -1,28 +1,17 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
-const PROFILE_EDIT_OPTIONS = ["头像", "昵称", "个性签名"];
 const CLEAR_OPTIONS = ["清除图片缓存", "清除全部记录"];
-
-function getVersion() {
-  try {
-    const info = wx.getAccountInfoSync ? wx.getAccountInfoSync() : null;
-    const mini = info && info.miniProgram;
-    return (mini && (mini.version || mini.envVersion)) || "1.0.0";
-  } catch (e) {
-    return "1.0.0";
-  }
-}
 
 Page({
   data: {
     notifyOn: true,
-    version: "1.0.0",
+    version: "1.1.5",
   },
 
   onLoad() {
     this.loadSettings();
-    this.setData({
-      version: getVersion(),
-    });
+    const app = getApp();
+    const v = app && app.globalData && app.globalData.APP_VERSION;
+    this.setData({ version: v || "1.1.5" });
   },
 
   loadSettings() {
@@ -57,18 +46,9 @@ Page({
     this.saveSettings({ reminderEnabled: notifyOn });
   },
 
-  goEditProfile() {
-    wx.showActionSheet({
-      itemList: PROFILE_EDIT_OPTIONS,
-      success: (res) => {
-        const app = getApp();
-        if (app && app.globalData) {
-          app.globalData.pendingProfileEditField = PROFILE_EDIT_OPTIONS[res.tapIndex] || "";
-        }
-        wx.switchTab({
-          url: "/pages/my/index",
-        });
-      },
+  goProfileEditMenu() {
+    wx.navigateTo({
+      url: "/pages/profile-edit-menu/index",
     });
   },
 
@@ -159,6 +139,6 @@ Page({
   },
 
   goBack() {
-    this.__safeNavigateBack("/pages/my/index");
+    this.__safeNavigateBack("pages/my/index");
   },
 });

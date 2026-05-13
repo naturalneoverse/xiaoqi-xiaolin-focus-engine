@@ -1,0 +1,29 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="back-wrap tap-target" bindtap="goBack">
+      <image class="back-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
+    </view>
+    <text class="page-title">用户服务协议</text>
+    <view class="top-space"></view>
+  </view>
+
+  <view class="doc-panel">
+    <view class="content">
+      <text class="doc-title">小麒小麟专注引擎用户服务协议</text>
+      <text class="doc-p">本协议由天成新宇（北京）文化科技有限公司（统一社会信用代码：91110108MABLT4LH84，以下简称“甲方”）与小程序使用者（以下简称“乙方”）签订，界定双方权利义务，保障服务正常运行。</text>
+      <text class="doc-heading">1. 服务内容</text>
+      <text class="doc-p">甲方为乙方提供个人任务管理与自我觉察工具服务，包括任务创建与管理、时间流向追踪、身体边界记录、时间编织报告、真我时刻生成、数据存储与同步等核心功能。甲方有权根据技术优化、合规要求调整服务内容。重大调整将提前3个工作日通过小程序公告通知乙方。</text>
+      <text class="doc-heading">2. 乙方权利与义务</text>
+      <text class="doc-p">乙方有权合法使用本小程序核心功能。乙方需微信登录后使用，账号仅限本人使用。乙方发布的任务内容、个性签名不得违反法律法规或公序良俗。</text>
+      <text class="doc-heading">3. 甲方权利与义务</text>
+      <text class="doc-p">甲方有权对违规内容进行管理。甲方承诺保障小程序正常运行，保护乙方个人信息安全。</text>
+      <text class="doc-heading">4. 免责条款</text>
+      <text class="doc-p">因不可抗力或第三方技术故障导致无法使用服务的，甲方不承担赔偿责任。乙方自身操作失误导致的数据丢失，甲方仅提供必要技术协助。</text>
+      <text class="doc-heading">5. 协议终止</text>
+      <text class="doc-p">乙方可通过注销账号终止本协议。乙方严重违约时，甲方有权单方终止协议并封禁账号。</text>
+      <text class="doc-heading">6. 争议解决</text>
+      <text class="doc-p">本协议争议由双方协商解决，协商不成的，提交甲方所在地有管辖权的人民法院诉讼解决。本协议适用中华人民共和国法律。</text>
+      <text class="doc-date">生效日期：2026年05月13日</text>
+    </view>
+  </view>
+</view>

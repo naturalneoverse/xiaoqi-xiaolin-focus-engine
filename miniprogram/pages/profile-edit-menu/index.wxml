@@ -1,0 +1,26 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="back-wrap tap-target" bindtap="goBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
+    </view>
+    <text class="page-title">修改资料</text>
+    <view class="top-space"></view>
+  </view>
+
+  <view class="group">
+    <view class="cell tap-target" bindtap="goAvatar" hover-class="cell-hover">
+      <text class="cell-title">修改头像</text>
+      <text class="arrow">></text>
+    </view>
+    <view class="line"></view>
+    <view class="cell tap-target" bindtap="goNickname" hover-class="cell-hover">
+      <text class="cell-title">修改昵称</text>
+      <text class="arrow">></text>
+    </view>
+    <view class="line"></view>
+    <view class="cell tap-target" bindtap="goSignature" hover-class="cell-hover">
+      <text class="cell-title">修改个性签名</text>
+      <text class="arrow">></text>
+    </view>
+  </view>
+</view>

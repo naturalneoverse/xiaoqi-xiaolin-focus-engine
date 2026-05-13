@@ -47,11 +47,11 @@ page {
   width: 170rpx;
   height: 170rpx;
   border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.5);
-  border: 5rpx solid rgba(255, 255, 255, 0.92);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 8rpx 26rpx rgba(24, 64, 97, 0.08);
 }
 
 .avatar-inner {
@@ -293,6 +293,8 @@ page {
 .record-btn {
   margin-top: 22rpx;
   width: 100%;
+  max-width: 100%;
+  min-width: 480rpx;
   height: 100rpx;
   line-height: 1;
   border-radius: 20rpx;
@@ -305,6 +307,8 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  padding: 0 20rpx;
   white-space: nowrap;
 }
 

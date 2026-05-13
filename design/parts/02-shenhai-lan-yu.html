@@ -1,0 +1,91 @@
+<!-- 真我时刻海报背景 - 深海蓝 (羽) -->
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Zen Feather Background</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- BEGIN: Custom Configuration -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'zen-light': '#EDF5FA',
+            'zen-dark': '#C5D9E8',
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+              '50%': { transform: 'translateY(-15px) rotate(2deg)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+<!-- END: Custom Configuration -->
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="layout-styles">
+    /* Ensure the body takes up full viewport height and prevents scrolling */
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+      background-color: #EDF5FA;
+    }
+
+    /* Gradient overlay to match requested hex codes if the image doesn't cover perfectly */
+    .zen-gradient-bg {
+      background: linear-gradient(to bottom, #EDF5FA 0%, #C5D9E8 100%);
+    }
+
+    /* Optimization for mobile height issues (iOS Safari) */
+    .safe-height {
+      height: 100vh;
+      height: 100svh;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="safe-height flex flex-col items-center justify-center">
+<!-- BEGIN: MainContainer -->
+<main class="relative w-full h-full zen-gradient-bg flex items-center justify-center overflow-hidden" data-purpose="background-scene">
+<!-- BEGIN: BackgroundImageLayer -->
+<!-- 
+      Using the provided canvas image which contains the feather and gradient.
+      We use object-cover to ensure it fills the mobile screen gracefully.
+    -->
+<div class="absolute inset-0 z-0">
+<img alt="Soft white feather floating in a blue gradient sky" class="w-full h-full object-cover" data-purpose="zen-background-image" src="https://lh3.googleusercontent.com/aida/ADBb0uiUJ1NKYg0jJruVOlc-jtssskgC-1--vzihyGXmAl80iIPBB5uZXmSTeEtJKIElSRjNpPg87EK7dxDid7BjNFfA6-C768hGD8MAM3fNHmBxm0Jy8JQGMU9KVAV5PxWiTg7gidQpWY65KAGdRBohrGD6L8eBG4iiCS13TN0zsHvp66Tza2IPcMJTwVLPdFAwkaBHAXuMmZqCrzcA9Hi0UnQxfw3N7NI9XhXSA0nxLX0JBgBuskffYv13cg"/>
+</div>
+<!-- END: BackgroundImageLayer -->
+<!-- BEGIN: VisualOverlay -->
+<!-- 
+      Optional subtle overlay to ensure the "Zen" aesthetic and 
+      smooth the transition between image and the requested hex colors.
+    -->
+<div class="absolute inset-0 z-10 opacity-20 pointer-events-none" data-purpose="ethereal-overlay" style="background: linear-gradient(to bottom, #EDF5FA, transparent, #C5D9E8);"></div>
+<!-- END: VisualOverlay -->
+<!-- BEGIN: FloatingAnimationContainer -->
+<!-- 
+      This empty container serves as a spacer to maintain the minimalist 
+      structure while focusing purely on the background visual.
+    -->
+<div class="relative z-20 flex flex-col items-center justify-end h-full w-full pb-20">
+<!-- 
+        The feather is baked into the image provided. 
+        If interactivity were needed, an SVG or PNG feather would go here.
+      -->
+</div>
+<!-- END: FloatingAnimationContainer -->
+</main>
+<!-- END: MainContainer -->
+</body></html>

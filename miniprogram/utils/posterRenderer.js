@@ -1,9 +1,6 @@
 /**
- * 真我时刻海报：逻辑画布固定 1080×1920（9:16）；盲盒渐变 + accent；盲盒一金句（≥21 锁定）；盲盒三衬线/非衬线。
+ * 真我时刻海报：逻辑画布固定 1080×1920（9:16）；背景多套渐变盲盒 + accent；可选 cloudFileId 云底图；金句与字体盲盒随机。
  * 导出：整幅 1080×1920 PNG；物理尺寸 = 逻辑 × devicePixelRatio。
- *
- * Logo 稳定性（真机验证，见 .cursor/rules/poster-logo-stable.mdc）：
- * 须由页面传入 logoProcessCanvas（#posterLogoWork）；勿改为仅离屏或仅 destination-in。
  */
 
 const POSTER_W = 1080;
@@ -15,7 +12,9 @@ const TEXT_W = POSTER_W - MARGIN_X * 2;
 const TOP_GROUP_GAP_MIN = 8;
 /** 底组：引导 ↔ 码、码 ↔ CTA 固定间距 */
 const BOTTOM_GROUP_GAP = 10;
-/** 顶部首行（Logo 带上缘）距画布顶；略大以整体下移顶组 */
+/** 小程序码与底部文案相对原位置整体下移（约等于 CTA 一行行距，30px 字号 ×1.2） */
+const BOTTOM_QR_SECTION_DROP = 36;
+/** 顶部正文区上缘距画布顶（已无顶栏 Logo） */
 const TOP_PAD = 100;
 /** 画布底至底组最下沿留白 */
 const BOTTOM_SAFE = 110;
@@ -28,15 +27,22 @@ const CARD_PAD_Y = 0;
 /** 金句与上一块间距（取代原 SP_DATA_TO_QUOTE） */
 const GAP_BEFORE_QUOTE = 8;
 
-const COLOR_BRAND = "#2C3E50";
-const COLOR_CYCLE = "#8A9CB0";
+/** 中间卡片内文案整体缩放（字号与配套间距同步；底码与 CTA 不变） */
+const MID_TEXT_SCALE = 1.2;
+function mid(n) {
+  return Math.round(n * MID_TEXT_SCALE);
+}
+
 const COLOR_STATUS = "#4A4A4A";
 const COLOR_LABEL = "#7F8C8D";
 const COLOR_SECONDARY = "#95A5A6";
 const COLOR_QUOTE_BODY = "#2C3E50";
 const COLOR_QUOTE_MARK = "#D5D8DC";
-const COLOR_GUIDE = "#ADB5BD";
 const COLOR_CTA = "#2C3E50";
+
+const { POSTER_THEMES } = require("../config/posterThemes.js");
+/** 盲盒主题（渐变 + 可选 image 底图）；与 design/parts 十六套一一对应 */
+const PALETTES = POSTER_THEMES;
 
 const QUOTES = [
   "你编织的，不是时间，是自己。",
@@ -45,7 +51,7 @@ const QUOTES = [
   "你看见时间的那一刻，时间才属于你。",
   "成为自己，是唯一值得做的事。",
   "边界不是终点，是开始的起点。",
-  "劳动为了生存，工作为了世界，行动为了成为。",
+  "劳动为了生存，工作为了世界，\n行动为了成为。",
   "向死而生，每一天都是选择。",
   "真正的自由，是说\"不\"的能力。",
   "你此刻在哪里，你就活在哪里。",
@@ -56,32 +62,17 @@ const QUOTES = [
   "宽恕过去，才能开始未来。",
 ];
 
-const PALETTES = [
-  { bg0: "#EFF7FD", bg1: "#D6EBF7", accent: "#12598F" },
-  { bg0: "#F5F0FA", bg1: "#E8DFF5", accent: "#6B4C8A" },
-  { bg0: "#F0F7F0", bg1: "#DCE8DC", accent: "#3D6B4F" },
-  { bg0: "#FDF7F0", bg1: "#F5E8D8", accent: "#C0713B" },
-  { bg0: "#EDF5FA", bg1: "#C5D9E8", accent: "#1B4F72" },
-  { bg0: "#F5F3F0", bg1: "#E8E3DC", accent: "#5C4F45" },
-  { bg0: "#F2F8F2", bg1: "#D8EDD8", accent: "#2E6B3E" },
-  { bg0: "#FDF5F5", bg1: "#F5E0E0", accent: "#A0525A" },
-];
-
 const MILESTONE_21 = "21天，你活成了自己选择的样子。";
 const ZERO_COPY = "这一周，为生存和责任奔波，辛苦了。";
-const GUIDE_ABOVE_QR = "微信扫一扫 · 生成你的真我时刻";
-const CTA_TEXT = "看看你有多少真我时刻 →";
+const CTA_TEXT = "扫我，看看你有多少真我时刻 →";
 
-const QR_OUTER = 260;
-const QR_INNER = 220;
-const QR_RADIUS = 20;
-const QR_INNER_RADIUS = 12;
+const QR_OUTER = 240;
+const QR_INNER = 200;
+const QR_RADIUS = 18;
+const QR_INNER_RADIUS = 11;
 
-/** 底组总高：引导块 + 间距 + 码外框 + 间距 + CTA 块 */
-const BOTTOM_BLOCK_H = 44 + BOTTOM_GROUP_GAP + QR_OUTER + BOTTOM_GROUP_GAP + 48;
-
-const LOGO_BOX = 80;
-const BRAND_GAP = 16;
+/** 底组总高：码外框 + 间距 + CTA 块（已去掉二维码上方引导文案） */
+const BOTTOM_BLOCK_H = QR_OUTER + BOTTOM_GROUP_GAP + 48;
 
 function rollBlindBox() {
   return {
@@ -116,20 +107,28 @@ function hexToLineColorObj(hex) {
   };
 }
 
+/** 先按 `\n` 强制断行，再在各行内按宽度折行（避免金句孤字） */
 function wrapLines(ctx, text, maxWidth) {
-  const chars = String(text).split("");
+  const segments = String(text).split("\n");
   const lines = [];
-  let line = "";
-  for (let i = 0; i < chars.length; i += 1) {
-    const test = line + chars[i];
-    if (ctx.measureText(test).width > maxWidth && line) {
-      lines.push(line);
-      line = chars[i];
-    } else {
-      line = test;
+  segments.forEach((segment, si) => {
+    if (segment === "") {
+      if (si > 0) lines.push("");
+      return;
     }
-  }
-  if (line) lines.push(line);
+    const chars = segment.split("");
+    let line = "";
+    for (let i = 0; i < chars.length; i += 1) {
+      const test = line + chars[i];
+      if (ctx.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = chars[i];
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+  });
   return lines.length ? lines : [""];
 }
 
@@ -156,9 +155,9 @@ function drawTextCenterInWidth(ctx, text, left, width, yBaseline, color) {
 
 function quoteBodyFontSize(inner) {
   const n = String(inner).length;
-  if (n <= 18) return 38;
-  if (n <= 26) return 34;
-  return 30;
+  if (n <= 18) return mid(38);
+  if (n <= 26) return mid(34);
+  return mid(30);
 }
 
 function bodyFontForStyle(fontStyle, sizePx) {
@@ -168,13 +167,13 @@ function bodyFontForStyle(fontStyle, sizePx) {
 
 /** 方案 C1：弯引号用宋体/Georgia 栈，与正文块整体水平居中 */
 function drawQuoteSectionFixed(ctx, cx, yStart, innerText, fontStyle) {
-  const markFont =
-    '400 68px "Songti SC", STSong, STKaiti, "Kaiti SC", Georgia, "Times New Roman", serif';
+  const markPx = mid(68);
+  const markFont = `400 ${markPx}px "Songti SC", STSong, STKaiti, "Kaiti SC", Georgia, "Times New Roman", serif`;
   const sizePx = quoteBodyFontSize(innerText);
   const lh = sizePx * 1.5;
   const bodyFont = bodyFontForStyle(fontStyle, sizePx);
-  const innerGap = 10;
-  const bodyMaxW = TEXT_W - 140;
+  const innerGap = mid(10);
+  const bodyMaxW = TEXT_W - mid(140);
 
   ctx.font = markFont;
   const qwL = ctx.measureText("「").width;
@@ -191,9 +190,9 @@ function drawQuoteSectionFixed(ctx, cx, yStart, innerText, fontStyle) {
   const bodyBlockW = maxW;
   const totalW = qwL + innerGap + bodyBlockW + innerGap + qwR;
   const blockStart = cx - totalW / 2;
-  const topPad = Math.max(0, (bodyLines.length * lh - 68) / 2);
+  const topPad = Math.max(0, (bodyLines.length * lh - markPx) / 2);
   const quoteTop = yStart + topPad;
-  const markBaseline = quoteTop + 56;
+  const markBaseline = quoteTop + mid(56);
 
   ctx.fillStyle = COLOR_QUOTE_MARK;
   ctx.font = markFont;
@@ -213,40 +212,41 @@ function drawQuoteSectionFixed(ctx, cx, yStart, innerText, fontStyle) {
   const lastBaseline = markBaseline + (bodyLines.length - 1) * lh;
   ctx.fillText("」", blockStart + qwL + innerGap + bodyBlockW + innerGap, lastBaseline);
 
-  return quoteTop + 56 + bodyLines.length * lh + 28;
+  return quoteTop + mid(56) + bodyLines.length * lh + mid(28);
 }
 
 /** 不绘制，仅量金句块高度（与 drawQuoteSectionFixed 一致，行高 1.5） */
 function measureQuoteBlockHeight(ctx, innerText, fontStyle) {
-  const markFont =
-    '400 68px "Songti SC", STSong, STKaiti, "Kaiti SC", Georgia, "Times New Roman", serif';
+  const markPx = mid(68);
+  const markFont = `400 ${markPx}px "Songti SC", STSong, STKaiti, "Kaiti SC", Georgia, "Times New Roman", serif`;
   const sizePx = quoteBodyFontSize(innerText);
   const lh = sizePx * 1.5;
   const bodyFont = bodyFontForStyle(fontStyle, sizePx);
-  const innerGap = 10;
-  const bodyMaxW = TEXT_W - 140;
+  const innerGap = mid(10);
+  const bodyMaxW = TEXT_W - mid(140);
 
   ctx.font = markFont;
   ctx.font = bodyFont;
   const bodyLines = wrapLines(ctx, innerText, bodyMaxW);
-  const topPad = Math.max(0, (bodyLines.length * lh - 68) / 2);
-  return topPad + 56 + bodyLines.length * lh + 28;
+  const topPad = Math.max(0, (bodyLines.length * lh - markPx) / 2);
+  return topPad + mid(56) + bodyLines.length * lh + mid(28);
 }
 
 /** 有分：中间卡片内正文区高度（不含卡片上下 CARD_PAD_Y） */
 function measureScoreCardBodyHeight(ctx, streakDays, innerText, fontStyle) {
-  const streakH = streakDays > 0 ? 36 : 0;
+  const streakH = streakDays > 0 ? mid(36) : 0;
   const quoteH = measureQuoteBlockHeight(ctx, innerText, fontStyle);
-  return 180 + streakH + GAP_BEFORE_QUOTE + quoteH;
+  return mid(180) + streakH + mid(GAP_BEFORE_QUOTE) + quoteH;
 }
 
 /** 零分：中间卡片内正文区高度（32px 字、行高 1.5） */
 function measureZeroCardBodyHeight(ctx) {
-  ctx.font = "400 32px PingFang SC, sans-serif";
+  const fz = mid(32);
+  ctx.font = `400 ${fz}px PingFang SC, sans-serif`;
   const innerW = TEXT_W - 2 * CARD_PAD_X;
   const lines = wrapLines(ctx, ZERO_COPY, innerW);
-  const lh = 32 * 1.5;
-  return 28 + lines.length * lh + 24;
+  const lh = fz * 1.5;
+  return mid(28) + lines.length * lh + mid(24);
 }
 
 function loadImage(createImage, src) {
@@ -262,270 +262,17 @@ function loadImage(createImage, src) {
   });
 }
 
-function parseAccentRgb(hex) {
-  const h = String(hex || "").replace("#", "");
-  if (h.length !== 6) return { r: 24, g: 64, b: 97 };
-  return {
-    r: parseInt(h.slice(0, 2), 16),
-    g: parseInt(h.slice(2, 4), 16),
-    b: parseInt(h.slice(4, 6), 16),
-  };
-}
-
-function parseHexRgb(hex) {
-  return parseAccentRgb(hex);
-}
-
-/** 与海报纵向渐变一致：y ∈ [0, POSTER_H]，与 createLinearGradient(0,0,0,POSTER_H) 同色 */
-function samplePosterBgAtY(y, palette) {
-  const t = Math.max(0, Math.min(1, y / POSTER_H));
-  const c0 = parseHexRgb(palette.bg0);
-  const c1 = parseHexRgb(palette.bg1);
-  return {
-    r: Math.round(c0.r + (c1.r - c0.r) * t),
-    g: Math.round(c0.g + (c1.g - c0.g) * t),
-    b: Math.round(c0.b + (c1.b - c0.b) * t),
-  };
-}
-
-/** 高阈值纯白 */
-function isStrongWhite(r, g, b, t) {
-  return r >= t && g >= t && b >= t;
-}
-
-/** 浅灰 / 米白等「平」浅底（仅用 RGB，避免把低 Alpha 描边整块当底） */
-function isLightFlatBackdrop(r, g, b) {
-  const mx = Math.max(r, g, b);
-  const mn = Math.min(r, g, b);
-  const avg = (r + g + b) / 3;
-  return mx >= 198 && mx - mn <= 42 && avg >= 182;
-}
-
-/** 黑 / 深灰平铺底 */
-function isDarkFlatBackdrop(r, g, b) {
-  const mx = Math.max(r, g, b);
-  const mn = Math.min(r, g, b);
-  const sum = r + g + b;
-  return mx <= 68 && mx - mn <= 38 && sum < 175;
-}
-
-/** BFS 种子与孤立底：白、浅灰平、深灰平、近透明 */
-function isLogoBackdropLike(r, g, b, a, whiteT) {
-  const t = whiteT == null ? 228 : whiteT;
-  if (a < 10) return true;
-  if (isStrongWhite(r, g, b, t)) return true;
-  if (isLightFlatBackdrop(r, g, b)) return true;
-  if (isDarkFlatBackdrop(r, g, b)) return true;
-  return false;
-}
-
-/**
- * 从四边 BFS：与边缘连通的底图像素 → 用海报渐变不透明填实（避免 PNG 真透明在相册/组件里黑白不一致）。
- * 其余像素 → accent，保留 Alpha。
- */
-function tintLogoImageData(id, accentHex, palette, slotDy, slotDh, whiteThreshold) {
-  const t = whiteThreshold == null ? 228 : whiteThreshold;
-  const { r: ar, g: ag, b: ab } = parseAccentRgb(accentHex);
-  const W = id.width;
-  const H = id.height;
-  const d = id.data;
-  const n = W * H;
-  const flood = new Uint8Array(n);
-
-  function bgLike(r, g, b, a) {
-    return isLogoBackdropLike(r, g, b, a, t);
-  }
-
-  const qx = [];
-  const qy = [];
-  function push(x, y) {
-    const p = y * W + x;
-    if (flood[p]) return;
-    const i = p * 4;
-    const r = d[i];
-    const g = d[i + 1];
-    const b = d[i + 2];
-    const a = d[i + 3];
-    if (!bgLike(r, g, b, a)) return;
-    flood[p] = 1;
-    qx.push(x);
-    qy.push(y);
-  }
-
-  for (let x = 0; x < W; x += 1) {
-    push(x, 0);
-    push(x, H - 1);
-  }
-  for (let y = 0; y < H; y += 1) {
-    push(0, y);
-    push(W - 1, y);
-  }
-
-  let qi = 0;
-  while (qi < qx.length) {
-    const x = qx[qi];
-    const y = qy[qi];
-    qi += 1;
-    const nb = [
-      [x - 1, y],
-      [x + 1, y],
-      [x, y - 1],
-      [x, y + 1],
-    ];
-    for (let k = 0; k < nb.length; k += 1) {
-      const nx = nb[k][0];
-      const ny = nb[k][1];
-      if (nx < 0 || nx >= W || ny < 0 || ny >= H) continue;
-      push(nx, ny);
-    }
-  }
-
-  for (let p = 0; p < n; p += 1) {
-    const i = p * 4;
-    const r = d[i];
-    const g = d[i + 1];
-    const b = d[i + 2];
-    const a = d[i + 3];
-    const py = (p / W) | 0;
-    const posterY = slotDy + ((py + 0.5) / H) * slotDh;
-    const bg = samplePosterBgAtY(posterY, palette);
-
-    if (flood[p]) {
-      d[i] = bg.r;
-      d[i + 1] = bg.g;
-      d[i + 2] = bg.b;
-      d[i + 3] = 255;
-      continue;
-    }
-    if (a < 6) {
-      d[i] = bg.r;
-      d[i + 1] = bg.g;
-      d[i + 2] = bg.b;
-      d[i + 3] = 255;
-      continue;
-    }
-    if (isLogoBackdropLike(r, g, b, a, t)) {
-      d[i] = bg.r;
-      d[i + 1] = bg.g;
-      d[i + 2] = bg.b;
-      d[i + 3] = 255;
-      continue;
-    }
-    d[i] = ar;
-    d[i + 1] = ag;
-    d[i + 2] = ab;
-    d[i + 3] = a;
-  }
-}
-
-/**
- * Logo：去白边 + accent 着色。
- * 原因：很多 logo.png 外沿带不透明白（或灰）矩形，仅用 destination-in 会整块变成 accent 方框；
- * 透明区在小程序 Canvas 上若未先铺渐变，会透出默认白底。
- * 做法：clip 内先铺纵向渐变；优先用页面内 type=2d 小画布做 getImageData（真机离屏 API 常失败），否则再试 wx.createOffScreenCanvas。
- */
-function drawLogoViaPixelCanvas(cnode, mainCtx, img, dx, dy, dw, dh, W, H, accent, palette, slotDy, slotDh) {
-  if (!cnode || typeof cnode.getContext !== "function") return false;
-  try {
-    cnode.width = W;
-    cnode.height = H;
-  } catch (e) {
-    return false;
-  }
-  const wctx = cnode.getContext("2d");
-  if (!wctx) return false;
-  try {
-    wctx.clearRect(0, 0, W, H);
-    wctx.drawImage(img, 0, 0, dw, dh);
-    const id = wctx.getImageData(0, 0, W, H);
-    tintLogoImageData(id, accent, palette, slotDy, slotDh, 228);
-    wctx.putImageData(id, 0, 0);
-    mainCtx.drawImage(cnode, 0, 0, W, H, dx, dy, dw, dh);
-    return true;
-  } catch (e) {
-    console.warn("poster logo pixel canvas", e);
-    return false;
-  }
-}
-
-function drawLogoInSlot(ctx, img, x, y, w, h, _radius, accent, bgGradient, palette, logoProcessCanvas) {
+/** 底图铺满逻辑画布（等同 CSS object-fit: cover） */
+function drawBackgroundImageCover(ctx, img, cw, ch) {
   if (!img || !img.width) return;
   const sw = img.width;
   const sh = img.height;
-  const scale = Math.max(w / sw, h / sh);
+  const scale = Math.max(cw / sw, ch / sh);
   const dw = sw * scale;
   const dh = sh * scale;
-  const dx = x + (w - dw) / 2;
-  const dy = y + (h - dh) / 2;
-  const W = Math.max(1, Math.ceil(dw));
-  const H = Math.max(1, Math.ceil(dh));
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(dx, dy, dw, dh);
-  ctx.clip();
-  ctx.fillStyle = bgGradient;
-  ctx.fillRect(dx, dy, dw, dh);
-
-  let drawn = false;
-  if (logoProcessCanvas && drawLogoViaPixelCanvas(logoProcessCanvas, ctx, img, dx, dy, dw, dh, W, H, accent, palette, dy, dh)) {
-    drawn = true;
-  }
-
-  if (!drawn && typeof wx.createOffScreenCanvas === "function") {
-    try {
-      const oc = wx.createOffScreenCanvas({ type: "2d", width: W, height: H });
-      const octx = oc.getContext("2d");
-      if (octx) {
-        octx.clearRect(0, 0, W, H);
-        octx.drawImage(img, 0, 0, dw, dh);
-        const id = octx.getImageData(0, 0, W, H);
-        tintLogoImageData(id, accent, palette, dy, dh, 228);
-        octx.putImageData(id, 0, 0);
-        ctx.drawImage(oc, 0, 0, W, H, dx, dy, dw, dh);
-        drawn = true;
-      }
-    } catch (e) {
-      console.warn("poster logo offscreen", e);
-    }
-  }
-
-  if (!drawn) {
-    ctx.fillStyle = accent;
-    ctx.fillRect(dx, dy, dw, dh);
-    ctx.globalCompositeOperation = "destination-in";
-    ctx.drawImage(img, dx, dy, dw, dh);
-    ctx.globalCompositeOperation = "source-over";
-  }
-  ctx.restore();
-}
-
-/** B1：Logo + 品牌名整体水平居中（仅 Logo 用 accent） */
-function drawBrandStripCentered(ctx, cx, yTop, logoImg, accent, bgGradient, palette, logoProcessCanvas) {
-  const brandText = "小麒小麟专注引擎";
-  ctx.font = "600 40px PingFang SC, Helvetica Neue, sans-serif";
-  const tw = ctx.measureText(brandText).width;
-  const rowW = LOGO_BOX + BRAND_GAP + tw;
-  let rowStart = cx - rowW / 2;
-  if (rowStart < MARGIN_X) rowStart = MARGIN_X;
-  if (rowStart + rowW > POSTER_W - MARGIN_X) rowStart = POSTER_W - MARGIN_X - rowW;
-
-  let x = rowStart;
-  if (logoImg) {
-    drawLogoInSlot(ctx, logoImg, x, yTop, LOGO_BOX, LOGO_BOX, 16, accent, bgGradient, palette, logoProcessCanvas);
-  } else {
-    ctx.strokeStyle = accent;
-    ctx.globalAlpha = 0.45;
-    ctx.lineWidth = 1;
-    roundRectPath(ctx, x, yTop, LOGO_BOX, LOGO_BOX, 16);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-  }
-  x += LOGO_BOX + BRAND_GAP;
-
-  ctx.fillStyle = COLOR_BRAND;
-  const brandBaseline = yTop + 52;
-  ctx.fillText(brandText, x, brandBaseline);
+  const dx = (cw - dw) / 2;
+  const dy = (ch - dh) / 2;
+  ctx.drawImage(img, dx, dy, dw, dh);
 }
 
 /**
@@ -539,9 +286,6 @@ async function drawPosterFrame(ctx, opt) {
     blind,
     qrTempPath,
     createImage,
-    weekRangeText,
-    logoSrc,
-    logoProcessCanvas,
   } = opt;
   const accent = palette.accent;
   const cx = POSTER_W / 2;
@@ -549,25 +293,24 @@ async function drawPosterFrame(ctx, opt) {
   const g = ctx.createLinearGradient(0, 0, 0, POSTER_H);
   g.addColorStop(0, palette.bg0);
   g.addColorStop(1, palette.bg1);
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, POSTER_W, POSTER_H);
 
-  const [logoImg, qrImg] = await Promise.all([
-    loadImage(createImage, logoSrc || ""),
+  const bgSrc = palette.image && String(palette.image).trim();
+  const [bgImg, qrImg] = await Promise.all([
+    loadImage(createImage, bgSrc || ""),
     loadImage(createImage, qrTempPath || ""),
   ]);
 
-  const yBrand = TOP_PAD;
-  drawBrandStripCentered(ctx, cx, yBrand, logoImg, accent, g, palette, logoProcessCanvas);
+  if (bgImg && bgImg.width) {
+    drawBackgroundImageCover(ctx, bgImg, POSTER_W, POSTER_H);
+  } else {
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, POSTER_W, POSTER_H);
+  }
 
-  const cycleTop = TOP_PAD + LOGO_BOX + TOP_GROUP_GAP_MIN;
-  ctx.font = "400 28px PingFang SC, sans-serif";
-  ctx.fillStyle = COLOR_CYCLE;
-  drawTextCenterInWidth(ctx, weekRangeText || "", MARGIN_X, TEXT_W, cycleTop + 22, COLOR_CYCLE);
-  const yAfterTop = cycleTop + 32;
+  const yAfterTop = TOP_PAD + TOP_GROUP_GAP_MIN;
 
   const yBottomTop = POSTER_H - BOTTOM_SAFE - BOTTOM_BLOCK_H;
-  const hM = Math.max(120, yBottomTop - yAfterTop);
+  const hM = Math.max(120, yBottomTop - yAfterTop - BOTTOM_QR_SECTION_DROP);
 
   const inner = getQuoteInnerText(streakDays, blind.quoteIndex);
   const bodyH =
@@ -588,53 +331,50 @@ async function drawPosterFrame(ctx, opt) {
 
   const innerTop = yCard + CARD_PAD_Y;
   if (momentScore <= 0) {
-    ctx.font = "400 32px PingFang SC, sans-serif";
+    const zf = mid(32);
+    ctx.font = `400 ${zf}px PingFang SC, sans-serif`;
     ctx.fillStyle = COLOR_STATUS;
     const innerW = TEXT_W - 2 * CARD_PAD_X;
     const lines = wrapLines(ctx, ZERO_COPY, innerW);
-    const zlh = 32 * 1.5;
+    const zlh = zf * 1.5;
     lines.forEach((ln, i) => {
-      drawTextCenterInWidth(ctx, ln, MARGIN_X, innerW, innerTop + 28 + i * zlh, COLOR_STATUS);
+      drawTextCenterInWidth(ctx, ln, MARGIN_X, innerW, innerTop + mid(28) + i * zlh, COLOR_STATUS);
     });
   } else {
     let cur = innerTop;
-    ctx.font = "400 32px PingFang SC, sans-serif";
+    ctx.font = `400 ${mid(32)}px PingFang SC, sans-serif`;
     ctx.fillStyle = COLOR_LABEL;
-    drawTextCenterInWidth(ctx, "这一周，真我时刻", MARGIN_X, TEXT_W, cur + 28, COLOR_LABEL);
-    cur += 56;
+    drawTextCenterInWidth(ctx, "这一周，真我时刻", MARGIN_X, TEXT_W, cur + mid(28), COLOR_LABEL);
+    cur += mid(56);
     const numStr = String(momentScore);
     const unit = "次";
-    ctx.font = "700 88px DIN Alternate, PingFang SC, sans-serif";
+    ctx.font = `700 ${mid(88)}px DIN Alternate, PingFang SC, sans-serif`;
     const wn = ctx.measureText(numStr).width;
-    ctx.font = "400 36px PingFang SC, sans-serif";
+    ctx.font = `400 ${mid(36)}px PingFang SC, sans-serif`;
     const wu = ctx.measureText(unit).width;
-    const gapU = 8;
+    const gapU = mid(8);
     const groupW = wn + gapU + wu;
     const startX = cx - groupW / 2;
-    const numBaseline = cur + 72;
-    ctx.font = "700 88px DIN Alternate, PingFang SC, sans-serif";
+    const numBaseline = cur + mid(72);
+    ctx.font = `700 ${mid(88)}px DIN Alternate, PingFang SC, sans-serif`;
     ctx.fillStyle = accent;
     ctx.fillText(numStr, startX, numBaseline);
-    ctx.font = "400 36px PingFang SC, sans-serif";
+    ctx.font = `400 ${mid(36)}px PingFang SC, sans-serif`;
     ctx.fillStyle = hexToRgba(accent, 0.3);
     ctx.fillText(unit, startX + wn + gapU, numBaseline);
-    cur += 124;
+    cur += mid(124);
     if (streakDays > 0) {
-      ctx.font = "400 28px PingFang SC, sans-serif";
+      ctx.font = `400 ${mid(28)}px PingFang SC, sans-serif`;
       ctx.fillStyle = COLOR_SECONDARY;
       const streakText = `● 已连续记录 ${streakDays} 天`;
-      drawTextCenterInWidth(ctx, streakText, MARGIN_X, TEXT_W, cur + 22, COLOR_SECONDARY);
-      cur += 36;
+      drawTextCenterInWidth(ctx, streakText, MARGIN_X, TEXT_W, cur + mid(22), COLOR_SECONDARY);
+      cur += mid(36);
     }
-    cur += GAP_BEFORE_QUOTE;
+    cur += mid(GAP_BEFORE_QUOTE);
     drawQuoteSectionFixed(ctx, cx, cur, inner, blind.fontStyle);
   }
 
-  let yBot = yBottomTop;
-  ctx.font = "400 24px PingFang SC, sans-serif";
-  ctx.fillStyle = COLOR_GUIDE;
-  drawTextCenterInWidth(ctx, GUIDE_ABOVE_QR, MARGIN_X, TEXT_W, yBot + 22, COLOR_GUIDE);
-  yBot += 44 + BOTTOM_GROUP_GAP;
+  let yBot = yBottomTop + BOTTOM_QR_SECTION_DROP;
 
   const qrLeft = (POSTER_W - QR_OUTER) / 2;
   const pad = (QR_OUTER - QR_INNER) / 2;

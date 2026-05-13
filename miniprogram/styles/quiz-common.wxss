@@ -107,12 +107,16 @@ page {
 
 .btn {
   flex: 1;
+  min-width: 0;
   height: 82rpx;
   line-height: 82rpx;
   border-radius: 999rpx;
   background: #12598f;
   color: #fff;
   font-size: 28rpx;
+  box-sizing: border-box;
+  padding: 0 16rpx;
+  white-space: nowrap;
 }
 
 .btn-light {

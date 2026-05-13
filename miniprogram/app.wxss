@@ -66,9 +66,8 @@ button .wechat-btn-text {
 
 page {
   background: #e2eaf7;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  box-sizing: border-box;
+  min-height: 100vh;
 }
 
 .page-content {
@@ -82,6 +81,12 @@ page {
   min-height: 88rpx;
   padding: 12rpx;
   box-sizing: border-box;
+}
+
+/* 关闭/返回区内的图标：真机上 image 常抢走命中，导致外层 bindtap 不触发 */
+.close-icon,
+.nav-icon {
+  pointer-events: none;
 }
 
 /* Global helper for pages that need to avoid overlap with custom tabbar */

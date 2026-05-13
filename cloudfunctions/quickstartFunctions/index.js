@@ -4,6 +4,7 @@
  * 或使用云函数内 getWXContext().OPENID 写入，前端仅通过本云函数访问。
  */
 const cloud = require("wx-server-sdk");
+const mascotCopy = require("./mascotCopy");
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
 });
@@ -112,6 +113,130 @@ const saveUserTags = async (event) => {
   }
 };
 
+const TASKS_COLL = "tasks";
+const BODY_RECORDS_COLL = "body_records";
+
+function stripUndefinedDeep(input) {
+  if (input === undefined) return undefined;
+  if (input === null || typeof input !== "object") return input;
+  if (Array.isArray(input)) {
+    return input.map((x) => stripUndefinedDeep(x)).filter((x) => x !== undefined);
+  }
+  const out = {};
+  Object.keys(input).forEach((k) => {
+    const v = input[k];
+    if (v === undefined) return;
+    const nv = typeof v === "object" && v !== null ? stripUndefinedDeep(v) : v;
+    if (nv !== undefined) out[k] = nv;
+  });
+  return out;
+}
+
+function normalizeTagsForDb(tags) {
+  if (!Array.isArray(tags)) return [];
+  return tags.map((t) => ({
+    text: t && t.text != null ? String(t.text) : "",
+    className: t && t.className != null ? String(t.className) : "",
+  }));
+}
+
+const saveTask = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  /** 优先 taskDoc：少数环境下 event.task 与运行时字段名冲突导致取不到；兼容旧入参 event.task */
+  const task = (event && event.taskDoc) || (event && event.task);
+  if (!task || typeof task.id !== "string" || !task.id.trim()) {
+    return { success: false, errMsg: "missing task.id" };
+  }
+  const updatedAt = Number(task.updatedAt);
+  if (!Number.isFinite(updatedAt)) {
+    return { success: false, errMsg: "invalid updatedAt" };
+  }
+  const titleRaw = task.title != null ? String(task.title) : "";
+  const title = titleRaw.trim() || "未命名任务";
+  const statusRaw = task.statusText != null ? String(task.statusText) : "";
+  const statusText = statusRaw.trim() || "进行中";
+  let createdAt = task.createdAt != null ? String(task.createdAt) : "";
+  if (!createdAt.trim()) {
+    createdAt = new Date(updatedAt).toISOString().slice(0, 16).replace("T", " ");
+  }
+  const tags = normalizeTagsForDb(Array.isArray(task.tags) ? task.tags : []);
+  const data = stripUndefinedDeep({
+    openid,
+    id: task.id.trim(),
+    title,
+    content: task.content != null ? String(task.content) : "",
+    timeText: task.timeText != null ? String(task.timeText) : "",
+    dateValue: task.dateValue != null ? String(task.dateValue) : "",
+    statusText,
+    done: !!task.done,
+    createdAt,
+    updatedAt,
+    completedAt: task.completedAt != null ? String(task.completedAt) : "",
+    reminderDate: task.reminderDate != null ? String(task.reminderDate) : "",
+    reminderTime: task.reminderTime != null ? String(task.reminderTime) : "",
+    reminderFrequency: task.reminderFrequency != null ? String(task.reminderFrequency) : "不重复",
+    tags,
+  });
+  try {
+    const existed = await db.collection(TASKS_COLL).where({ openid, id: data.id }).limit(1).get();
+    if (existed.data && existed.data[0]) {
+      await db.collection(TASKS_COLL).doc(existed.data[0]._id).update({ data });
+    } else {
+      await db.collection(TASKS_COLL).add({ data });
+    }
+    return { success: true };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+const saveBodyRecord = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  const r = event && event.record;
+  if (!r || typeof r.dateKey !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(r.dateKey)) {
+    return { success: false, errMsg: "invalid dateKey" };
+  }
+  const updatedAt = Number(r.updatedAt);
+  if (!Number.isFinite(updatedAt)) {
+    return { success: false, errMsg: "invalid updatedAt" };
+  }
+  const sleep = r.sleep != null ? String(r.sleep) : "";
+  const sport = r.sport != null ? String(r.sport) : "";
+  const signal = r.signal != null ? String(r.signal) : "";
+  if (!sleep || !sport || !signal) {
+    return { success: false, errMsg: "missing sleep/sport/signal" };
+  }
+  const data = stripUndefinedDeep({
+    openid,
+    dateKey: r.dateKey,
+    sleep,
+    sport,
+    signal,
+    updatedAt,
+    id: r.id != null ? String(r.id) : "",
+    createdAt: r.createdAt != null ? String(r.createdAt) : "",
+  });
+  try {
+    const existed = await db.collection(BODY_RECORDS_COLL).where({ openid, dateKey: data.dateKey }).limit(1).get();
+    if (existed.data && existed.data[0]) {
+      await db.collection(BODY_RECORDS_COLL).doc(existed.data[0]._id).update({ data });
+    } else {
+      await db.collection(BODY_RECORDS_COLL).add({ data });
+    }
+    return { success: true };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
 // 模拟后端登录：接收 code 并返回用户登录态
 const loginByCode = async (event) => {
   if (!event || !event.code) {
@@ -194,6 +319,30 @@ const getUnlimitedPosterQr = async (event) => {
       fileContent: resp.buffer,
     });
     return { success: true, fileID: upload.fileID };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+/** 云存储 fileID → 临时 HTTPS，解决「仅创建者可读写」时客户端 wx.cloud.downloadFile(fileID) 失败 */
+const getPosterBgUrl = async (event) => {
+  const fileID = event && (event.fileID || event.fileId);
+  if (!fileID || typeof fileID !== "string") {
+    return { success: false, errMsg: "missing fileID" };
+  }
+  try {
+    const r = await cloud.getTempFileURL({
+      fileList: [fileID],
+    });
+    const item = r.fileList && r.fileList[0];
+    const url = item && item.tempFileURL;
+    if (!url) {
+      return {
+        success: false,
+        errMsg: (item && item.errMsg) || "no tempFileURL",
+      };
+    }
+    return { success: true, tempFileURL: url, maxAge: item.maxAge };
   } catch (e) {
     return { success: false, errMsg: e && e.message ? e.message : String(e) };
   }
@@ -359,6 +508,14 @@ exports.main = async (event, context) => {
       return await insertRecord(event);
     case "deleteRecord":
       return await deleteRecord(event);
+    case "getPosterBgUrl":
+      return await getPosterBgUrl(event);
+    case "saveTask":
+      return await saveTask(event);
+    case "saveBodyRecord":
+      return await saveBodyRecord(event);
+    case "getMascotCopy":
+      return await mascotCopy.generateMascotCopy(event, cloud.getWXContext());
     default:
       return {
         success: false,

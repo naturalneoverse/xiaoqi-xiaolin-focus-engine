@@ -5,13 +5,7 @@ const OPTIONS = [
   { key: "不二", desc: "自他不二，同时为自己也为别人" },
 ];
 
-function parsePayload(payload) {
-  try {
-    return payload ? JSON.parse(decodeURIComponent(payload)) : {};
-  } catch (e) {
-    return {};
-  }
-}
+const { parsePayload } = require("../../utils/parsePayload");
 
 Page({
   data: {

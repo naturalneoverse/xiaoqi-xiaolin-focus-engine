@@ -25,7 +25,6 @@ Page({
       this.syncUserProfile();
       this.loadTaskStats();
       this.syncNotifyFromApp();
-      this.tryOpenPendingProfileEdit();
       if (typeof this.getTabBar === "function" && this.getTabBar()) {
         this.getTabBar().setData({ selected: 2 });
       }
@@ -56,24 +55,6 @@ Page({
     }
   },
 
-  tryOpenPendingProfileEdit() {
-    const app = getApp();
-    const field = app && app.globalData ? app.globalData.pendingProfileEditField : "";
-    if (!field) return;
-    app.globalData.pendingProfileEditField = "";
-    if (field === "头像") {
-      this.onTapAvatar();
-      return;
-    }
-    if (field === "昵称") {
-      this.startEditNickname();
-      return;
-    }
-    if (field === "个性签名") {
-      this.startEditSignature();
-    }
-  },
-
   onGlobalUserProfileChange(nextProfile) {
     this.setData({
       userProfile: { ...nextProfile },
@@ -89,39 +70,10 @@ Page({
   },
 
   onTapAvatar() {
+    const { pickAndUploadUserAvatar } = require("../../utils/avatarUpload");
     return this.__withSubmitting("avatarUpload", async () => {
-      const app = getApp();
-      const previousAvatar = this.data.userProfile.avatarUrl;
-      wx.chooseImage({
-        count: 1,
-        sizeType: ["compressed"],
-        sourceType: ["album"],
-        success: async (res) => {
-          const tempFilePath = res.tempFilePaths && res.tempFilePaths[0];
-          if (!tempFilePath) return;
-          wx.showLoading({ title: "上传中", mask: true });
-          try {
-            const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).slice(2)}.png`;
-            const uploadRes = await wx.cloud.uploadFile({
-              cloudPath,
-              filePath: tempFilePath,
-            });
-            const fileID = uploadRes && uploadRes.fileID;
-            if (!fileID) throw new Error("avatar_upload_no_fileid");
-            const ok = app.setUserProfile({
-              avatarUrl: fileID,
-            });
-            if (!ok) throw new Error("avatar_save_failed");
-            dailyCheckIn.recordDailyCheckIn();
-            wx.showToast({ title: "头像已更新", icon: "success" });
-          } catch (e) {
-            app.setUserProfile({ avatarUrl: previousAvatar });
-            wx.showToast({ title: "上传失败", icon: "none" });
-          } finally {
-            wx.hideLoading();
-          }
-        },
-      });
+      const ok = await pickAndUploadUserAvatar();
+      if (ok) this.syncUserProfile();
     });
   },
 
@@ -201,40 +153,55 @@ Page({
   },
 
   onNotifyChange(e) {
-    this.setData({
-      notifyOn: e.detail.value,
-    });
+    const notifyOn = !!e.detail.value;
+    this.setData({ notifyOn });
+    const app = getApp();
+    if (app && typeof app.setSettings === "function") {
+      app.setSettings({ reminderEnabled: notifyOn });
+      return;
+    }
+    try {
+      wx.setStorageSync(STORAGE_KEYS.REMINDER_ENABLED, notifyOn);
+      if (app && app.globalData) {
+        app.globalData.settings = {
+          ...(app.globalData.settings || {}),
+          reminderEnabled: notifyOn,
+        };
+      }
+    } catch (e) {
+      console.error("my onNotifyChange persist", e);
+    }
   },
 
   goCreateTask() {
     const key = momentScore.weekMondayKey(momentScore.getIsoWeekMonday(new Date()));
     wx.navigateTo({
-      url: `/pages/poster/index?weekStart=${encodeURIComponent(key)}`,
+      url: `/subpkg/poster/index?weekStart=${encodeURIComponent(key)}`,
     });
   },
 
   goTimeReport() {
     const key = momentScore.weekMondayKey(momentScore.getIsoWeekMonday(new Date()));
     wx.navigateTo({
-      url: `/pages/weekly-report/index?weekStart=${encodeURIComponent(key)}`,
+      url: `/subpkg/weekly-report/index?weekStart=${encodeURIComponent(key)}`,
     });
   },
 
   goBodyToday() {
     wx.navigateTo({
-      url: "/pages/body-report/index",
+      url: "/subpkg/body-report/index",
     });
   },
 
   goHelp() {
     wx.navigateTo({
-      url: "/pages/help/index",
+      url: "/subpkg/help/index",
     });
   },
 
   goAbout() {
     wx.navigateTo({
-      url: "/pages/about/index",
+      url: "/subpkg/about/index",
     });
   },
 });

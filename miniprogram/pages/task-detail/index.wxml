@@ -1,6 +1,6 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-nav">
-    <view class="close-btn tap-target" bindtap="goHome">
+    <view class="close-btn tap-target" catchtap="goHome">
       <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
     </view>
     <view class="top-nav-space"></view>
@@ -50,7 +50,8 @@
             text="{{mascotBubbleText}}"
             color="#b7d6ea"
             arrowPosition="left"
-            maxLength="{{60}}"
+            keepManualBreak="{{true}}"
+            maxLength="{{200}}"
           />
         </view>
         <view class="mascot-image-wrap">

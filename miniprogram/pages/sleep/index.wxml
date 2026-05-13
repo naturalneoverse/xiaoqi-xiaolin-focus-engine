@@ -48,7 +48,12 @@
 
   <view class="section-divider"></view>
 
-  <view class="report-card" bindtap="goTimeReport">
+  <view
+    class="report-card"
+    bindtap="goTimeReport"
+    hover-class="report-card--pressed"
+    hover-stay-time="70"
+  >
     <text class="report-title">时间编织图</text>
     <text class="report-sub">你编织的，不是时间，是自己。</text>
     <text class="report-arrow">></text>

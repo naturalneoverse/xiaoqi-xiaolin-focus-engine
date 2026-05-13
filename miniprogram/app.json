@@ -1,18 +1,16 @@
 {
   "entryPagePath": "pages/login/index",
+  "lazyCodeLoading": "requiredComponents",
   "pages": [
     "pages/login/index",
+    "pages/agreement/index",
+    "pages/privacy/index",
     "pages/onboarding-tags/index",
     "pages/sleep/index",
     "pages/index/index",
     "pages/body-sleep/index",
     "pages/body-sport/index",
     "pages/body/index",
-    "pages/body-report/index",
-    "pages/today-report/index",
-    "pages/time-report/index",
-    "pages/poster/index",
-    "pages/weekly-report/index",
     "pages/task-create/index",
     "pages/task-priority/index",
     "pages/task-for-whom/index",
@@ -20,10 +18,24 @@
     "pages/task-detail/index",
     "pages/my/index",
     "pages/settings/index",
-    "pages/privacy/index",
-    "pages/help/index",
-    "pages/about/index",
-    "pages/example/index"
+    "pages/profile-edit-menu/index",
+    "pages/profile-nickname/index",
+    "pages/profile-signature/index"
+  ],
+  "subPackages": [
+    {
+      "root": "subpkg",
+      "name": "secondary",
+      "pages": [
+        "help/index",
+        "about/index",
+        "body-report/index",
+        "today-report/index",
+        "time-report/index",
+        "weekly-report/index",
+        "poster/index"
+      ]
+    }
   ],
   "window": {
     "backgroundColor": "#F0F7FF",
@@ -54,6 +66,5 @@
     ]
   },
   "sitemapLocation": "sitemap.json",
-  "style": "v2",
-  "lazyCodeLoading": "requiredComponents"
+  "style": "v2"
 }

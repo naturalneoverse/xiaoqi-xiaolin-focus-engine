@@ -79,13 +79,6 @@ page {
   letter-spacing: 2.4rpx;
 }
 
-.hero-line {
-  margin-top: 32rpx;
-  width: 92rpx;
-  height: 2rpx;
-  background: rgba(120, 143, 164, 0.45);
-}
-
 .quote {
   margin-top: 48rpx;
   width: 85%;
@@ -142,7 +135,10 @@ page {
 .login-card::after {
   content: "";
   position: absolute;
-  inset: 10rpx;
+  top: 10rpx;
+  right: 10rpx;
+  bottom: 10rpx;
+  left: 10rpx;
   border-radius: 38rpx;
   border: 1rpx solid rgba(255, 255, 255, 0.56);
   pointer-events: none;
@@ -164,6 +160,8 @@ page {
 .wechat-btn {
   margin-top: 80rpx;
   width: 540rpx;
+  max-width: 100%;
+  min-width: 380rpx;
   height: 88rpx;
   border-radius: 999rpx;
   border: 0;
@@ -173,6 +171,9 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  padding: 0 20rpx;
+  white-space: nowrap;
 }
 
 .wechat-btn-disabled {
@@ -202,10 +203,28 @@ page {
   margin-top: 36rpx;
   width: 100%;
   display: flex;
-  align-items: center;
+  flex-direction: row;
   justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 20rpx;
   position: relative;
   z-index: 2;
+}
+
+.agreement-inner {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.checkbox-area {
+  flex-shrink: 0;
+  padding: 4rpx 0;
 }
 
 .checkbox {
@@ -242,14 +261,33 @@ page {
   opacity: 1;
 }
 
+.agreement-copy {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  line-height: 1.5;
+}
+
 .agreement-text {
   color: #48617a;
-  font-size: 30rpx;
-  line-height: 30rpx;
+  font-size: inherit;
+  flex-shrink: 0;
   white-space: nowrap;
-  max-width: calc(100% - 42rpx);
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.agreement-link {
+  color: #1f476a;
+  font-size: inherit;
+  font-weight: 700;
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-decoration: none;
 }
 
 @media screen and (min-width: 768px) {
