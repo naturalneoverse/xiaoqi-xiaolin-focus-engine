@@ -3,6 +3,7 @@ const TASK_NAME_MAX = 30;
 const TASK_CONTENT_MAX = 600;
 const { TASK_SCHEDULE_REMINDER_TMPL_ID } = require("../../config/subscribeTemplates");
 const { goSleepHome } = require("../../utils/goTabHome");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 function formatDateRangeText(startDate, endDate) {
   if (!startDate) return "未选择";
@@ -50,6 +51,7 @@ Page({
   },
 
   onLoad() {
+    if (!requireLoginOnLoad()) return;
     wx.setNavigationBarTitle({ title: "创建新任务" });
     const today = this.getToday();
     this.setData({

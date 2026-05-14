@@ -1,6 +1,6 @@
 // app.js
 const TAB_PAGE_ROUTES = new Set(["pages/sleep/index", "pages/index/index", "pages/my/index"]);
-const NO_TOP_SAFE_AREA_ROUTES = new Set(["pages/login/index", "pages/onboarding-tags/index"]);
+const NO_TOP_SAFE_AREA_ROUTES = new Set(["pages/login/index", "pages/onboarding-tags/index", "pages/launch/launch"]);
 /** 仅这些页为自定义导航，需顶部安全区 padding；其余使用系统导航，由微信留出标题栏，不再叠加 top padding */
 const CUSTOM_NAV_ROUTES = new Set([
   "pages/agreement/index",
@@ -326,14 +326,6 @@ App({
         }, 1400);
       }
     }
-    try {
-      const shareRef = require("./utils/shareReferrer");
-      if (shareRef && typeof shareRef.handleColdLaunchForQr === "function") {
-        shareRef.handleColdLaunchForQr(hasLoggedIn);
-      }
-    } catch (e) {
-      console.warn("[App] shareReferrer cold launch", e);
-    }
   },
 
   onShow() {
@@ -389,6 +381,14 @@ App({
 
   loadHasLoggedIn() {
     try {
+      const auth = require("./utils/authSession");
+      if (auth && typeof auth.hasLocalCredentials === "function" && auth.hasLocalCredentials()) {
+        return true;
+      }
+    } catch (e) {
+      /* ignore */
+    }
+    try {
       return !!wx.getStorageSync(STORAGE_KEYS.HAS_LOGGED_IN);
     } catch (e) {
       return false;
@@ -397,6 +397,16 @@ App({
 
   setHasLoggedIn(nextValue) {
     const value = !!nextValue;
+    if (!value) {
+      try {
+        const auth = require("./utils/authSession");
+        if (auth && typeof auth.clearSessionStorage === "function") {
+          auth.clearSessionStorage();
+        }
+      } catch (e) {
+        /* ignore */
+      }
+    }
     try {
       wx.setStorageSync(STORAGE_KEYS.HAS_LOGGED_IN, value);
       this.globalData.hasLoggedIn = value;

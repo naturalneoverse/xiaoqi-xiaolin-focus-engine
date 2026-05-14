@@ -1,7 +1,8 @@
 {
-  "entryPagePath": "pages/login/index",
+  "entryPagePath": "pages/launch/launch",
   "lazyCodeLoading": "requiredComponents",
   "pages": [
+    "pages/launch/launch",
     "pages/login/index",
     "pages/agreement/index",
     "pages/privacy/index",

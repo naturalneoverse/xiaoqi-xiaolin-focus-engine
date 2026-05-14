@@ -1,4 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { GENDER_OPTIONS, LIFE_STAGE_OPTIONS, ROLE_OPTIONS } = require("../../config/userTags");
 const { goSleepHome } = require("../../utils/goTabHome");
 
@@ -38,8 +39,9 @@ Page({
   },
 
   onLoad() {
+    if (!requireLoginOnLoad()) return;
     const app = getApp();
-    if (!app || !app.globalData || !app.globalData.hasLoggedIn) {
+    if (!app || !app.globalData) {
       wx.reLaunch({ url: "/pages/login/index" });
       return;
     }

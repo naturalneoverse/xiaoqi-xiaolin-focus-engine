@@ -297,3 +297,14 @@ page {
 .row-hover {
   opacity: 0.86;
 }
+
+/* 分享卡片画布：固定移出视口，避免影响点击与布局 */
+.weekly-share-card-canvas {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  left: -2000px;
+  top: 0;
+  overflow: hidden;
+  pointer-events: none;
+}

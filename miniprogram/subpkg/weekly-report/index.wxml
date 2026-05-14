@@ -59,3 +59,6 @@
     <button class="action-btn action-btn-ghost" open-type="share">分享给朋友</button>
   </view>
 </view>
+
+<!-- 微信分享卡片推荐 5:4（如 750×600）；屏外渲染，不参与首屏布局 -->
+<canvas type="2d" id="weeklyShareCardCanvas" class="weekly-share-card-canvas"></canvas>

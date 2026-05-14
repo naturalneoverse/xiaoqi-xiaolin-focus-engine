@@ -1,0 +1,4 @@
+<!-- 启动页：白底 + LOGO 旋转；跳转时机由 wx.checkSession 与业务结果决定，无固定时长定时器 -->
+<view class="launch-page">
+  <image class="launch-logo" src="/images/transparent background/logo.png" mode="aspectFit" />
+</view>

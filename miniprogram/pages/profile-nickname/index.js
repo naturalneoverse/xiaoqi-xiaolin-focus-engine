@@ -1,4 +1,5 @@
 const dailyCheckIn = require("../../utils/dailyCheckIn");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 Page({
   data: {
@@ -6,6 +7,7 @@ Page({
   },
 
   onLoad() {
+    if (!requireLoginOnLoad()) return;
     const app = getApp();
     const p = app && typeof app.getUserProfile === "function" ? app.getUserProfile() : {};
     const n = (p && p.nickname) || "";

@@ -5,10 +5,16 @@ const OPTIONS = [
   { key: "睡不着", desc: "躺那半天，脑子停不下来" },
 ];
 
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
+
 Page({
   data: {
     options: OPTIONS,
     selected: "",
+  },
+
+  onLoad() {
+    if (!requireLoginOnLoad()) return;
   },
 
   choose(e) {

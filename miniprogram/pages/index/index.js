@@ -1,6 +1,7 @@
 // index.js
 const STORAGE_KEYS = require("../../config/storageKeys");
 const bodyStats = require("../../utils/bodyStats");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 const { goMyHome, goSleepHome } = require("../../utils/goTabHome");
 const { getTodayKey } = require("../../utils/dateKeys");
@@ -104,6 +105,17 @@ Page({
     sleepSevenBar: "width: 0%;",
     sportSevenBar: "width: 0%;",
     signalSevenBar: "width: 0%;",
+  },
+
+  onLoad() {
+    try {
+      const shareRef = require("../../utils/shareReferrer");
+      const auth = require("../../utils/authSession");
+      shareRef.handleColdLaunchForQr(!!auth.hasLocalCredentials());
+    } catch (e) {
+      /* ignore */
+    }
+    if (!requireLoginOnLoad()) return;
   },
 
   onShow() {

@@ -1,4 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 const { getTodayKey } = require("../../utils/dateKeys");
 const { formatDateTime } = require("../../utils/dateFormat");
@@ -65,12 +66,20 @@ Page({
   onLoad(options) {
     try {
       const shareRef = require("../../utils/shareReferrer");
+      const auth = require("../../utils/authSession");
+      shareRef.handleColdLaunchForQr(!!auth.hasLocalCredentials());
+    } catch (e) {
+      /* ignore */
+    }
+    try {
+      const shareRef = require("../../utils/shareReferrer");
       if (shareRef.gateUnauthenticatedShareEntry(options)) {
         return;
       }
     } catch (e) {
       /* ignore */
     }
+    if (!requireLoginOnLoad()) return;
     this.loadTasks();
   },
 

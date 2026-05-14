@@ -13,6 +13,7 @@ const mascotCopyStats = require("../../utils/mascotCopyStats");
 const mascotEngineClient = require("../../utils/mascotEngineClient");
 const { raceResolve, MASCOT_ENGINE_TIMEOUT_MS } = require("../../utils/raceResolve");
 const { goMindHome } = require("../../utils/goTabHome");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 const SLEEP_OPTIONS = bodyStats.SLEEP_OPTIONS;
 const SPORT_OPTIONS = bodyStats.SPORT_OPTIONS;
@@ -50,6 +51,7 @@ Page({
   },
 
   onLoad() {
+    if (!requireLoginOnLoad()) return;
     wx.setNavigationBarTitle({ title: "身体边界报告" });
     this.loadWeeklyReport();
   },

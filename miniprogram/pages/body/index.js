@@ -6,6 +6,7 @@ const OPTIONS = [
 ];
 
 const { parsePayload } = require("../../utils/parsePayload");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 Page({
   data: {
@@ -17,6 +18,7 @@ Page({
   },
 
   onLoad(options) {
+    if (!requireLoginOnLoad()) return;
     this.setData({
       payload: parsePayload(options.payload),
     });

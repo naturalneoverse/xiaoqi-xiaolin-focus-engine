@@ -1,4 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const momentScore = require("../../utils/momentScore");
 const posterRenderer = require("../../utils/posterRenderer");
 
@@ -102,6 +103,7 @@ Page({
     } catch (e) {
       /* ignore */
     }
+    if (!requireLoginOnLoad()) return;
     const raw = options && options.weekStart ? decodeURIComponent(options.weekStart) : "";
     this.__weekMondayKey = raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
     this.__blind = posterRenderer.rollBlindBox();

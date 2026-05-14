@@ -1,0 +1,26 @@
+.launch-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: calc(100vh / 3 - 80rpx);
+  box-sizing: border-box;
+}
+
+.launch-logo {
+  width: 160rpx;
+  height: 160rpx;
+  animation: launch-logo-spin 1.65s linear infinite;
+}
+
+@keyframes launch-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

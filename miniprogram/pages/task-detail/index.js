@@ -1,6 +1,7 @@
 const { parsePayload } = require("../../utils/parsePayload");
 
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
 const mascotCopyClient = require("../../utils/mascotCopyClient");
 const mascotCopyStats = require("../../utils/mascotCopyStats");
@@ -83,6 +84,7 @@ Page({
   },
 
   onLoad(options) {
+    if (!requireLoginOnLoad()) return;
     const app = getApp();
     const imageAssets = (app && app.globalData && app.globalData.imageAssets) || {};
     const showSuccess = options && options.showSuccess === "1";

@@ -1,4 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const momentScore = require("../../utils/momentScore");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
@@ -17,6 +18,17 @@ Page({
     editingSignature: false,
     editingNicknameValue: "",
     editingSignatureValue: "",
+  },
+
+  onLoad() {
+    try {
+      const shareRef = require("../../utils/shareReferrer");
+      const auth = require("../../utils/authSession");
+      shareRef.handleColdLaunchForQr(!!auth.hasLocalCredentials());
+    } catch (e) {
+      /* ignore */
+    }
+    if (!requireLoginOnLoad()) return;
   },
 
   onShow() {

@@ -35,6 +35,9 @@ function mid(n) {
 
 const COLOR_STATUS = "#4A4A4A";
 const COLOR_LABEL = "#7F8C8D";
+/** 暮光紫 / 深海蓝底图：仅「这一周，真我时刻」行，字号与位置不变 */
+const COLOR_WEEK_MOMENT_LINE = "rgba(122, 138, 149, 0.9)";
+const WEEK_MOMENT_LINE_THEME_IDS = new Set(["mu-guang-zi-die", "mu-guang-zi-yu", "shen-hai-lan-die", "shen-hai-lan-yu"]);
 const COLOR_SECONDARY = "#95A5A6";
 const COLOR_QUOTE_BODY = "#2C3E50";
 const COLOR_QUOTE_MARK = "#D5D8DC";
@@ -105,6 +108,13 @@ function hexToLineColorObj(hex) {
     g: String(parseInt(h.slice(2, 4), 16)),
     b: String(parseInt(h.slice(4, 6), 16)),
   };
+}
+
+/** 顶行「这一周，真我时刻」：仅暮光紫 / 深海蓝四套底图换色，其余主题仍用 COLOR_LABEL */
+function colorForWeekMomentLine(palette) {
+  const id = palette && palette.id;
+  if (id && WEEK_MOMENT_LINE_THEME_IDS.has(id)) return COLOR_WEEK_MOMENT_LINE;
+  return COLOR_LABEL;
 }
 
 /** 先按 `\n` 强制断行，再在各行内按宽度折行（避免金句孤字） */
@@ -343,8 +353,14 @@ async function drawPosterFrame(ctx, opt) {
   } else {
     let cur = innerTop;
     ctx.font = `400 ${mid(32)}px PingFang SC, sans-serif`;
-    ctx.fillStyle = COLOR_LABEL;
-    drawTextCenterInWidth(ctx, "这一周，真我时刻", MARGIN_X, TEXT_W, cur + mid(28), COLOR_LABEL);
+    drawTextCenterInWidth(
+      ctx,
+      "这一周，真我时刻",
+      MARGIN_X,
+      TEXT_W,
+      cur + mid(28),
+      colorForWeekMomentLine(palette)
+    );
     cur += mid(56);
     const numStr = String(momentScore);
     const unit = "次";

@@ -1,6 +1,7 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const momentScore = require("../../utils/momentScore");
 const { goSleepHome } = require("../../utils/goTabHome");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 function toDateLabel(dateKey) {
   if (!dateKey) return "未分组";
@@ -80,6 +81,10 @@ Page({
     latest: buildEmptyLatest(),
     historyReports: [],
     pastTaskGroups: [{ range: "暂无完成任务", expanded: true, tasks: [] }],
+  },
+
+  onLoad() {
+    if (!requireLoginOnLoad()) return;
   },
 
   onShow() {

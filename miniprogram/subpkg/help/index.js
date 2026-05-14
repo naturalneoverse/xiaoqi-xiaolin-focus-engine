@@ -62,6 +62,11 @@ Page({
     faqOpen: [false, false, false, false, false, false, false, false],
   },
 
+  onLoad() {
+    const { requireLoginOnLoad } = require("../../utils/requireLogin");
+    if (!requireLoginOnLoad()) return;
+  },
+
   toggleGuide(e) {
     const { index } = e.currentTarget.dataset;
     const idx = Number(index);

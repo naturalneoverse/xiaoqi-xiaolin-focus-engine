@@ -1,4 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
+const authSession = require("../../utils/authSession");
 const { goSleepHome } = require("../../utils/goTabHome");
 
 Page({
@@ -11,14 +12,21 @@ Page({
   },
 
   onLoad(options) {
-    if (!options || typeof options !== "object") return;
+    const opts = options && typeof options === "object" ? options : {};
     try {
       const shareRef = require("../../utils/shareReferrer");
-      if (options.scene != null && options.scene !== "") {
-        shareRef.persistReferrerFromScene(options.scene);
+      const auth = require("../../utils/authSession");
+      shareRef.handleColdLaunchForQr(!!auth.hasLocalCredentials());
+    } catch (e) {
+      /* ignore */
+    }
+    try {
+      const shareRef = require("../../utils/shareReferrer");
+      if (opts.scene != null && opts.scene !== "") {
+        shareRef.persistReferrerFromScene(opts.scene);
       }
-      if (options.shareUid != null && options.shareUid !== "") {
-        shareRef.persistReferrerFromShareUid(options.shareUid);
+      if (opts.shareUid != null && opts.shareUid !== "") {
+        shareRef.persistReferrerFromShareUid(opts.shareUid);
       }
     } catch (e) {
       /* ignore */
@@ -54,6 +62,14 @@ Page({
     const app = getApp();
     if (app && app.globalData && typeof app.globalData.hasLoggedIn === "boolean") {
       return app.globalData.hasLoggedIn;
+    }
+    try {
+      const auth = require("../../utils/authSession");
+      if (auth && typeof auth.hasLocalCredentials === "function" && auth.hasLocalCredentials()) {
+        return true;
+      }
+    } catch (e) {
+      /* ignore */
     }
     try {
       return !!wx.getStorageSync(STORAGE_KEYS.HAS_LOGGED_IN);
@@ -144,6 +160,8 @@ Page({
             /* ignore */
           }
         }
+        const profile = app && typeof app.getUserProfile === "function" ? app.getUserProfile() : {};
+        authSession.persistAfterLogin(result, profile);
         let tagsComplete = result.tagsComplete === true;
         if (wx.cloud && typeof wx.cloud.callFunction === "function") {
           try {

@@ -116,6 +116,12 @@ page {
   font-size: 28rpx;
 }
 
+/* 退出登录：略弱化以区别于主操作 */
+.cell-logout-title {
+  color: #64748b;
+  font-weight: 500;
+}
+
 .notify-switch {
   transform: scale(0.8);
   transform-origin: right center;

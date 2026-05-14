@@ -1,6 +1,11 @@
 const { pickAndUploadUserAvatar } = require("../../utils/avatarUpload");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 Page({
+  onLoad() {
+    if (!requireLoginOnLoad()) return;
+  },
+
   goBack() {
     this.__safeNavigateBack("pages/my/index");
   },

@@ -1,4 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const CLEAR_OPTIONS = ["清除图片缓存", "清除全部记录"];
 
 Page({
@@ -8,6 +9,7 @@ Page({
   },
 
   onLoad() {
+    if (!requireLoginOnLoad()) return;
     this.loadSettings();
     const app = getApp();
     const v = app && app.globalData && app.globalData.APP_VERSION;
@@ -135,6 +137,13 @@ Page({
     wx.showToast({
       title: "即将上线",
       icon: "none",
+    });
+  },
+
+  /** 仅跳转登录页，不清理 token / 缓存 / 用户资料（与产品约定一致） */
+  onLogout() {
+    wx.reLaunch({
+      url: "/pages/login/index",
     });
   },
 

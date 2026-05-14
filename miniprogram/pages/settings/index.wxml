@@ -41,5 +41,9 @@
       <text class="cell-title">关于版本</text>
       <text class="version">{{version}}</text>
     </view>
+    <view class="line"></view>
+    <view class="cell tap-target" bindtap="onLogout" hover-class="cell-hover">
+      <text class="cell-title cell-logout-title">退出登录</text>
+    </view>
   </view>
 </view>

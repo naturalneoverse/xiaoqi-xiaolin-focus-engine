@@ -8,6 +8,7 @@ const OPTIONS = [
 const { parsePayload } = require("../../utils/parsePayload");
 
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
 const { goSleepHome } = require("../../utils/goTabHome");
 const { formatDateTime } = require("../../utils/dateFormat");
@@ -53,6 +54,7 @@ Page({
   },
 
   onLoad(options) {
+    if (!requireLoginOnLoad()) return;
     const payload = parsePayload(options.payload);
     this.setData({
       payload,

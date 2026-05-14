@@ -8,6 +8,7 @@ const { raceResolve, MASCOT_ENGINE_TIMEOUT_MS } = require("../../utils/raceResol
 const { goMindHome } = require("../../utils/goTabHome");
 const { getTodayKey } = require("../../utils/dateKeys");
 const { parsePayload } = require("../../utils/parsePayload");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 const NO_RECORD_ADVICE_FALLBACK = "今天还没和身体打招呼。有空时，给身体留个空白也好。";
 
@@ -27,6 +28,7 @@ Page({
   },
 
   onLoad(options) {
+    if (!requireLoginOnLoad()) return;
     wx.setNavigationBarTitle({ title: "今日报告" });
     const payload = parsePayload(options.payload);
     this.persistTodayBodyRecord(payload);
