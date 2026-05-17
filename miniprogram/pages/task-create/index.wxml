@@ -11,43 +11,91 @@
 
   <view class="input-card">
     <text class="label">任务名称</text>
-    <input
-      class="input"
-      placeholder="输入任务名称"
-      placeholder-class="placeholder-text"
-      value="{{taskName}}"
-      maxlength="200"
-      adjust-position
-      hold-keyboard="{{false}}"
-      disabled="{{showDateModal || showReminderModal}}"
-      bindinput="onTaskNameInput"
-    />
+    <view class="input-field-wrap input-field-wrap-name">
+      <view class="input-row input-row-textarea">
+        <textarea
+          class="textarea input-field input-field-name"
+          placeholder="输入任务名称"
+          placeholder-class="placeholder-text"
+          value="{{taskName}}"
+          maxlength="200"
+          adjust-position
+          hold-keyboard="{{false}}"
+          show-confirm-bar="{{false}}"
+          confirm-type="done"
+          disabled="{{showDateModal || showReminderModal || speechRecordingTarget === 'content'}}"
+          bindinput="onTaskNameInput"
+        />
+      </view>
+      <text class="limit-tip limit-tip-corner {{taskNameLength > taskNameMax ? 'limit-tip-exceeded' : ''}}">{{taskNameLength}}/{{taskNameMax}}</text>
+      <view class="speech-mic-hit speech-mic-corner">
+        <button
+          class="speech-mic-btn {{speechRecordingTarget === 'name' ? 'speech-mic-btn-recording' : ''}} {{speechNameMicDisabled ? 'speech-mic-btn-disabled' : ''}}"
+          plain
+          hover-class="none"
+          disabled="{{speechNameMicDisabled}}"
+          data-field="name"
+          catchlongpress="onSpeechLongPress"
+          catchtouchend="onSpeechTouchEnd"
+          catchtouchcancel="onSpeechTouchEnd"
+        >
+          <view wx:if="{{speechRecordingTarget === 'name'}}" class="speech-wave">
+            <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+          </view>
+          <view wx:else class="speech-mic-icon"></view>
+        </button>
+      </view>
+    </view>
     <text wx:if="{{taskNameError}}" class="limit-error">{{taskNameError}}</text>
-    <text class="limit-tip limit-tip-corner {{taskNameLength > 30 ? 'limit-tip-exceeded' : ''}}">
-      {{taskNameLength}}/30
-    </text>
   </view>
 
   <view class="input-card">
     <text class="label">任务内容</text>
-    <textarea
-      class="textarea"
-      placeholder="详细描述你的任务..."
-      placeholder-class="placeholder-text"
-      value="{{taskContent}}"
-      maxlength="2000"
-      auto-height
-      adjust-position
-      hold-keyboard="{{false}}"
-      show-confirm-bar="{{false}}"
-      confirm-type="done"
-      disabled="{{showDateModal || showReminderModal}}"
-      bindinput="onTaskContentInput"
-    />
+    <view class="input-field-wrap input-field-wrap-content">
+      <view class="input-row input-row-textarea">
+        <textarea
+          class="textarea input-field"
+          placeholder="详细描述你的任务..."
+          placeholder-class="placeholder-text"
+          value="{{taskContent}}"
+          maxlength="2000"
+          auto-height
+          adjust-position
+          hold-keyboard="{{false}}"
+          show-confirm-bar="{{false}}"
+          confirm-type="done"
+          disabled="{{showDateModal || showReminderModal || speechRecordingTarget === 'name'}}"
+          bindinput="onTaskContentInput"
+        />
+      </view>
+      <text class="limit-tip limit-tip-corner {{taskContentLength > taskContentMax ? 'limit-tip-exceeded' : ''}}">{{taskContentLength}}/{{taskContentMax}}</text>
+      <view class="speech-mic-hit speech-mic-corner">
+        <button
+          class="speech-mic-btn {{speechRecordingTarget === 'content' ? 'speech-mic-btn-recording' : ''}} {{speechContentMicDisabled ? 'speech-mic-btn-disabled' : ''}}"
+          plain
+          hover-class="none"
+          disabled="{{speechContentMicDisabled}}"
+          data-field="content"
+          catchlongpress="onSpeechLongPress"
+          catchtouchend="onSpeechTouchEnd"
+          catchtouchcancel="onSpeechTouchEnd"
+        >
+          <view wx:if="{{speechRecordingTarget === 'content'}}" class="speech-wave">
+            <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+          </view>
+          <view wx:else class="speech-mic-icon"></view>
+        </button>
+      </view>
+    </view>
     <text wx:if="{{taskContentError}}" class="limit-error">{{taskContentError}}</text>
-    <text class="limit-tip limit-tip-corner {{taskContentLength > 600 ? 'limit-tip-exceeded' : ''}}">
-      {{taskContentLength}}/600
-    </text>
   </view>
 
   <view class="grid">
@@ -96,15 +144,10 @@
     <view class="modal-panel" catchtap="noop">
       <text class="modal-title">设置提醒</text>
       <view class="modal-row">
-        <text class="modal-label">提醒时间</text>
-        <view class="modal-inline-pickers">
-          <picker mode="date" value="{{reminderDate}}" bindchange="onReminderDateChange">
-            <text class="modal-value">{{reminderDate || "选择日期"}}</text>
-          </picker>
-          <picker mode="time" value="{{reminderTime}}" bindchange="onReminderTimeChange">
-            <text class="modal-value">{{reminderTime || "选择时间"}}</text>
-          </picker>
-        </view>
+        <text class="modal-label">每日提醒时间</text>
+        <picker mode="time" value="{{reminderTime}}" bindchange="onReminderTimeChange">
+          <text class="modal-value">{{reminderTime || "选择时间"}}</text>
+        </picker>
       </view>
       <view class="modal-row">
         <text class="modal-label">提醒频率</text>
@@ -113,11 +156,9 @@
           range="{{reminderFrequencyOptions}}"
           value="{{reminderFrequencyIndex}}"
           bindchange="onReminderFrequencyChange"
-          disabled="{{!reminderDate || !reminderTime}}"
+          disabled="{{!reminderTime}}"
         >
-          <text class="modal-value {{(!reminderDate || !reminderTime) ? 'modal-value-disabled' : ''}}">
-            {{reminderFrequency}}
-          </text>
+          <text class="modal-value {{!reminderTime ? 'modal-value-disabled' : ''}}">{{reminderFrequency}}</text>
         </picker>
       </view>
       <view class="modal-actions">
@@ -126,4 +167,6 @@
       </view>
     </view>
   </view>
+
+  <calendar-guide-dialog id="calendar-guide-dialog" />
 </view>

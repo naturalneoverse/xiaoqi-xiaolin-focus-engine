@@ -1,0 +1,13 @@
+<view class="cg-mask" wx:if="{{visible}}" catchtouchmove="noop" bindtap="noop">
+  <view class="cg-panel" catchtap="noop">
+    <text class="cg-title">温馨提示</text>
+    <text class="cg-content">{{modalText}}</text>
+    <checkbox-group class="cg-never" bindchange="onNeverGroupChange">
+      <label class="cg-never-label">
+        <checkbox value="on" checked="{{neverChecked}}" color="#12598f" class="cg-check" />
+        <text class="cg-never-text">不再提示</text>
+      </label>
+    </checkbox-group>
+    <button class="cg-btn" type="primary" bindtap="onKnow">知道了</button>
+  </view>
+</view>

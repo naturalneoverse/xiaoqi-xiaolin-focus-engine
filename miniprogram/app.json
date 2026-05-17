@@ -13,6 +13,7 @@
     "pages/body-sport/index",
     "pages/body/index",
     "pages/task-create/index",
+    "pages/reminder-test/index",
     "pages/task-priority/index",
     "pages/task-for-whom/index",
     "pages/task-why/index",
@@ -67,5 +68,11 @@
     ]
   },
   "sitemapLocation": "sitemap.json",
-  "style": "v2"
+  "style": "v2",
+  "plugins": {
+    "WechatSI": {
+      "version": "0.3.7",
+      "provider": "wx069ba97219f66d99"
+    }
+  }
 }

@@ -1,5 +1,5 @@
 {
-  "navigationStyle": "custom",
+  "navigationBarTitleText": "闹钟提醒测试",
   "usingComponents": {
     "calendar-guide-dialog": "/components/calendar-guide-dialog/index"
   }

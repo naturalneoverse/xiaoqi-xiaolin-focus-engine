@@ -40,6 +40,27 @@
     </picker>
   </view>
 
+  <view class="card reminder-card" wx:if="{{taskId}}">
+    <text class="k">提醒</text>
+    <view class="reminder-row">
+      <text class="rk">每日时间</text>
+      <picker mode="time" value="{{reminderTime}}" bindchange="onDetailReminderTimeChange">
+        <view class="reminder-picker tap-target">{{reminderTime || "选择时间"}}</view>
+      </picker>
+    </view>
+    <view class="reminder-row">
+      <text class="rk">重复</text>
+      <picker
+        mode="selector"
+        range="{{detailReminderFreqOptions}}"
+        value="{{detailReminderFreqIndex}}"
+        bindchange="onDetailReminderFreqChange"
+      >
+        <view class="reminder-picker tap-target">{{reminderFrequency}}</view>
+      </picker>
+    </view>
+  </view>
+
   <view wx:if="{{showMascotModal}}" class="mascot-mask" bindtap="closeMascotModal">
     <view class="mascot-modal" catchtap="noop">
       <text class="mascot-title">提交成功</text>

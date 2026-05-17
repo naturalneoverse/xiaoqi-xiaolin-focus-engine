@@ -7,6 +7,7 @@ const mascotCopyClient = require("../../utils/mascotCopyClient");
 const mascotCopyStats = require("../../utils/mascotCopyStats");
 const { raceResolve, MASCOT_ENGINE_TIMEOUT_MS } = require("../../utils/raceResolve");
 const { goSleepHome } = require("../../utils/goTabHome");
+const reminderSchedule = require("../../utils/reminderSchedule");
 const STATUS_OPTIONS = ["进行中", "已完成", "已延期", "已取消"];
 
 /** 提交成功气泡：两行小麒模式（与副标题「小麒来为您庆祝啦」分工） */
@@ -76,6 +77,8 @@ Page({
     reminderDate: "",
     reminderTime: "",
     reminderFrequency: "不重复",
+    detailReminderFreqOptions: ["不重复", "每天"],
+    detailReminderFreqIndex: 0,
     tags: [],
     showMascotModal: false,
     xiaoqiImage: "/images/transparent background/xiaoqi.png",
@@ -109,6 +112,9 @@ Page({
         task.dateValue ||
         (task.timeText ? String(task.timeText).split(" ")[0].replace(/\//g, "-") : "") ||
         "未设置";
+      const rf = reminderSchedule.normalizeReminderFrequency(task.reminderFrequency);
+      const rt = task.reminderTime || "";
+      const rd = rt ? reminderSchedule.computeNextReminderDateYMD(rt) : "";
       this.setData({
         taskId: task.id,
         taskName: task.title || "未命名任务",
@@ -117,9 +123,10 @@ Page({
         statusText,
         statusIndex: Math.max(0, STATUS_OPTIONS.indexOf(statusText)),
         statusClass: getStatusClass(statusText),
-        reminderDate: task.reminderDate || "",
-        reminderTime: task.reminderTime || "",
-        reminderFrequency: task.reminderFrequency || "不重复",
+        reminderDate: rd,
+        reminderTime: rt,
+        reminderFrequency: rf,
+        detailReminderFreqIndex: rf === "每天" ? 1 : 0,
         tags: tagTexts,
         showMascotModal: showSuccess,
         xiaoqiImage: imageAssets.xiaoqi || "/images/transparent background/xiaoqi.png",
@@ -135,6 +142,9 @@ Page({
 
     const payload = parsePayload(options && options.payload);
     const tags = [payload.priority, payload.forWhom, payload.why].filter(Boolean);
+    const prf = reminderSchedule.normalizeReminderFrequency(payload.reminderFrequency);
+    const prt = payload.reminderTime || "";
+    const prd = prt ? reminderSchedule.computeNextReminderDateYMD(prt) : "";
     this.setData({
       taskId: payload.taskId || "",
       taskName: payload.taskName || "未命名任务",
@@ -143,9 +153,10 @@ Page({
       statusText: payload.statusText || "进行中",
       statusIndex: Math.max(0, STATUS_OPTIONS.indexOf(payload.statusText || "进行中")),
       statusClass: getStatusClass(payload.statusText || "进行中"),
-      reminderDate: payload.reminderDate || "",
-      reminderTime: payload.reminderTime || "",
-      reminderFrequency: payload.reminderFrequency || "不重复",
+      reminderDate: prd,
+      reminderTime: prt,
+      reminderFrequency: prf,
+      detailReminderFreqIndex: prf === "每天" ? 1 : 0,
       tags,
       showMascotModal: showSuccess,
       xiaoqiImage: imageAssets.xiaoqi || "/images/transparent background/xiaoqi.png",
@@ -190,11 +201,12 @@ Page({
   onStatusChange(e) {
     const index = Number(e.detail.value);
     const nextStatus = STATUS_OPTIONS[index] || STATUS_OPTIONS[0];
-    const hadReminder = !!(this.data.reminderDate && this.data.reminderTime);
+    const hadReminder = !!this.data.reminderTime;
     const clearReminder = nextStatus === "已完成" || nextStatus === "已取消";
     const nextReminderDate = clearReminder ? "" : this.data.reminderDate;
     const nextReminderTime = clearReminder ? "" : this.data.reminderTime;
     const nextReminderFrequency = clearReminder ? "不重复" : this.data.reminderFrequency;
+    const nextFreqIndex = clearReminder ? 0 : nextReminderFrequency === "每天" ? 1 : 0;
 
     this.setData({
       statusText: nextStatus,
@@ -203,6 +215,7 @@ Page({
       reminderDate: nextReminderDate,
       reminderTime: nextReminderTime,
       reminderFrequency: nextReminderFrequency,
+      detailReminderFreqIndex: nextFreqIndex,
     });
     if (clearReminder && hadReminder) {
       wx.showToast({
@@ -267,6 +280,36 @@ Page({
     } catch (e) {
       console.warn("[task-detail] cloudDataSync", e);
     }
+  },
+
+  onDetailReminderTimeChange(e) {
+    const reminderTime = (e.detail && e.detail.value) || "";
+    const reminderDate = reminderTime ? reminderSchedule.computeNextReminderDateYMD(reminderTime) : "";
+    this.setData({ reminderTime, reminderDate });
+    this.persistStatus(this.data.statusText, {
+      reminderDate,
+      reminderTime,
+      reminderFrequency: this.data.reminderFrequency,
+    });
+  },
+
+  onDetailReminderFreqChange(e) {
+    const idx = Number(e.detail.value);
+    const opts = this.data.detailReminderFreqOptions || ["不重复", "每天"];
+    const reminderFrequency = opts[idx] || "不重复";
+    const reminderDate = this.data.reminderTime
+      ? reminderSchedule.computeNextReminderDateYMD(this.data.reminderTime)
+      : "";
+    this.setData({
+      reminderFrequency,
+      detailReminderFreqIndex: idx,
+      reminderDate,
+    });
+    this.persistStatus(this.data.statusText, {
+      reminderDate,
+      reminderTime: this.data.reminderTime,
+      reminderFrequency,
+    });
   },
 
   closeMascotModal() {

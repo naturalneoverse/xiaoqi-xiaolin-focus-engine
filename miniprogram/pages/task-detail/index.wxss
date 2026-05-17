@@ -121,6 +121,39 @@ page {
   font-size: 22rpx;
 }
 
+.reminder-card {
+  margin-top: 18rpx;
+}
+
+.reminder-row {
+  margin-top: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.rk {
+  flex-shrink: 0;
+  color: #577388;
+  font-size: 26rpx;
+}
+
+.reminder-picker {
+  flex: 1;
+  text-align: right;
+  color: #184061;
+  font-size: 28rpx;
+  font-weight: 600;
+  padding: 12rpx 16rpx;
+  background: #f1f5f9;
+  border-radius: 12rpx;
+}
+
+.tap-target {
+  min-height: 44rpx;
+}
+
 .mascot-mask {
   position: fixed;
   left: 0;

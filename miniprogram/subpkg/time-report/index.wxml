@@ -76,7 +76,7 @@
         hover-class="row-hover"
       >
         <text class="group-arrow">{{item.expanded ? "▾" : "▸"}}</text>
-        <text class="group-range">{{item.range}}{{item.expanded ? "" : "（折叠）"}}</text>
+        <text class="group-range">{{item.range}}</text>
       </view>
       <view wx:if="{{item.expanded}}" class="task-items">
         <view wx:for="{{item.tasks}}" wx:key="name" class="task-item-row">

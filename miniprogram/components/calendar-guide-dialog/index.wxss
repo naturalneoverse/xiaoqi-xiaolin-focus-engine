@@ -1,0 +1,62 @@
+.cg-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.cg-panel {
+  width: 600rpx;
+  padding: 36rpx 32rpx 28rpx;
+  box-sizing: border-box;
+  border-radius: 24rpx;
+  background: #ffffff;
+}
+
+.cg-title {
+  display: block;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #184061;
+}
+
+.cg-content {
+  display: block;
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  line-height: 1.55;
+  color: #577388;
+}
+
+.cg-never {
+  margin-top: 24rpx;
+}
+
+.cg-never-label {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.cg-check {
+  transform: scale(0.92);
+}
+
+.cg-never-text {
+  font-size: 26rpx;
+  color: #334155;
+}
+
+.cg-btn {
+  margin-top: 28rpx;
+  width: 100%;
+  border-radius: 999rpx;
+  font-size: 28rpx;
+}

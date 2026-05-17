@@ -17,7 +17,8 @@ const {
   getForWhomTagClass,
   getWhyTagClass,
 } = require("../../utils/taskTagStyles");
-const TASK_NAME_MAX = 30;
+const { TASK_NAME_MAX } = require("../../config/taskLimits");
+const reminderRegistry = require("../../utils/reminderRegistry");
 
 function buildTags(payload, selectedWhy) {
   return [
@@ -95,6 +96,8 @@ Page({
       createdAt,
       updatedAt: Date.now(),
       dateValue: mergedPayload.dateValue || "",
+      startDate: mergedPayload.startDate || "",
+      endDate: mergedPayload.endDate || "",
       statusText: "进行中",
       done: false,
       reminderDate: mergedPayload.reminderDate || "",
@@ -102,6 +105,10 @@ Page({
       reminderFrequency: mergedPayload.reminderFrequency || "不重复",
       tags: buildTags(mergedPayload, selected),
     };
+    const draftTaskId = String(mergedPayload.draftTaskId || "").trim();
+    if (draftTaskId) {
+      reminderRegistry.migrateRecord(draftTaskId, taskId);
+    }
     let prevTasks = [];
     try {
       const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);

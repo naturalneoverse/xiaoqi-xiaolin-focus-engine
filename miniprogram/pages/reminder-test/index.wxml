@@ -1,0 +1,20 @@
+<view class="wrap">
+  <view class="row">
+    <text class="label">日期</text>
+    <picker mode="date" value="{{dateValue}}" bindchange="onDateChange">
+      <view class="picker">{{dateValue || "选择日期"}}</view>
+    </picker>
+  </view>
+  <view class="row">
+    <text class="label">时间</text>
+    <picker mode="time" value="{{timeValue}}" bindchange="onTimeChange">
+      <view class="picker">{{timeValue || "选择时间"}}</view>
+    </picker>
+  </view>
+  <view class="row">
+    <text class="label">标题</text>
+    <input class="input" value="{{title}}" placeholder="提醒标题" bindinput="onTitleInput" />
+  </view>
+  <button class="save" type="primary" bindtap="onSave">保存提醒</button>
+  <calendar-guide-dialog id="calendar-guide-dialog" />
+</view>
