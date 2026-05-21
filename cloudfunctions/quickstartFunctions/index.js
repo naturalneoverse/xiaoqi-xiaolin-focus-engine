@@ -5,6 +5,7 @@
  */
 const cloud = require("wx-server-sdk");
 const mascotCopy = require("./mascotCopy");
+const taskQuiz = require("./taskQuiz");
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV,
 });
@@ -571,6 +572,10 @@ exports.main = async (event, context) => {
       return await saveBodyRecord(event);
     case "getMascotCopy":
       return await mascotCopy.generateMascotCopy(event, cloud.getWXContext());
+    case "getTaskQuizCopy":
+      return await taskQuiz.getTaskQuizCopy(event);
+    case "getTaskQuizInsight":
+      return await taskQuiz.getTaskQuizInsight(event);
     default:
       return {
         success: false,

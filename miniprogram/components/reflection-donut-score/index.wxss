@@ -1,0 +1,173 @@
+.donut-root {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 24rpx 8rpx;
+}
+
+.donut-card {
+  margin: 0 auto;
+  max-width: 720rpx;
+  padding: 28rpx 24rpx 24rpx;
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.45);
+  border: 2rpx solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 12rpx 48rpx rgba(24, 64, 97, 0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.donut-card-title {
+  display: block;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #12598f;
+  margin-bottom: 12rpx;
+  letter-spacing: 0.06em;
+}
+
+.donut-stage {
+  position: relative;
+  width: 100%;
+  height: min(86vw, 624rpx);
+  min-height: 504rpx;
+  max-height: 672rpx;
+}
+
+.donut-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(96vw, 624rpx);
+  height: min(96vw, 624rpx);
+  max-width: 624rpx;
+  max-height: 624rpx;
+  display: block;
+}
+
+.donut-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  max-width: 280rpx;
+  box-sizing: border-box;
+}
+
+.donut-center-mascots {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: auto;
+}
+
+/* 略向中线靠拢，避免两图因留白显得过散 */
+.donut-mascot:first-child {
+  transform: translateX(14rpx);
+}
+
+.donut-mascot:last-child {
+  transform: translateX(-14rpx);
+}
+
+.donut-mascot {
+  flex: 0 0 auto;
+  width: min(25vw, 128rpx);
+  height: min(25vw, 128rpx);
+  box-sizing: border-box;
+}
+
+/* 较慢的「心跳式」呼吸：约 2.5s 一整拍，略强于全局 mascot-float 的幅度便于慢速下仍柔和可见 */
+.donut-mascot-breathe {
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
+  animation: donut-mascot-breathe 2.5s ease-in-out infinite;
+  filter:
+    drop-shadow(0 4rpx 8rpx rgba(24, 64, 97, 0.12))
+    drop-shadow(0 12rpx 20rpx rgba(24, 64, 97, 0.08));
+}
+
+.donut-mascot-breathe.donut-mascot-breathe-paused {
+  animation-play-state: paused;
+}
+
+@keyframes donut-mascot-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  18% {
+    transform: scale(1.05);
+  }
+  32% {
+    transform: scale(1.01);
+  }
+  48% {
+    transform: scale(1.04);
+  }
+  62% {
+    transform: scale(1);
+  }
+}
+
+.donut-mascot-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.donut-label {
+  position: absolute;
+  z-index: 2;
+  font-size: 22rpx;
+  font-weight: 500;
+  color: #577388;
+  line-height: 1.3;
+  max-width: 36%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.donut-label--tl {
+  left: 4%;
+  top: 10%;
+  text-align: left;
+}
+
+.donut-label--tr {
+  right: 4%;
+  top: 10%;
+  text-align: right;
+}
+
+.donut-label--br {
+  right: 4%;
+  bottom: 14%;
+  text-align: right;
+}
+
+.donut-label--bl {
+  left: 4%;
+  bottom: 14%;
+  text-align: left;
+}
+
+.donut-flow {
+  margin-top: 20rpx;
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #8a9cb0;
+  letter-spacing: 0.12em;
+}

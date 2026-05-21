@@ -1,0 +1,12 @@
+{
+  "name": "getTimeWeaveCopy",
+  "version": "1.0.0",
+  "description": "时间编织报告小麟文案",
+  "main": "index.js",
+  "scripts": {
+    "smoke": "node smoke-local.js"
+  },
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

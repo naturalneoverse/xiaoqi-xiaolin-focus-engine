@@ -1,6 +1,13 @@
 <view
-  class="chat-bubble {{arrowClass}}"
+  class="chat-bubble {{arrowClass}} {{sizeClass}} {{shellLayoutClass}}"
   style="--bubble-border: {{bubbleColor}};"
 >
-  <text class="bubble-text">{{normalizedText}}</text>
+  <block wx:if="{{useReportBlocks}}">
+    <text
+      wx:for="{{reportLines}}"
+      wx:key="index"
+      class="bubble-text bubble-text-report bubble-text-report-block {{index > 0 ? 'bubble-text-report-line' : ''}}"
+    >{{item}}</text>
+  </block>
+  <text wx:else class="bubble-text {{textLayoutClass}}">{{normalizedText}}</text>
 </view>

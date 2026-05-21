@@ -1,0 +1,13 @@
+{
+  "envId": "cloud1-9goe0m7d1d397415",
+  "functionRoot": "cloudfunctions",
+  "functions": [
+    {
+      "name": "getReply",
+      "timeout": 10,
+      "runtime": "Nodejs16",
+      "installDependency": true
+    }
+  ],
+  "$schema": "https://framework-1258016615.tcloudbaseapp.com/schema/latest.json"
+}

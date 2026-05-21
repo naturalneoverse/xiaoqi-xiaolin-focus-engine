@@ -1,0 +1,13 @@
+{
+  "navigationBarTitleText": "象限答题",
+  "navigationBarBackgroundColor": "#EFF7FD",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#EFF7FD",
+  "backgroundColorContent": "#D6EBF7",
+  "usingComponents": {
+    "reflection-text-card": "/components/reflection-text-card/index",
+    "reflection-single-card": "/components/reflection-single-card/index",
+    "reflection-multi-card": "/components/reflection-multi-card/index",
+    "reflection-conclusion-modal": "/components/reflection-conclusion-modal/index"
+  }
+}

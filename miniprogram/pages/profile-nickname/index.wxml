@@ -10,8 +10,8 @@
   <view class="group">
     <input
       class="field-input"
-      maxlength="20"
-      placeholder="请输入昵称"
+      placeholder="空缺中"
+      placeholder-class="nickname-field-placeholder"
       value="{{value}}"
       bindinput="onInput"
     />

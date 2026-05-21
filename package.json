@@ -1,0 +1,10 @@
+{
+  "name": "xiaoqi-xiaolin-focus-engine",
+  "private": true,
+  "scripts": {
+    "cf:getReply:install": "npm install --prefix cloudfunctions/getReply",
+    "cf:getReply:smoke": "node cloudfunctions/getReply/smoke-local.js",
+    "cf:getReply:test-client": "node scripts/test-getReply-client.cjs",
+    "cf:getReply:seed-json": "node scripts/export-task-reply-json.cjs"
+  }
+}

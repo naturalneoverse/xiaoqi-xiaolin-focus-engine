@@ -18,7 +18,9 @@
   <view wx:if="{{showMascotModal}}" class="mascot-modal-mask">
     <view class="mascot-modal">
       <view class="mascot-row">
-        <image class="mascot-image" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+        <view class="mascot-float-3d {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+          <image class="mascot-image mascot-float-img" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+        </view>
         <chat-bubble
           text="身体边界已记录完成，愿您安稳舒展。"
           color="#b7d6ea"

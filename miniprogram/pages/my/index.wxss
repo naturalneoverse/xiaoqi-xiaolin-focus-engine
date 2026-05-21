@@ -106,11 +106,21 @@ page {
   text-align: center;
 }
 
+.name-placeholder {
+  color: #8a9cb0;
+  font-weight: 400;
+}
+
 .signature {
   margin-top: 10rpx;
-  color: #7d95ad;
+  color: #577388;
   font-size: 28rpx;
   text-align: center;
+}
+
+.signature-placeholder {
+  color: #8a9cb0;
+  font-weight: 400;
 }
 
 .name-input {

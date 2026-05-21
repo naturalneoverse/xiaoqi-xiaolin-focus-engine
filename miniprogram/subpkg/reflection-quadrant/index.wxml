@@ -1,0 +1,87 @@
+<view
+  class="quadrant-page reflection-page"
+  catchtouchend="onGlobalSpeechTouchEnd"
+  catchtouchcancel="onGlobalSpeechTouchEnd"
+>
+  <scroll-view
+    class="quadrant-scroll"
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+    catchtouchend="onGlobalSpeechTouchEnd"
+    catchtouchcancel="onGlobalSpeechTouchEnd"
+  >
+    <view class="quadrant-scroll-inner">
+      <block wx:for="{{cards}}" wx:key="field">
+        <reflection-text-card
+          wx:if="{{item.type === 'text'}}"
+          question="{{item.question}}"
+          placeholder="{{item.placeholder}}"
+          value="{{textValues[item.field]}}"
+          maxLength="{{item.maxLength}}"
+          field="{{item.field}}"
+          disabled="{{inputDisabledMap[item.field]}}"
+          speechRecording="{{speechRecordingField === item.field}}"
+          speechMicDisabled="{{speechMicMap[item.field]}}"
+          bindchange="onTextCardChange"
+          bindspeechlongpress="onSpeechLongPress"
+          bindspeechtouchend="onSpeechTouchEnd"
+        />
+        <reflection-single-card
+          wx:if="{{item.type === 'single'}}"
+          question="{{item.question}}"
+          options="{{item.options}}"
+          selected="{{singleValues[item.field]}}"
+          field="{{item.field}}"
+          accent="{{accent}}"
+          selectedBg="{{optionSelectedBg}}"
+          bindchange="onSingleCardChange"
+        />
+        <reflection-multi-card
+          wx:if="{{item.type === 'multi'}}"
+          question="{{item.question}}"
+          options="{{item.options}}"
+          selected="{{multiValues[item.field]}}"
+          field="{{item.field}}"
+          exclusiveId="{{item.exclusiveId}}"
+          hasExpand="{{item.hasExpand}}"
+          expandRows="{{expandRows}}"
+          expandValues="{{multiExpandValues[item.field]}}"
+          accent="{{accent}}"
+          selectedBg="{{optionSelectedBg}}"
+          speechRecordingKey="{{speechRecordingField}}"
+          speechMicMap="{{speechMicMap}}"
+          inputDisabledMap="{{inputDisabledMap}}"
+          bindchange="onMultiCardChange"
+          bindexpandchange="onMultiExpandChange"
+          bindspeechlongpress="onSpeechLongPress"
+          bindspeechtouchend="onSpeechTouchEnd"
+        />
+      </block>
+      <view wx:if="{{!cards.length}}" class="quadrant-soon">
+        <text class="quadrant-soon-text">该象限内容即将上线</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{cards.length}}" class="quadrant-footer">
+    <button
+      class="quadrant-submit"
+      plain
+      hover-class="quadrant-submit-hover"
+      style="background: {{submitAccent}} !important;"
+      catchtap="onSubmit"
+    >
+      {{submitLabel}}
+    </button>
+  </view>
+
+  <reflection-conclusion-modal
+    visible="{{showConclusion}}"
+    bubbles="{{conclusionBubbles}}"
+    agent="{{conclusionAgent}}"
+    bubbleColor="{{conclusionBubbleColor}}"
+    accentColor="{{conclusionAccent}}"
+    bindcomplete="onConclusionComplete"
+  />
+</view>

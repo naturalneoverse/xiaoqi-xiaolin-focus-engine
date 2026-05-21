@@ -16,7 +16,9 @@
   <view class="card">
     <text class="title">小麟建议</text>
     <view class="advice-row">
-      <image class="advice-mascot" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+      <view class="mascot-float-3d advice-mascot-float {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+        <image class="advice-mascot mascot-float-img" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+      </view>
       <chat-bubble
         text="{{adviceText}}"
         color="#b7d6ea"

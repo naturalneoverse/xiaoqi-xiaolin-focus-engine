@@ -1,0 +1,81 @@
+<wxs module="m" src="./index.wxs"></wxs>
+<view class="reflection-multi-card">
+  <text class="card-q">{{question}}</text>
+  <block wx:for="{{options}}" wx:key="id">
+    <view class="option-block">
+      <view
+        class="option {{selectedMap[item.id] ? 'option-selected' : ''}} {{selectedMap[item.id] && expandMetaMap[item.id] ? 'option-with-expand' : ''}}"
+        style="{{selectedMap[item.id] ? 'background:' + selectedBg + ';border-color:transparent;' : ''}}"
+        hover-class="option-hover"
+        data-id="{{item.id}}"
+        catchtap="onToggle"
+      >
+        <view
+          class="check check-square {{selectedMap[item.id] ? 'check-selected' : ''}}"
+          style="{{selectedMap[item.id] ? '--accent:' + accent + ';' : ''}}"
+        ></view>
+        <text class="option-text">{{item.label}}</text>
+      </view>
+
+      <view
+        wx:if="{{hasExpand && selectedMap[item.id] && expandMetaMap[item.id]}}"
+        class="expand-card"
+      >
+        <text class="expand-label">{{expandMetaMap[item.id].label}}</text>
+        <view class="expand-input-wrap {{expandMetaMap[item.id].multiline ? 'expand-multiline' : ''}}">
+          <textarea
+            wx:if="{{expandMetaMap[item.id].multiline}}"
+            class="expand-textarea"
+            placeholder="{{expandMetaMap[item.id].placeholder}}"
+            placeholder-class="expand-placeholder"
+            value="{{m.expandVal(expandValues, expandMetaMap[item.id].key)}}"
+            maxlength="{{expandMetaMap[item.id].inputMaxLength}}"
+            auto-height
+            adjust-position
+            hold-keyboard="{{false}}"
+            show-confirm-bar="{{false}}"
+            disabled="{{inputDisabledMap[m.speechKey(field, expandMetaMap[item.id].key)]}}"
+            data-key="{{expandMetaMap[item.id].key}}"
+            bindinput="onExpandInput"
+          />
+          <input
+            wx:else
+            class="expand-input"
+            placeholder="{{expandMetaMap[item.id].placeholder}}"
+            placeholder-class="expand-placeholder"
+            value="{{m.expandVal(expandValues, expandMetaMap[item.id].key)}}"
+            maxlength="{{expandMetaMap[item.id].inputMaxLength}}"
+            disabled="{{inputDisabledMap[m.speechKey(field, expandMetaMap[item.id].key)]}}"
+            data-key="{{expandMetaMap[item.id].key}}"
+            bindinput="onExpandInput"
+          />
+          <view class="limit-row">
+            <text class="limit-tip">{{m.expandLen(lengthMap, expandMetaMap[item.id].key)}}/{{expandMetaMap[item.id].maxLength}}</text>
+            <view
+              class="speech-mic-hit {{speechMicMap[m.speechKey(field, expandMetaMap[item.id].key)] ? 'speech-mic-hit-disabled' : ''}}"
+              data-key="{{expandMetaMap[item.id].key}}"
+              catchlongpress="onSpeechLongPress"
+              catchtouchend="onSpeechTouchEnd"
+              catchtouchcancel="onSpeechTouchEnd"
+            >
+              <view
+                class="speech-wave {{m.isRecording(speechRecordingKey, field, expandMetaMap[item.id].key) ? '' : 'speech-layer-hidden'}}"
+                style="--accent: {{accent}};"
+              >
+                <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+                <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+                <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+                <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+                <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+              </view>
+              <view
+                class="speech-mic-icon {{m.isRecording(speechRecordingKey, field, expandMetaMap[item.id].key) ? 'speech-layer-hidden' : ''}}"
+                style="--accent: {{accent}};"
+              ></view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

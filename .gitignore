@@ -4,5 +4,6 @@ node_modules/
 
 cloudfunctions/mascotEngine/node_modules/
 cloudfunctions/quickstartFunctions/node_modules/
+cloudfunctions/getReply/node_modules/
 
 project.private.config.json

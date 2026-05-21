@@ -209,7 +209,12 @@ function countCreatedInWeek(tasks, weekMonday) {
 }
 
 const PRIORITY_KEYS = ["重要且紧急", "重要不紧急", "紧急不重要", "不重要不紧急"];
-const WHOM_KEYS = ["自己", "至亲", "外缘", "不二"];
+const WHOM_KEYS = ["自己", "至亲挚友", "外缘", "不二"];
+
+function normalizeForWhomTag(text) {
+  if (text === "至亲") return "至亲挚友";
+  return text;
+}
 const WHY_KEYS = ["生计", "职责", "真我", "合一"];
 
 function distributionRatios(tasksInWeekDone) {
@@ -223,7 +228,8 @@ function distributionRatios(tasksInWeekDone) {
       map[k] = 0;
     });
     list.forEach((task) => {
-      const t = getTagText(task.tags, index);
+      let t = getTagText(task.tags, index);
+      if (index === TAG_FOR_WHOM) t = normalizeForWhomTag(t);
       if (map[t] !== undefined) map[t] += 1;
     });
     return keys.map((k) => ({ key: k, count: map[k], percent: pct(map[k]) }));

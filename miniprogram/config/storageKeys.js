@@ -24,6 +24,8 @@ const STORAGE_KEYS = {
   PENDING_REFERRER_SOURCE: "pending_referrer_source",
   /** 当前用户 openid（登录后写入，用于「转朋友」path 带 shareUid） */
   USER_OPENID: "user_openid",
+  /** 哲思复盘记录：ReflectionRecord[]，按 taskId 聚合四象限 */
+  REFLECTION_RECORDS: "reflection_records",
 };
 
 module.exports = STORAGE_KEYS;

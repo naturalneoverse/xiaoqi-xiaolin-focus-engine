@@ -10,8 +10,9 @@
   <view class="group">
     <textarea
       class="field-area"
-      maxlength="60"
-      placeholder="请输入个性签名"
+      show-count="{{false}}"
+      placeholder="等你来定义我"
+      placeholder-class="signature-field-placeholder"
       value="{{value}}"
       bindinput="onInput"
       auto-height

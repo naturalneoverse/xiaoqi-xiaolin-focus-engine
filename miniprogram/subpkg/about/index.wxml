@@ -25,7 +25,9 @@
     <view class="line"></view>
     <view class="keeper-item">
       <view class="keeper-avatar">
-        <image class="keeper-avatar-image" src="/images/transparent background/xiaoqi.png" mode="aspectFill" binderror="onImageError" />
+        <view class="mascot-float-3d keeper-avatar-float {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+          <image class="keeper-avatar-image mascot-float-img" src="/images/transparent background/xiaoqi.png" mode="aspectFill" binderror="onImageError" />
+        </view>
       </view>
       <view class="keeper-main">
         <text class="keeper-name">小麒 · 向外行动的能量</text>
@@ -34,7 +36,9 @@
     </view>
     <view class="keeper-item">
       <view class="keeper-avatar">
-        <image class="keeper-avatar-image keeper-avatar-image-right" src="/images/transparent background/xiaolin.png" mode="aspectFill" binderror="onImageError" />
+        <view class="mascot-float-3d keeper-avatar-float {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+          <image class="keeper-avatar-image keeper-avatar-image-right mascot-float-img" src="/images/transparent background/xiaolin.png" mode="aspectFill" binderror="onImageError" />
+        </view>
       </view>
       <view class="keeper-main">
         <text class="keeper-name">小麟 · 向内觉察的智慧</text>

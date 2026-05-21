@@ -56,6 +56,66 @@ function buildBubbleText(value, keepManualBreak, maxLength) {
   return truncateByLength(normalized, maxLength);
 }
 
+/** 时间编织：开场 + 正文（中间一个换行） */
+function splitReportParts(text) {
+  const t = String(text || "").trim();
+  const i = t.indexOf("\n");
+  if (i < 0) return { opening: t, body: "" };
+  return {
+    opening: t.slice(0, i).trim(),
+    body: t.slice(i + 1).trim(),
+  };
+}
+
+/** 按顿逗分号拆行，标点留在上一行末尾（时间编织报告居中展示） */
+const CLAUSE_PUNCT = /[，、；]/;
+
+function splitClausesByPunctuation(sentence) {
+  const s = String(sentence || "").trim();
+  if (!s) return [];
+  const lines = [];
+  let buf = "";
+  Array.from(s).forEach((ch) => {
+    buf += ch;
+    if (CLAUSE_PUNCT.test(ch)) {
+      lines.push(preventOrphanLastChar(buf.trim()));
+      buf = "";
+    }
+  });
+  if (buf.trim()) lines.push(preventOrphanLastChar(buf.trim()));
+  return lines;
+}
+
+function buildReportDisplayLines(text) {
+  const parts = splitReportParts(text);
+  const lines = [];
+  splitClausesByPunctuation(parts.opening).forEach((line) => lines.push(line));
+  splitClausesByPunctuation(parts.body).forEach((line) => lines.push(line));
+  return lines;
+}
+
+function applyTextState(comp, text, keepManualBreak, maxLength, textLayout) {
+  const normalized = buildBubbleText(text, keepManualBreak, maxLength);
+  const isReport = textLayout === "report";
+  if (!isReport) {
+    comp.setData({
+      normalizedText: normalized,
+      useReportBlocks: false,
+      reportLines: [],
+      shellLayoutClass: "",
+      textLayoutClass: "",
+    });
+    return;
+  }
+  comp.setData({
+    normalizedText: normalized,
+    useReportBlocks: true,
+    reportLines: buildReportDisplayLines(normalized),
+    shellLayoutClass: "chat-bubble--report-shell",
+    textLayoutClass: "bubble-text-report",
+  });
+}
+
 Component({
   properties: {
     text: {
@@ -78,18 +138,44 @@ Component({
       type: Number,
       value: 48,
     },
+    /** md 默认；lg 用于任务庆祝弹窗等与图一对齐的更大气泡 */
+    size: {
+      type: String,
+      value: "md",
+    },
+    /** report：时间编织报告（撑满宽度、按，、；分行居中） */
+    textLayout: {
+      type: String,
+      value: "",
+    },
   },
 
   data: {
     arrowClass: "arrow-left",
     bubbleColor: "#7FB3D6",
     normalizedText: "",
+    sizeClass: "",
+    textLayoutClass: "",
+    shellLayoutClass: "",
+    useReportBlocks: false,
+    reportLines: [],
   },
 
   observers: {
-    "text, keepManualBreak, maxLength"(value, keepManualBreak, maxLength) {
-      const next = buildBubbleText(value, keepManualBreak, maxLength);
-      this.setData({ normalizedText: next });
+    textLayout(value) {
+      applyTextState(
+        this,
+        this.properties.text,
+        this.properties.keepManualBreak,
+        this.properties.maxLength,
+        value,
+      );
+    },
+    size(value) {
+      this.setData({ sizeClass: value === "lg" ? "chat-bubble--lg" : "" });
+    },
+    "text, keepManualBreak, maxLength, textLayout"(value, keepManualBreak, maxLength, textLayout) {
+      applyTextState(this, value, keepManualBreak, maxLength, textLayout);
     },
     arrowPosition(value) {
       const next = value === "right" ? "arrow-right" : "arrow-left";
@@ -103,11 +189,19 @@ Component({
 
   lifetimes: {
     attached() {
+      const size = this.properties.size;
       this.setData({
         arrowClass: this.properties.arrowPosition === "right" ? "arrow-right" : "arrow-left",
         bubbleColor: this.properties.color || "#7FB3D6",
-        normalizedText: buildBubbleText(this.properties.text, this.properties.keepManualBreak, this.properties.maxLength),
+        sizeClass: size === "lg" ? "chat-bubble--lg" : "",
       });
+      applyTextState(
+        this,
+        this.properties.text,
+        this.properties.keepManualBreak,
+        this.properties.maxLength,
+        this.properties.textLayout,
+      );
     },
   },
 });

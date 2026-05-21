@@ -109,28 +109,43 @@ Page({
 
   confirmClearAllRecords() {
     wx.showModal({
-      title: "清除全部记录",
-      content: "确定清除全部任务和身体记录吗？此操作不可恢复。",
+      title: "清空提醒",
+      content: "即将清空所有任务数据，数据删除后不可找回，是否继续？",
+      cancelText: "取消",
+      confirmText: "继续清空",
       confirmColor: "#dc2626",
       success: (res) => {
         if (!res.confirm) return;
-        try {
-          wx.removeStorageSync(STORAGE_KEYS.TASKS_DATA);
-          wx.removeStorageSync(STORAGE_KEYS.BODY_RECORDS);
-          wx.removeStorageSync(STORAGE_KEYS.DAILY_CHECK_INS);
-          wx.showToast({
-            title: "记录已清除",
-            icon: "success",
-          });
-        } catch (e) {
-          wx.showModal({
-            title: "清除失败",
-            content: "记录清除失败，请稍后重试",
-            showCancel: false,
-          });
-        }
+        wx.showModal({
+          title: "最终确认",
+          content: "此操作不可逆，所有任务记录将彻底删除，确定执行清空吗？",
+          cancelText: "再想想",
+          confirmText: "确认清空",
+          confirmColor: "#dc2626",
+          success: (res2) => {
+            if (!res2.confirm) return;
+            this._executeClearAllTasks();
+          },
+        });
       },
     });
+  },
+
+  _executeClearAllTasks() {
+    try {
+      wx.removeStorageSync(STORAGE_KEYS.TASKS_DATA);
+      wx.removeStorageSync(STORAGE_KEYS.REFLECTION_RECORDS);
+      wx.showToast({
+        title: "任务已清空",
+        icon: "success",
+      });
+    } catch (e) {
+      wx.showModal({
+        title: "清除失败",
+        content: "任务清空失败，请稍后重试",
+        showCancel: false,
+      });
+    }
   },
 
   onTapVersion() {

@@ -18,26 +18,32 @@
       wx:if="{{editingName}}"
       class="name-input"
       value="{{editingNicknameValue}}"
-      maxlength="20"
       focus
       cursor-spacing="20"
       bindinput="onNicknameInput"
       bindblur="onNicknameBlur"
       confirm-type="done"
     />
-    <text wx:else class="name" bindtap="startEditNickname">{{userProfile.nickname}}</text>
+    <text
+      wx:else
+      class="name {{(!userProfile.nickname || userProfile.nickname === '用户名') ? 'name-placeholder' : ''}}"
+      bindtap="startEditNickname"
+    >{{(!userProfile.nickname || userProfile.nickname === '用户名') ? '空缺中' : userProfile.nickname}}</text>
     <input
       wx:if="{{editingSignature}}"
       class="signature-input"
       value="{{editingSignatureValue}}"
-      maxlength="60"
       focus
       cursor-spacing="20"
       bindinput="onSignatureInput"
       bindblur="onSignatureBlur"
       confirm-type="done"
     />
-    <text wx:else class="signature" bindtap="startEditSignature">{{userProfile.signature}}</text>
+    <text
+      wx:else
+      class="signature {{(!userProfile.signature || userProfile.signature === '我的个性签名') ? 'signature-placeholder' : ''}}"
+      bindtap="startEditSignature"
+    >{{(!userProfile.signature || userProfile.signature === '我的个性签名') ? '等你来定义我' : userProfile.signature}}</text>
   </view>
 
   <view class="stats">
@@ -76,6 +82,11 @@
     <text class="group-title">我的数据</text>
     <view class="cell" bindtap="goTimeReport">
       <text>时间编织报告</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="line"></view>
+    <view class="cell" bindtap="goReflectionList">
+      <text>哲思复盘报告</text>
       <text class="arrow">›</text>
     </view>
     <view class="line"></view>

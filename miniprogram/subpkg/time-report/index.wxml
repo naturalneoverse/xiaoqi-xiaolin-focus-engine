@@ -79,9 +79,17 @@
         <text class="group-range">{{item.range}}</text>
       </view>
       <view wx:if="{{item.expanded}}" class="task-items">
-        <view wx:for="{{item.tasks}}" wx:key="name" class="task-item-row">
-          <text class="task-item-name">{{item.name}}</text>
-          <text class="task-item-tag">{{item.tag}}</text>
+        <view
+          wx:for="{{item.tasks}}"
+          wx:for-item="task"
+          wx:key="taskId"
+          class="task-item-row tap-target"
+          data-task-id="{{task.taskId}}"
+          bindtap="goPastTaskDetail"
+          hover-class="row-hover"
+        >
+          <text class="task-item-name">{{task.name}}</text>
+          <text class="task-item-tag">{{task.tag}}</text>
         </view>
       </view>
     </view>

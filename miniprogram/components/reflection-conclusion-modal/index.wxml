@@ -1,0 +1,33 @@
+<view wx:if="{{visible}}" class="rc-mask" catchtouchmove="noop">
+  <view class="rc-modal" catchtap="noop">
+    <view class="rc-stage">
+      <view class="rc-mascot">
+        <view class="mascot-float-3d {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+          <image
+            class="rc-mascot-img {{agent === 'xiaolin' ? 'rc-mascot-face-right' : ''}}"
+            src="{{mascotImage}}"
+            mode="aspectFit"
+          />
+        </view>
+      </view>
+      <view class="rc-bubble">
+        <chat-bubble
+          text="{{currentText}}"
+          color="{{bubbleColor}}"
+          arrowPosition="left"
+          keepManualBreak="{{true}}"
+          maxLength="{{200}}"
+        />
+      </view>
+    </view>
+    <button
+      class="rc-btn"
+      plain
+      hover-class="rc-btn-hover"
+      style="background: {{accentColor}} !important;"
+      bindtap="onNext"
+    >
+      {{btnText}}
+    </button>
+  </view>
+</view>

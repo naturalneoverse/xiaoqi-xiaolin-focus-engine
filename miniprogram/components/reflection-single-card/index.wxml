@@ -1,0 +1,18 @@
+<view class="reflection-single-card">
+  <text class="card-q">{{question}}</text>
+  <view
+    wx:for="{{options}}"
+    wx:key="id"
+    class="option {{selected === item.id ? 'option-selected' : ''}}"
+    style="{{selected === item.id ? 'background:' + selectedBg + ';border-color:transparent;' : ''}}"
+    hover-class="option-hover"
+    data-id="{{item.id}}"
+    bindtap="onSelect"
+  >
+    <view
+      class="check check-round {{selected === item.id ? 'check-selected' : ''}}"
+      style="{{selected === item.id ? '--accent:' + accent + ';' : ''}}"
+    ></view>
+    <text class="option-text">{{item.label}}</text>
+  </view>
+</view>

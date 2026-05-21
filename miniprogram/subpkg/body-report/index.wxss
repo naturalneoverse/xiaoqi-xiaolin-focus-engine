@@ -216,10 +216,12 @@ page {
   flex-shrink: 0;
 }
 
-.ai-avatar-image {
+.ai-avatar-float {
   width: 172rpx;
   height: 172rpx;
-  display: block;
+}
+
+.ai-avatar-image {
   transform: scaleX(-1);
 }
 

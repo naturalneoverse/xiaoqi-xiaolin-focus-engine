@@ -1,4 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
+const { clampNickname, clampSignature } = require("../../config/profileTextLimits");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const momentScore = require("../../utils/momentScore");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
@@ -99,7 +100,7 @@ Page({
 
   onNicknameInput(e) {
     this.setData({
-      editingNicknameValue: e.detail.value,
+      editingNicknameValue: clampNickname((e.detail && e.detail.value) || ""),
     });
   },
 
@@ -117,7 +118,7 @@ Page({
 
   onSignatureInput(e) {
     this.setData({
-      editingSignatureValue: e.detail.value,
+      editingSignatureValue: clampSignature((e.detail && e.detail.value) || ""),
     });
   },
 
@@ -128,8 +129,20 @@ Page({
   finishTextEdit(fieldName, draftKey, editingFlagKey) {
     const app = getApp();
     const previousValue = this.data.userProfile[fieldName] || "";
-    const draftValue = (this.data[draftKey] || "").trim();
-    const nextValue = draftValue || previousValue;
+    const rawDraft = this.data[draftKey] || "";
+    const draftValue =
+      fieldName === "nickname"
+        ? clampNickname(rawDraft).trim()
+        : fieldName === "signature"
+          ? clampSignature(rawDraft).trim()
+          : rawDraft.trim();
+    /** 签名允许清空；昵称空则回落为默认「用户名」（与 profile-nickname 一致） */
+    const nextValue =
+      fieldName === "signature"
+        ? draftValue
+        : fieldName === "nickname"
+          ? draftValue || "用户名"
+          : draftValue || previousValue;
     const ok = app && typeof app.setUserProfile === "function" ? app.setUserProfile({ [fieldName]: nextValue }) : false;
     if (!ok) {
       this.setData({
@@ -193,15 +206,20 @@ Page({
   },
 
   goTimeReport() {
-    const key = momentScore.weekMondayKey(momentScore.getIsoWeekMonday(new Date()));
     wx.navigateTo({
-      url: `/subpkg/weekly-report/index?weekStart=${encodeURIComponent(key)}`,
+      url: "/subpkg/weekly-report-list/index",
+    });
+  },
+
+  goReflectionList() {
+    wx.navigateTo({
+      url: "/subpkg/reflection-list/index",
     });
   },
 
   goBodyToday() {
     wx.navigateTo({
-      url: "/subpkg/body-report/index",
+      url: "/subpkg/body-report-list/index",
     });
   },
 

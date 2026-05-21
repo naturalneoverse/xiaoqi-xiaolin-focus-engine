@@ -23,6 +23,7 @@ function normalizeRoute(route) {
   return t.startsWith("/") ? t.slice(1) : t;
 }
 const STORAGE_KEYS = require("./config/storageKeys");
+const { clampNickname, clampSignature } = require("./config/profileTextLimits");
 const DEFAULT_USER_PROFILE = {
   avatarUrl: "/images/transparent background/avatar.png",
   nickname: "用户名",
@@ -129,11 +130,13 @@ if (!wx.__GLOBAL_SAFE_AREA_PATCHED__) {
     const originalData = options.data || {};
     const originalOnLoad = options.onLoad;
     const originalOnShow = options.onShow;
+    const originalOnHide = options.onHide;
 
     options.data = {
       ...originalData,
       _globalSafeAreaStyle: originalData._globalSafeAreaStyle || "",
       _globalImagePlaceholder: originalData._globalImagePlaceholder || "/images/transparent background/avatar.png",
+      mascotAnimPaused: false,
     };
 
     options.__applyGlobalSafeArea = function applyGlobalSafeArea() {
@@ -187,8 +190,22 @@ if (!wx.__GLOBAL_SAFE_AREA_PATCHED__) {
 
     options.onShow = function wrappedOnShow(...args) {
       this.__applyGlobalSafeArea();
+      const app = getApp();
+      const paused = !!(app && app.globalData && app.globalData.mascotAnimPaused);
+      if (this.data && this.data.mascotAnimPaused !== paused) {
+        this.setData({ mascotAnimPaused: paused });
+      }
       if (typeof originalOnShow === "function") {
         originalOnShow.apply(this, args);
+      }
+    };
+
+    options.onHide = function wrappedOnHide(...args) {
+      if (this.data && !this.data.mascotAnimPaused) {
+        this.setData({ mascotAnimPaused: true });
+      }
+      if (typeof originalOnHide === "function") {
+        originalOnHide.apply(this, args);
       }
     };
 
@@ -250,6 +267,7 @@ App({
       APP_VERSION,
       /** wx.cloud.init 成功前勿调 callFunction；仅在为 true 时允许数据同步 */
       cloudInitOk: false,
+      mascotAnimPaused: false,
     };
     if (!wx.cloud) {
       console.error("请使用 2.2.3 或以上的基础库以使用云能力");
@@ -267,11 +285,14 @@ App({
       }
       if (this.globalData.cloudInitOk && this.globalData.hasLoggedIn) {
         setTimeout(() => {
-          wx.cloud
-            .callFunction({
+          const { callFunction } = require("./utils/cloudCall");
+          callFunction(
+            {
               name: "quickstartFunctions",
               data: { type: "getUserTags" },
-            })
+            },
+            8000,
+          )
             .then((res) => {
               const r = (res && res.result) || {};
               if (!r.success) return;
@@ -329,11 +350,26 @@ App({
   },
 
   onShow() {
+    this.globalData.mascotAnimPaused = false;
+    try {
+      require("./utils/mascotAnimSync").syncMascotAnimPaused(false);
+    } catch (e) {
+      /* ignore */
+    }
     try {
       const m = require("./utils/cloudDataSync");
       if (m && typeof m.runIncrementalDebounced === "function") {
         m.runIncrementalDebounced();
       }
+    } catch (e) {
+      /* ignore */
+    }
+  },
+
+  onHide() {
+    this.globalData.mascotAnimPaused = true;
+    try {
+      require("./utils/mascotAnimSync").syncMascotAnimPaused(true);
     } catch (e) {
       /* ignore */
     }
@@ -464,9 +500,16 @@ App({
 
   setUserProfile(nextPatch) {
     const previous = this.getUserProfile();
+    const patch = { ...(nextPatch || {}) };
+    if (Object.prototype.hasOwnProperty.call(patch, "nickname")) {
+      patch.nickname = clampNickname(patch.nickname != null ? String(patch.nickname) : "");
+    }
+    if (Object.prototype.hasOwnProperty.call(patch, "signature")) {
+      patch.signature = clampSignature(patch.signature != null ? String(patch.signature) : "");
+    }
     const nextProfile = {
       ...previous,
-      ...(nextPatch || {}),
+      ...patch,
     };
     try {
       wx.setStorageSync(STORAGE_KEYS.USER_PROFILE, nextProfile);

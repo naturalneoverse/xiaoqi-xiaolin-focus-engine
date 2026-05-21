@@ -81,10 +81,13 @@ page {
   gap: 12rpx;
 }
 
-.advice-mascot {
+.advice-mascot-float {
   width: 112rpx;
   height: 112rpx;
   flex-shrink: 0;
+}
+
+.advice-mascot {
   transform: scaleX(-1);
 }
 

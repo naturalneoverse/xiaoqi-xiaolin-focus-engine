@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "复盘报告",
+  "navigationBarBackgroundColor": "#EFF7FD",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#EFF7FD",
+  "backgroundColorContent": "#D6EBF7",
+  "usingComponents": {
+    "reflection-donut-score": "../../components/reflection-donut-score/index"
+  }
+}

@@ -29,10 +29,13 @@
   gap: 12rpx;
 }
 
-.mascot-image {
+.mascot-row .mascot-float-3d {
   width: 168rpx;
   height: 168rpx;
   flex-shrink: 0;
+}
+
+.mascot-image {
   transform: scaleX(-1);
 }
 

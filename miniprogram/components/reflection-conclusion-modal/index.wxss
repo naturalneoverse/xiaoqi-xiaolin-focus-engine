@@ -1,0 +1,78 @@
+@import "../../styles/mascot-float.wxss";
+
+.rc-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(24, 64, 97, 0.35);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.rc-modal {
+  width: 100%;
+  max-width: 640rpx;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 32rpx;
+  padding: 40rpx 32rpx 32rpx;
+  box-sizing: border-box;
+  box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.08);
+}
+
+.rc-stage {
+  display: flex;
+  align-items: flex-end;
+  gap: 12rpx;
+}
+
+.rc-mascot {
+  flex-shrink: 0;
+  width: 168rpx;
+  height: 168rpx;
+}
+
+.rc-mascot .mascot-float-3d {
+  width: 168rpx;
+  height: 168rpx;
+}
+
+.rc-mascot-img {
+  width: 100%;
+  height: 100%;
+}
+
+/* 小麟：头朝右、尾朝左，面向气泡 */
+.rc-mascot-face-right {
+  transform: scaleX(-1);
+}
+
+.rc-bubble {
+  flex: 1;
+  min-width: 0;
+}
+
+.rc-bubble chat-bubble {
+  max-width: 100%;
+}
+
+.rc-btn {
+  margin-top: 32rpx;
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 999rpx;
+  color: #ffffff !important;
+  font-size: 28rpx;
+  font-weight: 500;
+  border: none !important;
+}
+
+.rc-btn-hover {
+  opacity: 0.92;
+}

@@ -1,0 +1,36 @@
+<view class="page reflection-page list-page" style="{{_globalSafeAreaStyle}}">
+  <scroll-view class="list-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <block wx:if="{{empty}}">
+      <view class="list-empty">
+        <text class="list-empty-title">还没有复盘记录</text>
+        <text class="list-empty-desc">在任务详情中开始哲思复盘，记录会出现在这里</text>
+      </view>
+    </block>
+    <block wx:else>
+      <view
+        wx:for="{{records}}"
+        wx:key="taskId"
+        class="list-card tap-target"
+        bindtap="onTapRecord"
+        data-task-id="{{item.taskId}}"
+        data-task-title="{{item.taskTitle}}"
+      >
+        <view class="list-card-head">
+          <text class="list-task-title">{{item.taskTitle}}</text>
+          <text class="list-arrow">›</text>
+        </view>
+        <text wx:if="{{item.reportTime}}" class="list-time">{{item.reportTime}}</text>
+        <view wx:if="{{item.tags.length}}" class="tag-row">
+          <text
+            wx:for="{{item.tags}}"
+            wx:for-item="tag"
+            wx:key="id"
+            class="tag-pill"
+            style="color: {{tag.accent}}; border-color: {{tag.accent}};"
+          >{{tag.title}}</text>
+        </view>
+      </view>
+    </block>
+    <view class="list-foot-space"></view>
+  </scroll-view>
+</view>

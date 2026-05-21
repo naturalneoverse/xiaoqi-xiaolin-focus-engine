@@ -9,7 +9,7 @@ function getPriorityTagClass(text) {
 
 function getForWhomTagClass(text) {
   if (text === "自己") return "tag-berry";
-  if (text === "至亲") return "tag-lavender";
+  if (text === "至亲挚友" || text === "至亲") return "tag-lavender";
   if (text === "外缘") return "tag-sky";
   if (text === "不二") return "tag-violet";
   return "";

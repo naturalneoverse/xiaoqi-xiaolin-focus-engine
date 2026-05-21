@@ -1,0 +1,27 @@
+<view class="page reflection-page list-page" style="{{_globalSafeAreaStyle}}">
+  <scroll-view class="list-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <block wx:if="{{empty}}">
+      <view class="list-empty">
+        <text class="list-empty-title">暂无往周记录</text>
+        <text class="list-empty-desc">本周请在身心 Tab 身体入口查看；历史周有身体记录后会出现在这里</text>
+      </view>
+    </block>
+    <block wx:else>
+      <view
+        wx:for="{{rows}}"
+        wx:key="weekMondayKey"
+        class="list-card tap-target"
+        data-week-start="{{item.weekMondayKey}}"
+        bindtap="onTapRow"
+        hover-class="row-hover"
+      >
+        <view class="list-card-head">
+          <text class="list-task-title">{{item.title}}</text>
+          <text class="list-arrow">›</text>
+        </view>
+        <text class="list-time">{{item.subtitle}}</text>
+      </view>
+    </block>
+    <view class="list-foot-space"></view>
+  </scroll-view>
+</view>

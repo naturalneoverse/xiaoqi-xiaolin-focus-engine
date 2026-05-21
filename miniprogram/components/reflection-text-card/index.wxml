@@ -1,0 +1,37 @@
+<view class="reflection-text-card">
+  <text class="card-q">{{question}}</text>
+  <view class="textarea-wrap">
+    <textarea
+      class="card-textarea"
+      placeholder="{{placeholder}}"
+      placeholder-class="card-placeholder"
+      value="{{value}}"
+      maxlength="{{inputMaxLength}}"
+      auto-height
+      adjust-position
+      hold-keyboard="{{false}}"
+      show-confirm-bar="{{false}}"
+      disabled="{{disabled}}"
+      bindinput="onInput"
+    />
+    <view class="limit-row">
+      <text class="limit-tip limit-tip-corner">{{displayLength}}/{{maxLength}}</text>
+      <view
+        class="speech-mic-hit speech-mic-corner {{speechMicDisabled ? 'speech-mic-hit-disabled' : ''}}"
+        data-field="{{field}}"
+        catchlongpress="onSpeechLongPress"
+        catchtouchend="onSpeechTouchEnd"
+        catchtouchcancel="onSpeechTouchEnd"
+      >
+        <view class="speech-wave {{speechRecording ? '' : 'speech-layer-hidden'}}">
+          <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+          <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+          <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+          <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+          <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+        </view>
+        <view class="speech-mic-icon {{speechRecording ? 'speech-layer-hidden' : ''}}"></view>
+      </view>
+    </view>
+  </view>
+</view>

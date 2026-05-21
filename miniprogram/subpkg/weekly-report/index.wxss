@@ -187,7 +187,14 @@ page {
 
 .mascot-bubble-wrap {
   flex: 1;
+  min-width: 0;
   margin-bottom: 34rpx;
+}
+
+.mascot-bubble-wrap chat-bubble {
+  display: block;
+  width: 100%;
+  max-width: none;
 }
 
 .mascot-bubble {
@@ -245,11 +252,9 @@ page {
   transform: translateY(14rpx);
 }
 
-.mascot-image {
+.mascot-image-wrap .mascot-float-3d {
   width: 160rpx;
   height: 210rpx;
-  display: block;
-  transform: scaleX(1);
 }
 
 .actions {

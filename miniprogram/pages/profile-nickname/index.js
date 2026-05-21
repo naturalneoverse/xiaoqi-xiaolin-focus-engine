@@ -1,4 +1,5 @@
 const dailyCheckIn = require("../../utils/dailyCheckIn");
+const { clampNickname } = require("../../config/profileTextLimits");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 Page({
@@ -22,14 +23,14 @@ Page({
 
   onInput(e) {
     this.setData({
-      value: (e.detail && e.detail.value) || "",
+      value: clampNickname((e.detail && e.detail.value) || ""),
     });
   },
 
   save() {
     const app = getApp();
-    const raw = (this.data.value || "").trim();
-    const next = raw ? raw.slice(0, 20) : "用户名";
+    const raw = clampNickname(this.data.value || "").trim();
+    const next = raw ? raw : "用户名";
     if (!app || typeof app.setUserProfile !== "function" || !app.setUserProfile({ nickname: next })) {
       wx.showToast({ title: "保存失败", icon: "none" });
       return;

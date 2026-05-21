@@ -1,0 +1,9 @@
+page {
+  background: linear-gradient(180deg, #eff7fd 0%, #e1f0fa 50%, #d6ebf7 100%);
+  background-color: #eff7fd;
+}
+
+.reflection-page {
+  min-height: 100vh;
+  box-sizing: border-box;
+}

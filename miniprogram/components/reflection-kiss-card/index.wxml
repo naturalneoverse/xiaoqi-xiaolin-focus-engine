@@ -1,0 +1,47 @@
+<view class="reflection-kiss-card">
+  <text class="kiss-title">{{title}}</text>
+  <block wx:for="{{rows}}" wx:key="key">
+    <view class="kiss-row {{item.emphasize ? 'kiss-row-emphasis' : ''}}" style="{{item.emphasize ? 'border-left-color:' + accent + ';' : ''}}">
+      <text class="kiss-label">{{item.label}}</text>
+      <view class="textarea-wrap">
+        <textarea
+          class="kiss-textarea"
+          placeholder="{{item.placeholder}}"
+          placeholder-class="kiss-placeholder"
+          value="{{values[item.key]}}"
+          maxlength="{{inputMaxLength}}"
+          auto-height
+          adjust-position
+          hold-keyboard="{{false}}"
+          show-confirm-bar="{{false}}"
+          disabled="{{inputDisabledMap[field + '_' + item.key]}}"
+          data-key="{{item.key}}"
+          bindinput="onInput"
+        />
+        <view class="limit-row">
+          <text class="limit-tip">{{lengthMap[item.key] || 0}}/{{maxLength}}</text>
+          <view
+            class="speech-mic-hit {{speechMicMap[field + '_' + item.key] ? 'speech-mic-hit-disabled' : ''}}"
+            data-key="{{item.key}}"
+            catchlongpress="onSpeechLongPress"
+            catchtouchend="onSpeechTouchEnd"
+            catchtouchcancel="onSpeechTouchEnd"
+          >
+            <view
+              wx:if="{{speechRecordingKey === field + '_' + item.key}}"
+              class="speech-wave"
+              style="--accent: {{accent}};"
+            >
+              <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+              <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+              <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+              <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+              <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+            </view>
+            <view wx:else class="speech-mic-icon" style="--accent: {{accent}};"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,8 @@
+{
+  "name": "getReply",
+  "type": "cloudfunction",
+  "runtime": "Nodejs16",
+  "installDependency": true,
+  "entry": "index.js",
+  "description": "按三位 code 查询 taskReply 集合，返回陪伴文案"
+}

@@ -50,9 +50,11 @@ Page({
     signalNarrative: "",
   },
 
-  onLoad() {
+  onLoad(options) {
     if (!requireLoginOnLoad()) return;
     wx.setNavigationBarTitle({ title: "身体边界报告" });
+    const raw = options && options.weekStart ? decodeURIComponent(String(options.weekStart)) : "";
+    this.__weekMondayKey = raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
     this.loadWeeklyReport();
   },
 
@@ -72,7 +74,19 @@ Page({
   },
 
   loadWeeklyReport() {
-    const { start, end } = bodyStats.getWeekRangeContaining(new Date());
+    let start;
+    let end;
+    const mon = this.__weekMondayKey ? momentScore.mondayDateFromKey(this.__weekMondayKey) : null;
+    if (mon) {
+      start = mon;
+      end = new Date(mon);
+      end.setDate(mon.getDate() + 6);
+      end.setHours(23, 59, 59, 999);
+    } else {
+      const r = bodyStats.getWeekRangeContaining(new Date());
+      start = r.start;
+      end = r.end;
+    }
     const rangeText = momentScore.formatCalendarRangeChinese(start, end);
     let allRecords = [];
     try {

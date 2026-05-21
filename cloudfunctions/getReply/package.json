@@ -1,0 +1,12 @@
+{
+  "name": "getReply",
+  "version": "1.0.0",
+  "description": "按 code 查询 taskReply 陪伴文案",
+  "main": "index.js",
+  "scripts": {
+    "smoke": "node smoke-local.js"
+  },
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

@@ -1,12 +1,8 @@
-const OPTIONS = [
-  { key: "自己", desc: "照顾身体、日常事务、自己的事" },
-  { key: "至亲", desc: "家人、长辈、孩子、伴侣" },
-  { key: "外缘", desc: "老板、同事、客户、社会事务" },
-  { key: "不二", desc: "自他不二，同时为自己也为别人" },
-];
-
+const { CIRCLE_OPTIONS } = require("../../config/taskQuizChoices");
 const { parsePayload } = require("../../utils/parsePayload");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
+
+const OPTIONS = CIRCLE_OPTIONS.map((o) => ({ key: o.title, desc: o.desc, id: o.id }));
 
 Page({
   data: {
@@ -40,8 +36,16 @@ Page({
       wx.showToast({ title: "请选择一项", icon: "none" });
       return;
     }
+    const row = OPTIONS.find((o) => o.key === selected);
     const nextPayload = encodeURIComponent(
-      JSON.stringify({ ...payload, forWhom: selected }),
+      JSON.stringify({
+        ...payload,
+        forWhom: selected,
+        quizSelections: {
+          ...(payload.quizSelections || {}),
+          circle: row ? row.id : 0,
+        },
+      }),
     );
     wx.navigateTo({
       url: `/pages/task-why/index?payload=${nextPayload}`,

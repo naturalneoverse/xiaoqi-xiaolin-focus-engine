@@ -1,0 +1,37 @@
+<view class="donut-root">
+  <view class="donut-card">
+    <text class="donut-card-title">哲思复盘</text>
+    <view class="donut-stage">
+      <canvas type="2d" id="donutCanvas" class="donut-canvas"></canvas>
+      <view class="donut-center">
+        <view class="donut-center-mascots">
+          <view class="donut-mascot">
+            <view class="donut-mascot-breathe {{mascotAnimPaused ? 'donut-mascot-breathe-paused' : ''}}">
+              <image
+                class="donut-mascot-img"
+                src="/images/transparent background/xiaoqi.png"
+                mode="aspectFit"
+                binderror="onDonutMascotImgError"
+              />
+            </view>
+          </view>
+          <view class="donut-mascot">
+            <view class="donut-mascot-breathe {{mascotAnimPaused ? 'donut-mascot-breathe-paused' : ''}}">
+              <image
+                class="donut-mascot-img"
+                src="/images/transparent background/xiaolin.png"
+                mode="aspectFit"
+                binderror="onDonutMascotImgError"
+              />
+            </view>
+          </view>
+        </view>
+      </view>
+      <text class="donut-label donut-label--tl">从看见到行动</text>
+      <text class="donut-label donut-label--tr">看见真实</text>
+      <text class="donut-label donut-label--br">听见自己</text>
+      <text class="donut-label donut-label--bl">找回节奏</text>
+    </view>
+    <view class="donut-flow">觉察 → 觉醒 → 解绑 → 行动</view>
+  </view>
+</view>

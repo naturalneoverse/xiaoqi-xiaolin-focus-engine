@@ -1,4 +1,5 @@
 const dailyCheckIn = require("../../utils/dailyCheckIn");
+const { clampSignature } = require("../../config/profileTextLimits");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 Page({
@@ -22,14 +23,14 @@ Page({
 
   onInput(e) {
     this.setData({
-      value: (e.detail && e.detail.value) || "",
+      value: clampSignature((e.detail && e.detail.value) || ""),
     });
   },
 
   save() {
     const app = getApp();
-    const raw = (this.data.value || "").trim();
-    const next = raw ? raw.slice(0, 60) : "我的个性签名";
+    const raw = clampSignature(this.data.value || "").trim();
+    const next = raw;
     if (!app || typeof app.setUserProfile !== "function" || !app.setUserProfile({ signature: next })) {
       wx.showToast({ title: "保存失败", icon: "none" });
       return;

@@ -352,7 +352,7 @@ page {
   text-align: left;
 }
 
-.advice-mascot {
+.advice-mascot-float {
   width: 220rpx;
   height: 220rpx;
   flex-shrink: 0;

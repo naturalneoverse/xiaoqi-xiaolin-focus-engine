@@ -1,0 +1,29 @@
+<view class="page reflection-page" style="{{_globalSafeAreaStyle}}">
+  <view class="select-body">
+    <text wx:if="{{taskTitle}}" class="task-name">{{taskTitle}}</text>
+
+    <view class="quadrant-grid">
+      <view
+        wx:for="{{quadrants}}"
+        wx:key="id"
+        class="quadrant-card tap-target {{item.completed ? 'quadrant-card--completed' : ''}}"
+        style="background: {{item.bg}};"
+        bindtap="onTapQuadrant"
+        data-id="{{item.id}}"
+      >
+        <view class="quadrant-card-inner">
+          <text class="q-title">{{item.title}}</text>
+          <text class="q-sub">{{item.sub1}}</text>
+          <text class="q-sub">{{item.sub2}}</text>
+          <text class="q-agent">{{item.agent}}</text>
+        </view>
+      </view>
+    </view>
+
+    <text class="guide">选一个你最想开始的方向</text>
+
+    <view wx:if="{{showReportEntry}}" class="report-entry tap-target" bindtap="onTapReport">
+      <text class="report-entry-text">查看复盘报告</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,66 @@
+@import "./reflection-page.wxss";
+
+.quadrant-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.quadrant-scroll {
+  flex: 1;
+  height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.quadrant-scroll-inner {
+  padding: 24rpx 40rpx calc(32rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.quadrant-soon {
+  margin-top: 120rpx;
+  text-align: center;
+}
+
+.quadrant-soon-text {
+  font-size: 28rpx;
+  color: #8a9cb0;
+  line-height: 1.6;
+}
+
+.quadrant-footer {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 20;
+  padding: 16rpx 40rpx calc(24rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(239, 247, 253, 0) 0%, rgba(239, 247, 253, 0.92) 24%);
+}
+
+.quadrant-submit {
+  width: 100%;
+  max-width: 700rpx;
+  margin: 0 auto;
+  height: 96rpx;
+  line-height: 96rpx;
+  border-radius: 48rpx;
+  background: #12598f !important;
+  color: #ffffff !important;
+  font-size: 32rpx;
+  font-weight: 500;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.quadrant-submit::after {
+  display: none !important;
+  border: none !important;
+}
+
+.quadrant-submit-hover {
+  background: #0e4a75 !important;
+  opacity: 0.96;
+}

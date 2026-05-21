@@ -1,0 +1,98 @@
+<view class="page reflection-page report-page" style="{{_globalSafeAreaStyle}}">
+  <scroll-view class="report-scroll" scroll-y>
+    <view class="report-head">
+      <text class="report-task-name">{{taskTitle}}</text>
+      <text wx:if="{{reportTime}}" class="report-time">最近复盘 · {{reportTime}}</text>
+    </view>
+
+    <reflection-donut-score
+      wx:if="{{taskId}}"
+      class="report-donut-wrap"
+      scores="{{donutScores}}"
+      mascotAnimPaused="{{mascotAnimPaused}}"
+    />
+
+    <view wx:if="{{reportIntro}}" class="report-combo report-combo--intro">
+      <text class="report-combo-text">{{reportIntro}}</text>
+    </view>
+
+    <view
+      wx:for="{{sections}}"
+      wx:key="id"
+      class="report-section {{item.filled ? 'report-section--filled' : ''}}"
+      style="background: {{item.bg}};"
+    >
+      <view class="section-head">
+        <view class="section-title-row">
+          <text class="section-title" style="color: {{item.accent}};">{{item.title}}</text>
+          <text wx:if="{{item.agentLabel}}" class="section-agent">{{item.agentLabel}}</text>
+        </view>
+        <text wx:if="{{item.subtitle}}" class="section-sub">{{item.subtitle}}</text>
+        <text wx:if="{{item.filled && item.completedAt}}" class="section-time">{{item.completedAt}}</text>
+      </view>
+
+      <view class="section-body">
+        <block wx:if="{{!item.filled}}">
+          <text class="section-empty">{{item.emptyLabel}}</text>
+        </block>
+        <block wx:elif="{{item.echoParagraphs && item.echoParagraphs.length}}">
+          <view
+            wx:for="{{item.echoParagraphs}}"
+            wx:for-item="echo"
+            wx:key="echoKey"
+            class="echo-para-wrap"
+          >
+            <text class="echo-para">{{echo.echoText}}</text>
+          </view>
+        </block>
+        <text wx:else class="section-empty">{{item.emptyLabel}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{generalEcho && generalEcho.length}}" class="report-section report-section--closing">
+      <view class="section-head">
+        <text class="section-title section-title--closing">整卷回响</text>
+        <text class="section-sub">四个象限都填满了才解锁这段</text>
+      </view>
+      <view class="section-body">
+        <view
+          wx:for="{{generalEcho}}"
+          wx:for-item="gpara"
+          wx:for-index="gi"
+          wx:key="*this"
+          class="echo-para-wrap"
+        >
+          <text class="echo-para echo-para--closing">{{gpara}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{reportOutro}}" class="report-combo report-combo--outro">
+      <text class="report-combo-text report-combo-text--outro">{{reportOutro}}</text>
+    </view>
+
+    <view wx:if="{{taskId}}" class="report-restart-wrap">
+      <button
+        class="report-restart-btn"
+        plain="{{true}}"
+        hover-class="report-restart-btn-hover"
+        catchtap="onTapRestartReflection"
+      >🔄 重新复盘</button>
+    </view>
+
+    <view class="report-foot-space"></view>
+  </scroll-view>
+
+  <view wx:if="{{hasAnyQuadrant}}" class="report-footer">
+    <button
+      class="report-save-btn"
+      plain
+      loading="{{saving}}"
+      disabled="{{saving}}"
+      hover-class="report-save-btn-hover"
+      bindtap="onSaveAlbum"
+    >保存到相册</button>
+  </view>
+
+  <canvas type="2d" id="reflectionReportCanvas" class="report-canvas-offscreen"></canvas>
+</view>

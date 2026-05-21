@@ -1,4 +1,4 @@
-<view class="page" style="{{_globalSafeAreaStyle}}">
+<view class="page {{showReflectionBtn ? 'page-with-reflection-btn' : ''}}" style="{{_globalSafeAreaStyle}}">
   <view class="top-nav">
     <view class="close-btn tap-target" catchtap="goHome">
       <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
@@ -61,22 +61,46 @@
     </view>
   </view>
 
+  <view wx:if="{{showReflectionBtn}}" class="reflection-entry-wrap">
+    <view class="mascot-float-3d reflection-entry-float {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+      <button class="reflection-entry-btn" plain hover-class="reflection-entry-btn-hover" bindtap="goReflection">
+        <text class="reflection-entry-text">哲思复盘</text>
+      </button>
+    </view>
+  </view>
+
   <view wx:if="{{showMascotModal}}" class="mascot-mask" bindtap="closeMascotModal">
     <view class="mascot-modal" catchtap="noop">
       <text class="mascot-title">提交成功</text>
       <text class="mascot-subtitle">小麒来为您庆祝啦</text>
       <view class="mascot-stage">
+        <view class="mascot-image-wrap">
+          <view class="mascot-float-3d {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+            <image class="mascot-image mascot-float-img" src="{{xiaoqiImage}}" mode="aspectFit" binderror="onImageError" data-err-field="xiaoqiImage" />
+          </view>
+        </view>
         <view class="mascot-bubble-wrap">
+          <view
+            wx:if="{{companionBubbleLines && companionBubbleLines.length}}"
+            class="companion-bubble-card"
+          >
+            <view class="companion-bubble-body">
+              <text
+                wx:for="{{companionBubbleLines}}"
+                wx:key="index"
+                class="companion-bubble-line"
+              >{{item}}</text>
+            </view>
+          </view>
           <chat-bubble
+            wx:else
             text="{{mascotBubbleText}}"
             color="#b7d6ea"
             arrowPosition="left"
             keepManualBreak="{{true}}"
             maxLength="{{200}}"
+            size="lg"
           />
-        </view>
-        <view class="mascot-image-wrap">
-          <image class="mascot-image" src="{{xiaoqiImage}}" mode="aspectFit" binderror="onImageError" data-err-field="xiaoqiImage" />
         </view>
       </view>
       <button class="mascot-btn" bindtap="closeMascotModal">知道了</button>

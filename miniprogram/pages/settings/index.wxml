@@ -33,7 +33,7 @@
     </view>
     <view class="line"></view>
     <view class="cell" bindtap="onClearCache">
-      <text class="cell-title">清除缓存</text>
+      <text class="cell-title">清除数据</text>
       <text class="arrow">></text>
     </view>
     <view class="line"></view>

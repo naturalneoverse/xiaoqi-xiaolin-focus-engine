@@ -8,16 +8,24 @@ const mascotCopyStats = require("../../utils/mascotCopyStats");
 const { raceResolve, MASCOT_ENGINE_TIMEOUT_MS } = require("../../utils/raceResolve");
 const { goSleepHome } = require("../../utils/goTabHome");
 const reminderSchedule = require("../../utils/reminderSchedule");
+const { formatCompanionBubbleLines } = require("../../utils/formatCompanionBubble");
 const STATUS_OPTIONS = ["进行中", "已完成", "已延期", "已取消"];
 
 /** 提交成功气泡：两行小麒模式（与副标题「小麒来为您庆祝啦」分工） */
 const TASK_SUCCESS_LINE1 = "恭喜您完成全部选择～";
+const TASK_SUCCESS_INTRO_CORE = "恭喜您完成全部选择";
 const TASK_SUCCESS_LINE2_DEFAULT = "小麒陪你从当下这一刻开始，不必急着证明什么。";
+
+/** 云端 taskReply.fullPrefix 已含祝贺语时，不再由前端重复拼接 */
+function hasTaskSuccessIntro(text) {
+  const s = String(text || "").trim();
+  return s.indexOf(TASK_SUCCESS_INTRO_CORE) === 0;
+}
 
 function buildTaskSuccessBubble(secondLine) {
   const s = (secondLine || "").trim();
   if (!s) return `${TASK_SUCCESS_LINE1}\n${TASK_SUCCESS_LINE2_DEFAULT}`;
-  if (s.indexOf(TASK_SUCCESS_LINE1) === 0) return s;
+  if (s.indexOf(TASK_SUCCESS_LINE1) === 0 || hasTaskSuccessIntro(s)) return s;
   return `${TASK_SUCCESS_LINE1}\n${s}`;
 }
 
@@ -26,6 +34,11 @@ function getStatusClass(statusText) {
   if (statusText === "已延期") return "status-value-delayed";
   if (statusText === "已取消") return "status-value-cancelled";
   return "";
+}
+
+/** 哲思复盘：除已取消外均可进入；不弹窗、不 Toast 引导 */
+function canShowReflectionEntry(statusText) {
+  return statusText !== "已取消";
 }
 
 function toCompletedAt() {
@@ -80,7 +93,11 @@ Page({
     detailReminderFreqOptions: ["不重复", "每天"],
     detailReminderFreqIndex: 0,
     tags: [],
+    showReflectionBtn: false,
+    mascotAnimPaused: false,
     showMascotModal: false,
+    /** 云端陪伴语拆行展示；有值时用圆角卡片，无值时用 chat-bubble */
+    companionBubbleLines: null,
     xiaoqiImage: "/images/transparent background/xiaoqi.png",
     mascotBubbleText:
       "恭喜您完成全部选择～\n认真梳理轻重、对象与初心，\n慢慢理清生活的秩序感，\n每一次向内梳理，都是在好好爱自己。",
@@ -121,6 +138,7 @@ Page({
         taskContent: task.content || "暂无描述",
         dateText,
         statusText,
+        showReflectionBtn: canShowReflectionEntry(statusText),
         statusIndex: Math.max(0, STATUS_OPTIONS.indexOf(statusText)),
         statusClass: getStatusClass(statusText),
         reminderDate: rd,
@@ -135,7 +153,7 @@ Page({
           : this.data.mascotBubbleText,
       });
       if (showSuccess) {
-        this.loadCreateMascotTextFromCategory(tagTexts);
+        this.applyCreateSuccessBubble(task, tagTexts);
       }
       return;
     }
@@ -145,14 +163,16 @@ Page({
     const prf = reminderSchedule.normalizeReminderFrequency(payload.reminderFrequency);
     const prt = payload.reminderTime || "";
     const prd = prt ? reminderSchedule.computeNextReminderDateYMD(prt) : "";
+    const payloadStatus = payload.statusText || "进行中";
     this.setData({
       taskId: payload.taskId || "",
       taskName: payload.taskName || "未命名任务",
       taskContent: payload.taskContent || "暂无描述",
       dateText: payload.dateValue || "未设置",
-      statusText: payload.statusText || "进行中",
-      statusIndex: Math.max(0, STATUS_OPTIONS.indexOf(payload.statusText || "进行中")),
-      statusClass: getStatusClass(payload.statusText || "进行中"),
+      statusText: payloadStatus,
+      showReflectionBtn: !!(payload.taskId) && canShowReflectionEntry(payloadStatus),
+      statusIndex: Math.max(0, STATUS_OPTIONS.indexOf(payloadStatus)),
+      statusClass: getStatusClass(payloadStatus),
       reminderDate: prd,
       reminderTime: prt,
       reminderFrequency: prf,
@@ -165,8 +185,41 @@ Page({
         : this.data.mascotBubbleText,
     });
     if (showSuccess) {
-      this.loadCreateMascotTextFromCategory(tags);
+      const companion = String(payload.companionText || "").trim();
+      if (companion) {
+        this.setCompanionBubbleDisplay(companion);
+      } else {
+        this.loadCreateMascotTextFromCategory(tags);
+      }
     }
+  },
+
+  /**
+   * 云端陪伴语：首句 / 前缀余下 / reply 分行，左对齐，原文不删减。
+   * @returns {boolean} 是否已用拆行卡片展示
+   */
+  setCompanionBubbleDisplay(companionText) {
+    const lines = formatCompanionBubbleLines(companionText);
+    if (lines && lines.length) {
+      this.setData({ companionBubbleLines: lines, mascotBubbleText: "" });
+      return true;
+    }
+    this.setData({
+      companionBubbleLines: null,
+      mascotBubbleText: buildTaskSuccessBubble(companionText),
+    });
+    return false;
+  },
+
+  /** 优先展示 taskReply 个性化陪伴语；无则回退 mascotEngine */
+  applyCreateSuccessBubble(task, tagTexts) {
+    const companion = String((task && task.companionText) || "").trim();
+    if (companion) {
+      this.setCompanionBubbleDisplay(companion);
+      return;
+    }
+    this.setData({ companionBubbleLines: null });
+    this.loadCreateMascotTextFromCategory(tagTexts);
   },
 
   loadCreateMascotTextFromCategory(tagTexts) {
@@ -175,6 +228,7 @@ Page({
     const stats = mascotCopyStats.buildTaskCreateStats(tasks, taskCategory);
     const localLine = mascotCopyClient.composeLocalCopy("task_create", stats).text;
     this.setData({
+      companionBubbleLines: null,
       mascotBubbleText: buildTaskSuccessBubble(localLine || TASK_SUCCESS_LINE2_DEFAULT),
     });
     raceResolve(
@@ -185,11 +239,13 @@ Page({
         if (!res) return;
         if (res.infraError) {
           this.setData({
+            companionBubbleLines: null,
             mascotBubbleText: buildTaskSuccessBubble(TASK_SUCCESS_LINE2_DEFAULT),
           });
           return;
         }
         this.setData({
+          companionBubbleLines: null,
           mascotBubbleText: buildTaskSuccessBubble(res.text),
         });
       })
@@ -210,6 +266,7 @@ Page({
 
     this.setData({
       statusText: nextStatus,
+      showReflectionBtn: !!this.data.taskId && canShowReflectionEntry(nextStatus),
       statusIndex: index,
       statusClass: getStatusClass(nextStatus),
       reminderDate: nextReminderDate,
@@ -309,6 +366,14 @@ Page({
       reminderDate,
       reminderTime: this.data.reminderTime,
       reminderFrequency,
+    });
+  },
+
+  goReflection() {
+    const { taskId, taskName, statusText } = this.data;
+    if (!taskId || !canShowReflectionEntry(statusText)) return;
+    wx.navigateTo({
+      url: `/subpkg/reflection-select/index?taskId=${encodeURIComponent(taskId)}&taskTitle=${encodeURIComponent(taskName || "")}`,
     });
   },
 

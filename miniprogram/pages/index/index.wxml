@@ -101,6 +101,8 @@
       <text class="advice-tag">守护者建议</text>
       <text class="advice-text">“深呼吸，感受此时此刻的空气。你的身体正在通过平静来积蓄下一次爆发的力量。今天也很棒，再坚持一下。”</text>
     </view>
-    <image class="advice-mascot" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+    <view class="mascot-float-3d advice-mascot-float {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+      <image class="advice-mascot mascot-float-img" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+    </view>
   </view>
 </view>

@@ -1,0 +1,76 @@
+.reflection-single-card {
+  margin-bottom: 24rpx;
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 40rpx;
+  padding: 48rpx;
+  box-sizing: border-box;
+  box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.06);
+}
+
+.card-q {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #184061;
+  line-height: 1.45;
+  margin-bottom: 24rpx;
+}
+
+.option {
+  border: 2rpx solid #e1e5ea;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+  transition: transform 0.15s ease;
+}
+
+.option:last-child {
+  margin-bottom: 0;
+}
+
+.option-hover {
+  transform: scale(0.98);
+}
+
+.check {
+  width: 36rpx;
+  height: 36rpx;
+  border: 2rpx solid #c5d0db;
+  flex-shrink: 0;
+  margin-top: 4rpx;
+  box-sizing: border-box;
+}
+
+.check-round {
+  border-radius: 50%;
+}
+
+.check-selected {
+  border-color: transparent;
+  background: var(--accent, #12598f);
+  position: relative;
+}
+
+.check-selected::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 10rpx;
+  height: 18rpx;
+  border-right: 3rpx solid #fff;
+  border-bottom: 3rpx solid #fff;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.option-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #184061;
+  line-height: 1.6;
+}

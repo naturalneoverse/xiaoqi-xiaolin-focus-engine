@@ -1,0 +1,32 @@
+function expandVal(values, key) {
+  if (!values || !key) return "";
+  return values[key] || "";
+}
+
+function expandLen(lengthMap, key) {
+  if (!lengthMap || !key) return 0;
+  return lengthMap[key] || 0;
+}
+
+function expandMeta(metaMap, optionId) {
+  if (!metaMap || !optionId) return null;
+  return metaMap[optionId] || null;
+}
+
+function speechKey(field, key) {
+  if (!field || !key) return "";
+  return field + "_" + key;
+}
+
+function isRecording(recordingKey, field, key) {
+  if (!recordingKey || !field || !key) return false;
+  return recordingKey === field + "_" + key;
+}
+
+module.exports = {
+  expandVal: expandVal,
+  expandLen: expandLen,
+  expandMeta: expandMeta,
+  speechKey: speechKey,
+  isRecording: isRecording,
+};

@@ -1,0 +1,75 @@
+<view class="page page--quiz-multi" style="{{_globalSafeAreaStyle}}">
+  <scroll-view class="quiz-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="quiz-stack">
+      <view
+        wx:for="{{sections}}"
+        wx:for-item="section"
+        wx:key="key"
+        class="card quiz-card"
+      >
+        <view class="title-row">
+          <view class="title-main">
+            <image
+              class="title-icon {{section.iconClass}}"
+              src="{{section.icon}}"
+              mode="aspectFit"
+              binderror="onImageError"
+            />
+            <text class="title">{{section.title}}</text>
+          </view>
+        </view>
+        <view class="list">
+          <view
+            wx:for="{{section.options}}"
+            wx:for-item="opt"
+            wx:key="id"
+            class="item {{selections[section.key] === opt.id ? 'item-selected' : ''}}"
+            data-section="{{section.key}}"
+            data-id="{{opt.id}}"
+            bindtap="onChoose"
+          >
+            <view>
+              <text class="item-title">{{opt.title}}</text>
+              <text class="item-desc">{{opt.desc}}</text>
+            </view>
+            <text class="mark">{{selections[section.key] === opt.id ? "✓" : "○"}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{companionText}}" class="companion-card">
+        <text class="companion-label">小麒陪伴</text>
+        <text class="companion-text" user-select>{{companionText}}</text>
+        <text wx:if="{{quizCode}}" class="companion-code">组合码 {{quizCode}}</text>
+        <view wx:if="{{insightText}}" class="insight-row">
+          <text class="companion-label">心境一语</text>
+          <text class="insight-text" user-select>{{insightText}}</text>
+        </view>
+        <button
+          wx:elif="{{quizCode && !insightLoading}}"
+          class="btn btn-insight"
+          plain
+          bindtap="onTapInsight"
+          disabled="{{loadingCopy}}"
+        >听听小麒怎么说</button>
+        <button wx:elif="{{insightLoading}}" class="btn btn-insight" plain loading disabled>生成中…</button>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="tip">
+    先看清轻重、圈层与行事层次，再为小麒留一句陪伴。
+  </view>
+
+  <view class="actions actions--quiz">
+    <button class="btn btn-light" bindtap="goPrev" disabled="{{saveSubmitting || loadingCopy}}">上一步</button>
+    <button
+      class="btn"
+      bindtap="onPrimaryAction"
+      disabled="{{saveSubmitting || loadingCopy}}"
+      loading="{{loadingCopy && !saveSubmitting}}"
+    >
+      {{primaryBtnText}}
+    </button>
+  </view>
+</view>

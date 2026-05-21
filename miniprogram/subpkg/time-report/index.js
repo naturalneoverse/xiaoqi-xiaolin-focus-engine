@@ -36,6 +36,7 @@ function buildGroups(doneTasks) {
     if (!dateKey) return;
     if (!map[dateKey]) map[dateKey] = [];
     map[dateKey].push({
+      taskId: task.id || "",
       name: task.title,
       tag: (task.tags && task.tags[0] && task.tags[0].text) || "任务",
     });
@@ -161,6 +162,17 @@ Page({
     groups[index].expanded = !groups[index].expanded;
     this.setData({
       pastTaskGroups: groups,
+    });
+  },
+
+  goPastTaskDetail(e) {
+    const taskId = e.currentTarget.dataset.taskId;
+    if (!taskId) {
+      wx.showToast({ title: "任务信息缺失", icon: "none" });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/task-detail/index?taskId=${encodeURIComponent(String(taskId))}`,
     });
   },
 });

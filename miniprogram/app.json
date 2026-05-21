@@ -13,6 +13,7 @@
     "pages/body-sport/index",
     "pages/body/index",
     "pages/task-create/index",
+    "pages/task-quiz/index",
     "pages/reminder-test/index",
     "pages/task-priority/index",
     "pages/task-for-whom/index",
@@ -32,10 +33,16 @@
         "help/index",
         "about/index",
         "body-report/index",
+        "body-report-list/index",
         "today-report/index",
         "time-report/index",
         "weekly-report/index",
-        "poster/index"
+        "weekly-report-list/index",
+        "poster/index",
+        "reflection-select/index",
+        "reflection-quadrant/index",
+        "reflection-report/index",
+        "reflection-list/index"
       ]
     }
   ],

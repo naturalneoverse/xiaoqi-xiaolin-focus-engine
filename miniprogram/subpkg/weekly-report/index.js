@@ -1,10 +1,13 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const momentScore = require("../../utils/momentScore");
-const mascotCopyClient = require("../../utils/mascotCopyClient");
-const mascotCopyStats = require("../../utils/mascotCopyStats");
-const mascotEngineClient = require("../../utils/mascotEngineClient");
-const { raceResolve, MASCOT_ENGINE_TIMEOUT_MS } = require("../../utils/raceResolve");
+const timeWeaveWeekStats = require("../../utils/timeWeaveWeekStats");
+const {
+  fetchTimeWeaveCopy,
+  composeXiaolinBubbleText,
+  localLine,
+  FALLBACK_NEUTRAL,
+} = require("../../utils/getTimeWeaveCopyClient");
 
 /** 转给朋友 / 分享图内文案：引号已去除；句末标点按产品保留 */
 const WEEKLY_SHARE_FRIEND_TITLES = [
@@ -110,47 +113,39 @@ Page({
       momentScore.mondayDateFromKey(this.__weekMondayKey) || momentScore.getIsoWeekMonday(new Date());
     const refNow = new Date();
     const agg = momentScore.aggregateMomentScoreForWeek(tasks, monday, refNow);
-    const { doneCount, momentScore: ms, distTasks } = agg;
-    const createdCount = momentScore.countCreatedInWeek(tasks, monday);
-    const dist = momentScore.distributionRatios(distTasks || []);
-    const stats = mascotCopyStats.buildWeeklyTimeStats(tasks, monday, refNow);
+    const { doneCount, momentScore: ms } = agg;
+    const weave = timeWeaveWeekStats.buildTimeWeaveWeekStats(tasks, monday, refNow);
 
-    const baselineMascot = mascotCopyClient.composeLocalCopy("weekly_time", stats).text;
+    const baselineBody = localLine(weave.copyKey, weave.lineIndex) || FALLBACK_NEUTRAL;
+    const baselineMascot = composeXiaolinBubbleText(baselineBody);
+
     this.setData({
       rangeLabel: momentScore.formatWeekRangeChinese(monday),
-      recordedCount: createdCount,
+      recordedCount: weave.recordedCount,
       finishedCount: doneCount,
       momentScore: ms,
-      distPriority: dist.priority,
-      distWhom: dist.whom,
-      distWhy: dist.why,
+      distPriority: weave.distPriority,
+      distWhom: weave.distWhom,
+      distWhy: weave.distWhy,
       mascotText: baselineMascot,
       mascotInfraError: false,
     });
 
-    return raceResolve(
-      mascotEngineClient.fetchMascotEngineWeeklyTime(stats),
-      MASCOT_ENGINE_TIMEOUT_MS,
-    )
-      .then((t) => {
-        if (t) {
+    return fetchTimeWeaveCopy({
+      copyKey: weave.copyKey,
+      lineIndex: weave.lineIndex,
+      weekKey: weave.weekKey,
+    })
+      .then((res) => {
+        if (res && res.text) {
           this.setData({
-            mascotText: t,
-            mascotInfraError: false,
+            mascotText: res.text,
+            mascotInfraError: !!res.degraded,
           });
-          return;
         }
-        return mascotCopyClient.fetchMascotCopy("weekly_time", stats).then((res) => {
-          if (res && res.text) {
-            this.setData({
-              mascotText: res.text,
-              mascotInfraError: !!res.infraError,
-            });
-          }
-        });
       })
       .catch((e) => {
-        console.error("weekly-report mascot", e);
+        console.error("weekly-report timeWeave copy", e);
       });
   },
 

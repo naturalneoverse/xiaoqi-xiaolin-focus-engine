@@ -9,6 +9,10 @@
   box-sizing: border-box;
 }
 
+.nickname-field-placeholder {
+  color: #8a9cb0;
+}
+
 .save-wrap {
   margin-top: 32rpx;
   background: #12598f;

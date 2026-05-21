@@ -43,8 +43,12 @@
 
   <view class="brand-wrap">
     <view class="mascot-row">
-      <image class="mascot-image mascot-left" src="/images/transparent background/xiaoqi.png" mode="aspectFit" binderror="onImageError" />
-      <image class="mascot-image mascot-right" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+      <view class="mascot-float-3d mascot-float-left {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+        <image class="mascot-image mascot-float-img" src="/images/transparent background/xiaoqi.png" mode="aspectFit" binderror="onImageError" />
+      </view>
+      <view class="mascot-float-3d mascot-float-right {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+        <image class="mascot-image mascot-float-img" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+      </view>
     </view>
     <text class="brand-slogan">用智慧爱自己  用行动爱世界</text>
   </view>

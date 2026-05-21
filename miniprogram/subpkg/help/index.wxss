@@ -163,17 +163,15 @@ page {
   gap: 0;
 }
 
-.mascot-image {
+.mascot-float-left,
+.mascot-float-right {
   width: 104rpx;
   height: 104rpx;
 }
 
-.mascot-left {
-  transform: translateY(0);
-}
-
-.mascot-right {
-  transform: translate(-24rpx, 2rpx);
+.mascot-float-right {
+  margin-left: -24rpx;
+  margin-bottom: 2rpx;
 }
 
 .brand-slogan {

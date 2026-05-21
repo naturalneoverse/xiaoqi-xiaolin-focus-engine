@@ -65,7 +65,9 @@
 
     <view class="ai-card">
       <view class="ai-avatar">
-        <image class="ai-avatar-image" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+        <view class="mascot-float-3d ai-avatar-float {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
+          <image class="ai-avatar-image mascot-float-img" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
+        </view>
       </view>
       <view class="ai-bubble-wrap">
         <chat-bubble
