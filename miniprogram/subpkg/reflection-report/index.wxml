@@ -33,7 +33,7 @@
 
       <view class="section-body">
         <block wx:if="{{!item.filled}}">
-          <text class="section-empty">{{item.emptyLabel}}</text>
+          <text class="section-empty reflection-empty-label">{{item.emptyLabel}}</text>
         </block>
         <block wx:elif="{{item.echoParagraphs && item.echoParagraphs.length}}">
           <view
@@ -45,7 +45,7 @@
             <text class="echo-para">{{echo.echoText}}</text>
           </view>
         </block>
-        <text wx:else class="section-empty">{{item.emptyLabel}}</text>
+        <text wx:else class="section-empty reflection-empty-label">{{item.emptyLabel}}</text>
       </view>
     </view>
 
@@ -71,15 +71,6 @@
       <text class="report-combo-text report-combo-text--outro">{{reportOutro}}</text>
     </view>
 
-    <view wx:if="{{taskId}}" class="report-restart-wrap">
-      <button
-        class="report-restart-btn"
-        plain="{{true}}"
-        hover-class="report-restart-btn-hover"
-        catchtap="onTapRestartReflection"
-      >🔄 重新复盘</button>
-    </view>
-
     <view class="report-foot-space"></view>
   </scroll-view>
 
@@ -92,6 +83,14 @@
       hover-class="report-save-btn-hover"
       bindtap="onSaveAlbum"
     >保存到相册</button>
+  </view>
+
+  <view wx:if="{{reportLoading}}" class="report-loading-mask">
+    <view class="report-loading-panel">
+      <view class="report-loading-line report-loading-line--lg"></view>
+      <view class="report-loading-line report-loading-line--md"></view>
+      <text class="report-loading-text">正在整理回响…</text>
+    </view>
   </view>
 
   <canvas type="2d" id="reflectionReportCanvas" class="report-canvas-offscreen"></canvas>

@@ -1,1 +1,79 @@
 @import "../../styles/reflection-quadrant-shell.wxss";
+
+.quadrant-submit-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+  background: rgba(239, 247, 253, var(--reflection-card-alpha));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.quadrant-submit-panel {
+  width: 100%;
+  max-width: 560rpx;
+  padding: 40rpx 36rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12rpx 40rpx rgba(18, 89, 143, 0.08);
+  box-sizing: border-box;
+}
+
+.quadrant-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.quadrant-skeleton-line {
+  height: 28rpx;
+  border-radius: 14rpx;
+  background: linear-gradient(
+    90deg,
+    rgba(183, 214, 234, 0.35) 0%,
+    rgba(183, 214, 234, 0.75) 50%,
+    rgba(183, 214, 234, 0.35) 100%
+  );
+  background-size: 200% 100%;
+  animation: quadrant-skeleton-shimmer 1.2s ease-in-out infinite;
+}
+
+.quadrant-skeleton-line--lg {
+  width: 100%;
+}
+
+.quadrant-skeleton-line--md {
+  width: 82%;
+}
+
+.quadrant-skeleton-line--sm {
+  width: 58%;
+}
+
+@keyframes quadrant-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.quadrant-submit-progress {
+  display: block;
+  margin-top: 32rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #4a6278;
+  line-height: 1.5;
+}
+
+.quadrant-submit[disabled] {
+  opacity: 0.72;
+}

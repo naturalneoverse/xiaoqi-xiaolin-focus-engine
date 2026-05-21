@@ -1,0 +1,39 @@
+/**
+ * 哲思复盘全局样式变量（PRD v1.0 指令 6）
+ * 四象限区块透明度、空态、报告页排版 — 禁止在业务 wxss 中零散写死同类数值
+ */
+
+page,
+.reflection-page {
+  /* 象限卡片渐变叠加强度（与 reflectionTheme.js QUADRANT_CARD_BG_ALPHA 一致） */
+  --reflection-card-alpha: 0.7;
+  --reflection-card-border-alpha: 0.7;
+
+  /* 空态（对齐 reflectionReport.EMPTY_LABEL） */
+  --reflection-empty-label-color: #8a9cb0;
+  --reflection-empty-label-size: 28rpx;
+  --reflection-empty-label-line: 1.5;
+
+  /* 哲思报告页正文排版（固定，不随 AI 输出变化） */
+  --reflection-report-font-title: 36rpx;
+  --reflection-report-font-sub: 26rpx;
+  --reflection-report-font-body: 28rpx;
+  --reflection-report-font-meta: 22rpx;
+  --reflection-report-font-combo: 28rpx;
+  --reflection-report-line-title: 1.35;
+  --reflection-report-line-sub: 1.4;
+  --reflection-report-line-body: 1.65;
+  --reflection-report-line-combo: 1.55;
+  --reflection-report-para-gap: 28rpx;
+  --reflection-report-section-radius: 28rpx;
+  --reflection-report-section-margin-h: 32rpx;
+  --reflection-report-section-gap: 24rpx;
+}
+
+.reflection-empty-label {
+  display: block;
+  font-size: var(--reflection-empty-label-size);
+  font-weight: 400;
+  color: var(--reflection-empty-label-color);
+  line-height: var(--reflection-empty-label-line);
+}

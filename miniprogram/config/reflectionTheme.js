@@ -3,9 +3,9 @@
 const NAV_BAR_BG = "#EFF7FD";
 const PAGE_GRADIENT = "linear-gradient(180deg, #EFF7FD 0%, #E1F0FA 50%, #D6EBF7 100%)";
 
-const QUADRANT_CARD_BG_ALPHA = 0.3;
-/** 已提交：渐变叠加强度（默认 0.30 → 0.72，配合 4 倍饱和度） */
-const QUADRANT_CARD_BG_ALPHA_COMPLETED = 0.72;
+/** PRD v1.0：四象限卡片底色叠加强度统一 70%（与 --reflection-card-alpha 一致） */
+const QUADRANT_CARD_BG_ALPHA = 0.7;
+const QUADRANT_CARD_BG_ALPHA_COMPLETED = 0.7;
 
 const QUADRANT_CARD_STOPS = {
   1: [
@@ -128,10 +128,10 @@ function getQuadrantCardBg(quadrantId, completed) {
 }
 
 const QUADRANT_OPTION_SELECTED_BG = {
-  1: "linear-gradient(135deg, rgba(239,247,253,0.60) 0%, rgba(214,235,247,0.60) 100%)",
-  2: "linear-gradient(135deg, rgba(245,240,250,0.60) 0%, rgba(232,223,245,0.60) 100%)",
-  3: "linear-gradient(135deg, rgba(242,248,242,0.60) 0%, rgba(216,237,216,0.60) 100%)",
-  4: "linear-gradient(135deg, rgba(253,247,240,0.60) 0%, rgba(245,232,216,0.60) 100%)",
+  1: "linear-gradient(135deg, rgba(239,247,253,0.70) 0%, rgba(214,235,247,0.70) 100%)",
+  2: "linear-gradient(135deg, rgba(245,240,250,0.70) 0%, rgba(232,223,245,0.70) 100%)",
+  3: "linear-gradient(135deg, rgba(242,248,242,0.70) 0%, rgba(216,237,216,0.70) 100%)",
+  4: "linear-gradient(135deg, rgba(253,247,240,0.70) 0%, rgba(245,232,216,0.70) 100%)",
 };
 
 /** 结语气泡边框色（与 PRD 象限色系一致） */

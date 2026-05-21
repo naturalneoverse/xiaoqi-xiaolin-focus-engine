@@ -1,4 +1,8 @@
-const { QUADRANT_CARD_STOPS } = require("../config/reflectionTheme");
+const {
+  QUADRANT_CARD_STOPS,
+  QUADRANT_CARD_BG_ALPHA,
+  QUADRANT_CARD_BG_ALPHA_COMPLETED,
+} = require("../config/reflectionTheme");
 
 const CANVAS_W = 750;
 const MARGIN_X = 40;
@@ -46,7 +50,7 @@ function lineHeight(fontSize, ratio) {
 function sectionFillColor(quadrantId, filled) {
   const stops = QUADRANT_CARD_STOPS[Number(quadrantId)] || QUADRANT_CARD_STOPS[1];
   const rgb = stops[filled ? 1 : 0];
-  const alpha = filled ? 0.72 : 0.3;
+  const alpha = filled ? QUADRANT_CARD_BG_ALPHA_COMPLETED : QUADRANT_CARD_BG_ALPHA;
   return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${alpha})`;
 }
 
@@ -211,7 +215,7 @@ function drawSection(ctx, section, y, innerW) {
   drawRoundedRect(ctx, x, y, w, blockH, 24);
   ctx.fillStyle = sectionFillColor(section.id, section.filled);
   ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,0.72)";
+  ctx.strokeStyle = `rgba(255,255,255,${QUADRANT_CARD_BG_ALPHA})`;
   ctx.lineWidth = 2;
   ctx.stroke();
 
@@ -281,9 +285,9 @@ function drawClosingBlock(ctx, paragraphs, y, innerW) {
   const w = CONTENT_W;
   const blockH = measureClosingBlock(ctx, paragraphs, innerW);
   drawRoundedRect(ctx, x, y, w, blockH, 24);
-  ctx.fillStyle = "rgba(255,255,255,0.72)";
+  ctx.fillStyle = `rgba(255,255,255,${QUADRANT_CARD_BG_ALPHA})`;
   ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,0.72)";
+  ctx.strokeStyle = `rgba(255,255,255,${QUADRANT_CARD_BG_ALPHA})`;
   ctx.lineWidth = 2;
   ctx.stroke();
 

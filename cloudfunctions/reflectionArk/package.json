@@ -1,0 +1,14 @@
+{
+  "name": "reflectionArk",
+  "version": "1.0.0",
+  "description": "哲思复盘四象限手写文本 · 火山方舟 Responses API",
+  "main": "index.js",
+  "scripts": {
+    "smoke": "node smoke-local.js",
+    "test": "node openingCheck.test.js",
+    "test:opening": "node openingCheck.test.js"
+  },
+  "dependencies": {
+    "wx-server-sdk": "~2.4.0"
+  }
+}

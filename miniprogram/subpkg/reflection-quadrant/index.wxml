@@ -70,10 +70,28 @@
       plain
       hover-class="quadrant-submit-hover"
       style="background: {{submitAccent}} !important;"
+      disabled="{{submitLoading}}"
+      loading="{{submitLoading}}"
       catchtap="onSubmit"
     >
       {{submitLabel}}
     </button>
+  </view>
+
+  <view
+    wx:if="{{submitLoading}}"
+    class="quadrant-submit-mask"
+    catchtouchmove="true"
+    catchtap="true"
+  >
+    <view class="quadrant-submit-panel">
+      <view class="quadrant-skeleton">
+        <view class="quadrant-skeleton-line quadrant-skeleton-line--lg"></view>
+        <view class="quadrant-skeleton-line quadrant-skeleton-line--md"></view>
+        <view class="quadrant-skeleton-line quadrant-skeleton-line--sm"></view>
+      </view>
+      <text class="quadrant-submit-progress">{{submitProgressText}}</text>
+    </view>
   </view>
 
   <reflection-conclusion-modal

@@ -1,6 +1,6 @@
 /**
  * 复盘报告叙事 humorous_v1_with_original（与 reflectionReportNarrativeSpec 对齐）
- * 不展示题目；先「你说：」再回响；禁复述原文、禁「应该」「必须」。
+ * 不展示题目；先「您说：」再回响；禁复述原文、禁「应该」「必须」。
  */
 
 const { getQuadrantCards, resolveSingleSelected } = require("../config/reflectionQuadrantCards");
@@ -29,7 +29,7 @@ function normalizeQuoteText(s) {
   return String(s || "").trim().replace(/\s+/g, " ");
 }
 
-const USER_PREFIX = "你说：";
+const USER_PREFIX = "您说：";
 const QUOTE_OPEN = "「";
 const QUOTE_CLOSE = "」";
 
@@ -242,13 +242,13 @@ function q4SelectionKey(selected, hasEx, hasFe, hasDe) {
 function q4MultiLead(selected) {
   const types = (selected || []).filter((id) => id && id !== "nothing");
   if (!types.length) {
-    if ((selected || []).indexOf("nothing") >= 0) return "你选择：什么也不带走";
+    if ((selected || []).indexOf("nothing") >= 0) return "您选择：什么也不带走";
     return "";
   }
   if (types.length === 1) {
-    if (types[0] === "experience") return "你想带走一个经验";
-    if (types[0] === "feeling") return "你想带走一个感受";
-    if (types[0] === "decision") return "你想带走一个决定";
+    if (types[0] === "experience") return "您想带走一个经验";
+    if (types[0] === "feeling") return "您想带走一个感受";
+    if (types[0] === "decision") return "您想带走一个决定";
   }
   const brief = types
     .map((id) => {
@@ -258,7 +258,7 @@ function q4MultiLead(selected) {
       return "";
     })
     .filter(Boolean);
-  return `你想带走：${brief.join("、")}`;
+  return `您想带走：${brief.join("、")}`;
 }
 
 /** 象限四 */
@@ -309,7 +309,7 @@ function echoQ4(cards, cardResponses) {
     const out = selKey ? QUADRANT_4.output_by_selection[selKey] : "";
     const echo = selKey ? QUADRANT_4.echo_by_selection[selKey] : "";
     if (onlyNothing && out && echo) {
-      const lead = "你选择：什么也不带走";
+      const lead = "您选择：什么也不带走";
       let body = `${out}\n${echo}`;
       const scan = `${ex} ${fe} ${de}`.trim();
       body = appendEmotion(body, scan);
@@ -394,7 +394,9 @@ function buildGeneralClosingEcho() {
 }
 
 module.exports = {
+  formatUserSays,
   buildQuadrantEchoParagraphs,
+  buildQuadrantEchoSegments: require("./reflectionReportSegments").buildQuadrantEchoSegments,
   buildGeneralClosingEcho,
   REPORT_COMBO_INTRO,
   REPORT_COMBO_OUTRO,

@@ -30,7 +30,7 @@
   box-sizing: border-box;
   box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.06);
   overflow: hidden;
-  border: 2rpx solid rgba(255, 255, 255, 0.72);
+  border: 2rpx solid rgba(255, 255, 255, var(--reflection-card-border-alpha));
   transition: background 0.25s ease, filter 0.25s ease;
 }
 

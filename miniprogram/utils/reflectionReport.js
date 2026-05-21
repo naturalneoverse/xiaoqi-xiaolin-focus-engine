@@ -2,15 +2,24 @@ const { QUADRANT_IDS } = require("../config/reflectionRecordSchema");
 const { getQuadrantMeta, getQuadrantCardBg } = require("../config/reflectionTheme");
 const reflectionManager = require("./reflectionManager");
 const {
-  buildQuadrantEchoParagraphs,
   buildGeneralClosingEcho,
   REPORT_COMBO_INTRO,
   REPORT_COMBO_OUTRO,
 } = require("./reflectionReportNarrative");
+const { assembleQuadrantEchoParagraphs, stripEmoji } = require("./reflectionReportAssembly");
+const {
+  fetchQuadrantCacheRows,
+  buildReplyMapFromRows,
+} = require("./reflectionArkCache");
 
 const EMPTY_LABEL = "暂未填写";
 
-function buildQuadrantSection(record, quadrantId) {
+/**
+ * @param {object} record
+ * @param {number} quadrantId
+ * @returns {Promise<object>}
+ */
+async function buildQuadrantSection(record, quadrantId) {
   const meta = getQuadrantMeta(quadrantId);
   const entry = record ? reflectionManager.getQuadrantEntry(record, quadrantId) : null;
   const filled = record ? reflectionManager.isQuadrantComplete(record, quadrantId) : false;
@@ -25,37 +34,39 @@ function buildQuadrantSection(record, quadrantId) {
     filled,
     completedAt: filled && entry ? entry.completedAt || "" : "",
     emptyLabel: EMPTY_LABEL,
-    /** @type {{ echoKey: string, echoText: string }[]} 每段含「你说：」原话摘要 + 回响；不展示题目原文 */
     echoParagraphs: [],
   };
 
-  if (filled && entry) {
-    let paras;
-    try {
-      paras = buildQuadrantEchoParagraphs(quadrantId, entry.cardResponses);
-    } catch (e) {
-      console.warn("[reflectionReport] buildQuadrantEchoParagraphs", quadrantId, e && (e.message || e));
-      paras = ["这份象限的回响生成时出了点小状况，可返回重新打开或再提交一次本象限。"];
-    }
-    if (!Array.isArray(paras) || !paras.length) {
-      paras = ["啥也没写？那就不生成，不打扰。"];
-    }
-    section.echoParagraphs = paras.map((raw, idx) => {
-      const t = typeof raw === "string" ? raw : raw != null ? String(raw) : "";
-      return {
-        echoKey: `q${quadrantId}-${idx}`,
-        echoText: t,
-      };
-    });
+  if (!filled || !entry || !record) {
+    return section;
   }
+
+  try {
+    const rows = await fetchQuadrantCacheRows(record.taskId, quadrantId);
+    const cacheMap = buildReplyMapFromRows(rows);
+    section.echoParagraphs = assembleQuadrantEchoParagraphs(
+      quadrantId,
+      entry.cardResponses,
+      cacheMap,
+    );
+  } catch (e) {
+    console.warn("[reflectionReport] assemble quadrant", quadrantId, e && (e.message || e));
+    section.echoParagraphs = [
+      {
+        echoKey: `q${quadrantId}-err`,
+        echoText: stripEmoji("这份象限的回响暂时未能完整呈现，可返回重新打开或再提交一次本象限。"),
+      },
+    ];
+  }
+
   return section;
 }
 
 /**
  * @param {string} taskId
- * @returns {{ taskId: string, taskTitle: string, reportTime: string, sections: object[], hasAnyQuadrant: boolean, generalEcho: string[]|null, reportIntro: string, reportOutro: string }|null}
+ * @returns {Promise<object|null>}
  */
-function buildReportViewModel(taskId) {
+async function buildReportViewModel(taskId) {
   if (!taskId) return null;
   const record = reflectionManager.findByTaskId(taskId);
   if (!record) {
@@ -63,7 +74,18 @@ function buildReportViewModel(taskId) {
       taskId: String(taskId),
       taskTitle: "未命名任务",
       reportTime: "",
-      sections: QUADRANT_IDS.map((id) => buildQuadrantSection(null, id)),
+      sections: QUADRANT_IDS.map((id) => ({
+        id,
+        title: getQuadrantMeta(id) ? getQuadrantMeta(id).title : `象限${id}`,
+        subtitle: getQuadrantMeta(id) ? getQuadrantMeta(id).subtitle : "",
+        agentLabel: getQuadrantMeta(id) ? getQuadrantMeta(id).agentLabel : "",
+        accent: getQuadrantMeta(id) ? getQuadrantMeta(id).accent : "#184061",
+        bg: getQuadrantCardBg(id, false),
+        filled: false,
+        completedAt: "",
+        emptyLabel: EMPTY_LABEL,
+        echoParagraphs: [],
+      })),
       hasAnyQuadrant: false,
       generalEcho: null,
       reportIntro: "",
@@ -71,16 +93,20 @@ function buildReportViewModel(taskId) {
     };
   }
 
-  const sections = QUADRANT_IDS.map((id) => buildQuadrantSection(record, id));
+  const sections = await Promise.all(
+    QUADRANT_IDS.map((id) => buildQuadrantSection(record, id)),
+  );
+
   let generalEcho = null;
   if (reflectionManager.isAllQuadrantsComplete(record)) {
     try {
-      generalEcho = buildGeneralClosingEcho();
+      generalEcho = buildGeneralClosingEcho().map((t) => stripEmoji(t));
     } catch (e) {
       console.warn("[reflectionReport] buildGeneralClosingEcho", e && (e.message || e));
-      generalEcho = ["整卷回响暂时生成失败，其它象限内容不受影响。"];
+      generalEcho = [stripEmoji("整卷回响暂时生成失败，其它象限内容不受影响。")];
     }
   }
+
   const hasAnyQuadrant = reflectionManager.getCompletedQuadrantIds(record).length > 0;
   return {
     taskId: record.taskId,
@@ -89,8 +115,8 @@ function buildReportViewModel(taskId) {
     sections,
     hasAnyQuadrant,
     generalEcho,
-    reportIntro: hasAnyQuadrant ? REPORT_COMBO_INTRO : "",
-    reportOutro: hasAnyQuadrant ? REPORT_COMBO_OUTRO : "",
+    reportIntro: hasAnyQuadrant ? stripEmoji(REPORT_COMBO_INTRO) : "",
+    reportOutro: hasAnyQuadrant ? stripEmoji(REPORT_COMBO_OUTRO) : "",
   };
 }
 
