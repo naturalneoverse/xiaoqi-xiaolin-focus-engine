@@ -16,7 +16,7 @@ const LIFE_STAGE_OPTIONS = [
 
 const ROLE_OPTIONS = [
   { id: "cattle", label: "从业者" },
-  { id: "herder", label: "管理者" },
+  { id: "herder", label: "带队者" },
   { id: "boss", label: "自己当老板" },
   { id: "resting", label: "暂时休整" },
   { id: "parent", label: "当爸妈的" },
