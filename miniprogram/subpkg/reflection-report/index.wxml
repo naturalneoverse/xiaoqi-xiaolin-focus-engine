@@ -52,7 +52,6 @@
     <view wx:if="{{generalEcho && generalEcho.length}}" class="report-section report-section--closing">
       <view class="section-head">
         <text class="section-title section-title--closing">整卷回响</text>
-        <text class="section-sub">四个象限都填满了才解锁这段</text>
       </view>
       <view class="section-body">
         <view
@@ -74,17 +73,6 @@
     <view class="report-foot-space"></view>
   </scroll-view>
 
-  <view wx:if="{{hasAnyQuadrant}}" class="report-footer">
-    <button
-      class="report-save-btn"
-      plain
-      loading="{{saving}}"
-      disabled="{{saving}}"
-      hover-class="report-save-btn-hover"
-      bindtap="onSaveAlbum"
-    >保存到相册</button>
-  </view>
-
   <view wx:if="{{reportLoading}}" class="report-loading-mask">
     <view class="report-loading-panel">
       <view class="report-loading-line report-loading-line--lg"></view>
@@ -93,5 +81,4 @@
     </view>
   </view>
 
-  <canvas type="2d" id="reflectionReportCanvas" class="report-canvas-offscreen"></canvas>
 </view>

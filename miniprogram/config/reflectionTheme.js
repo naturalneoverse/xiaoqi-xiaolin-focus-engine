@@ -166,7 +166,7 @@ const QUADRANT_META = {
     accent: "#6B4C8A",
   },
   3: {
-    title: "明辨本心",
+    title: "自我主宰",
     subtitle: "分清课题，找回节奏",
     agentLabel: "小麒·解绑",
     agent: "xiaoqi",

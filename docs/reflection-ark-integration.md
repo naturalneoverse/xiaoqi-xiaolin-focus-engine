@@ -24,7 +24,7 @@
 |--------|--------|------|
 | `ARK_API_KEY` | （控制台获取） | 仅云函数读取；**禁止**硬编码、**禁止**日志打印 |
 | `ARK_BASE_URL` | `https://ark.cn-beijing.volces.com/api/v3` | 不含路径后缀 |
-| `ARK_MODEL_ID` | `doubao-seed-2-0-lite-260428` | PRD 固定模型 |
+| `ARK_MODEL_ID` | `ep-m-20260521214207-hxl7h` | 豆包 Endpoint ID（`ep-m-` 或 `ep-` 开头，勿填裸模型名） |
 
 ### 2.2 HTTP 端点
 
@@ -138,7 +138,7 @@ curl --location "https://ark.cn-beijing.volces.com/api/v3/responses" \
   --header "Authorization: Bearer $ARK_API_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-    "model": "doubao-seed-2-0-lite-260428",
+    "model": "ep-m-20260521214207-hxl7h",
     "input": "你好，请用一句话回复。"
   }'
 ```
@@ -152,7 +152,7 @@ curl --location "https://ark.cn-beijing.volces.com/api/v3/responses" \
   --header "Authorization: Bearer $ARK_API_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-    "model": "doubao-seed-2-0-lite-260428",
+    "model": "ep-m-20260521214207-hxl7h",
     "instructions": "你为小麟……（此处粘贴 personas.js 完整 system，联调时可先用短句占位）",
     "input": [
       {
@@ -235,9 +235,9 @@ function extractReplyText(arkResponse) {
 | Q2 | 观心明己 | `c0` | text | **是** | xiaolin | 三卡均可独立缓存 |
 | Q2 | 观心明己 | `c1` | text | **是** | xiaolin | |
 | Q2 | 观心明己 | `c2` | text | **是** | xiaolin | 报告页长文与 `Q2_CONCLUSION_BUBBLES` 短句区分 |
-| Q3 | 明辨本心 | `c0` | text | **是** | xiaoqi | |
-| Q3 | 明辨本心 | `c1` | single | 否 | — | 本地规则 + 提交页气泡 |
-| Q3 | 明辨本心 | `c2` | text | **是** | xiaoqi | |
+| Q3 | 自我主宰 | `c0` | text | **是** | xiaoqi | |
+| Q3 | 自我主宰 | `c1` | single | 否 | — | 本地规则 + 提交页气泡 |
+| Q3 | 自我主宰 | `c2` | text | **是** | xiaoqi | |
 | Q4 | 踏实前行 | `c0` | text | **是** | xiaoqi | 主文本，与多选无关 |
 | Q4 | 踏实前行 | `c1` | text | **是** | xiaoqi | 主文本 |
 | Q4 | 踏实前行 | `c2` | multi 选项 | 否 | — | 选项文案本地 |

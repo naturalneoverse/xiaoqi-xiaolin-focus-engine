@@ -11,6 +11,8 @@ Component({
     bubbleColor: { type: String, value: "#b7d6ea" },
     accentColor: { type: String, value: "#12598f" },
     mascotAnimPaused: { type: Boolean, value: false },
+    /** 为 true 时气泡内文字全文居中（观心明己 Q2） */
+    bubbleCenter: { type: Boolean, value: false },
   },
 
   data: {
@@ -18,6 +20,8 @@ Component({
     currentText: "",
     btnText: "继续",
     mascotImage: MASCOT_IMAGES.xiaolin,
+    stageClass: "",
+    bubbleTextLayout: "",
   },
 
   observers: {
@@ -25,8 +29,20 @@ Component({
       if (v) {
         this.setData({ step: 0 });
         this._renderStep(0);
+        this._syncLayoutClasses();
       } else {
-        this.setData({ step: 0, currentText: "", btnText: "继续" });
+        this.setData({
+          step: 0,
+          currentText: "",
+          btnText: "继续",
+          stageClass: "",
+          bubbleTextLayout: "",
+        });
+      }
+    },
+    bubbleCenter() {
+      if (this.properties.visible) {
+        this._syncLayoutClasses();
       }
     },
     agent(a) {
@@ -51,6 +67,14 @@ Component({
     _updateMascot(agent) {
       const key = agent === "xiaoqi" ? "xiaoqi" : "xiaolin";
       this.setData({ mascotImage: MASCOT_IMAGES[key] });
+    },
+
+    _syncLayoutClasses() {
+      const centered = !!this.properties.bubbleCenter;
+      this.setData({
+        stageClass: centered ? "rc-stage--centered" : "",
+        bubbleTextLayout: centered ? "center" : "",
+      });
     },
 
     _renderStep(step) {

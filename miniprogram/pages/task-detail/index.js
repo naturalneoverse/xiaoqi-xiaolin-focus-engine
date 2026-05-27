@@ -1,5 +1,3 @@
-const { parsePayload } = require("../../utils/parsePayload");
-
 const STORAGE_KEYS = require("../../config/storageKeys");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
@@ -110,74 +108,42 @@ Page({
     const showSuccess = options && options.showSuccess === "1";
     const taskIdOpt = options && options.taskId ? decodeURIComponent(String(options.taskId)) : "";
 
-    if (taskIdOpt) {
-      const task = findTaskById(taskIdOpt);
-      if (!task) {
-        wx.showToast({ title: "任务不存在或已删除", icon: "none" });
-        setTimeout(() => {
-          wx.navigateBack({
-            fail: () => {
-              goSleepHome();
-            },
-          });
-        }, 400);
-        return;
-      }
-      const statusText = task.statusText || "进行中";
-      const tagTexts = (task.tags || []).map((t) => (t && t.text) || "").filter(Boolean);
-      const dateText =
-        task.dateValue ||
-        (task.timeText ? String(task.timeText).split(" ")[0].replace(/\//g, "-") : "") ||
-        "未设置";
-      const rf = reminderSchedule.normalizeReminderFrequency(task.reminderFrequency);
-      const rt = task.reminderTime || "";
-      const rd = rt ? reminderSchedule.computeNextReminderDateYMD(rt) : "";
-      this.setData({
-        taskId: task.id,
-        taskName: task.title || "未命名任务",
-        taskContent: task.content || "暂无描述",
-        dateText,
-        statusText,
-        showReflectionBtn: canShowReflectionEntry(statusText),
-        statusIndex: Math.max(0, STATUS_OPTIONS.indexOf(statusText)),
-        statusClass: getStatusClass(statusText),
-        reminderDate: rd,
-        reminderTime: rt,
-        reminderFrequency: rf,
-        detailReminderFreqIndex: rf === "每天" ? 1 : 0,
-        tags: tagTexts,
-        showMascotModal: showSuccess,
-        xiaoqiImage: imageAssets.xiaoqi || "/images/transparent background/xiaoqi.png",
-        mascotBubbleText: showSuccess
-          ? buildTaskSuccessBubble(TASK_SUCCESS_LINE2_DEFAULT)
-          : this.data.mascotBubbleText,
-      });
-      if (showSuccess) {
-        this.applyCreateSuccessBubble(task, tagTexts);
-      }
+    if (!taskIdOpt) {
+      wx.showToast({ title: "请从任务列表打开", icon: "none" });
+      setTimeout(() => goSleepHome(), 400);
       return;
     }
 
-    const payload = parsePayload(options && options.payload);
-    const tags = [payload.priority, payload.forWhom, payload.why].filter(Boolean);
-    const prf = reminderSchedule.normalizeReminderFrequency(payload.reminderFrequency);
-    const prt = payload.reminderTime || "";
-    const prd = prt ? reminderSchedule.computeNextReminderDateYMD(prt) : "";
-    const payloadStatus = payload.statusText || "进行中";
+    const task = findTaskById(taskIdOpt);
+    if (!task) {
+      wx.showToast({ title: "任务不存在或已删除", icon: "none" });
+      setTimeout(() => goSleepHome(), 400);
+      return;
+    }
+
+    const statusText = task.statusText || "进行中";
+    const tagTexts = (task.tags || []).map((t) => (t && t.text) || "").filter(Boolean);
+    const dateText =
+      task.dateValue ||
+      (task.timeText ? String(task.timeText).split(" ")[0].replace(/\//g, "-") : "") ||
+      "未设置";
+    const rf = reminderSchedule.normalizeReminderFrequency(task.reminderFrequency);
+    const rt = task.reminderTime || "";
+    const rd = rt ? reminderSchedule.computeNextReminderDateYMD(rt) : "";
     this.setData({
-      taskId: payload.taskId || "",
-      taskName: payload.taskName || "未命名任务",
-      taskContent: payload.taskContent || "暂无描述",
-      dateText: payload.dateValue || "未设置",
-      statusText: payloadStatus,
-      showReflectionBtn: !!(payload.taskId) && canShowReflectionEntry(payloadStatus),
-      statusIndex: Math.max(0, STATUS_OPTIONS.indexOf(payloadStatus)),
-      statusClass: getStatusClass(payloadStatus),
-      reminderDate: prd,
-      reminderTime: prt,
-      reminderFrequency: prf,
-      detailReminderFreqIndex: prf === "每天" ? 1 : 0,
-      tags,
+      taskId: task.id,
+      taskName: task.title || "未命名任务",
+      taskContent: task.content || "暂无描述",
+      dateText,
+      statusText,
+      showReflectionBtn: canShowReflectionEntry(statusText),
+      statusIndex: Math.max(0, STATUS_OPTIONS.indexOf(statusText)),
+      statusClass: getStatusClass(statusText),
+      reminderDate: rd,
+      reminderTime: rt,
+      reminderFrequency: rf,
+      detailReminderFreqIndex: rf === "每天" ? 1 : 0,
+      tags: tagTexts,
       showMascotModal: showSuccess,
       xiaoqiImage: imageAssets.xiaoqi || "/images/transparent background/xiaoqi.png",
       mascotBubbleText: showSuccess
@@ -185,12 +151,7 @@ Page({
         : this.data.mascotBubbleText,
     });
     if (showSuccess) {
-      const companion = String(payload.companionText || "").trim();
-      if (companion) {
-        this.setCompanionBubbleDisplay(companion);
-      } else {
-        this.loadCreateMascotTextFromCategory(tags);
-      }
+      this.applyCreateSuccessBubble(task, tagTexts);
     }
   },
 
@@ -383,7 +344,7 @@ Page({
     });
   },
 
-  /** 关闭：固定回「时间」Tab 首页（与底部「时间」一致），避免 navigateBack 栈不一致导致无反应或回到非首页 */
+  /** 自定义顶栏关闭：回「时间」Tab（创建成功经 reLaunch 进详情，无系统返回键） */
   goHome() {
     goSleepHome();
   },

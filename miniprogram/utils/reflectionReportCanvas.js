@@ -107,9 +107,7 @@ function measureClosingBlock(ctx, paragraphs, innerW) {
   let h = 28 + 16;
   ctx.font = "500 32px sans-serif";
   h += lineHeight(32);
-  ctx.font = "400 22px sans-serif";
-  h += 8 + lineHeight(22);
-  h += 14;
+  h += 12;
   (paragraphs || []).forEach((para) => {
     ctx.font = "400 26px sans-serif";
     wrapLines(ctx, para, innerW).forEach(() => {
@@ -300,12 +298,7 @@ function drawClosingBlock(ctx, paragraphs, y, innerW) {
   ctx.font = "500 32px sans-serif";
   ctx.fillText("整卷回响", px, cy);
   cy += lineHeight(32);
-  cy += 8;
-  ctx.fillStyle = COLOR_SUB;
-  ctx.font = "400 22px sans-serif";
-  ctx.fillText("四个象限都填满了才解锁这段", px, cy);
-  cy += lineHeight(22);
-  cy += 14;
+  cy += 12;
 
   (paragraphs || []).forEach((para) => {
     ctx.fillStyle = "#334d62";

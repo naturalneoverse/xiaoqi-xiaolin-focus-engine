@@ -116,6 +116,7 @@ const saveUserTags = async (event) => {
 
 const TASKS_COLL = "tasks";
 const BODY_RECORDS_COLL = "body_records";
+const BODY_WEEK_ARCHIVE_COLL = "body_week_archives";
 
 function stripUndefinedDeep(input) {
   if (input === undefined) return undefined;
@@ -190,6 +191,78 @@ const saveTask = async (event) => {
       await db.collection(TASKS_COLL).add({ data });
     }
     return { success: true };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+function archiveDocFromEntry(openid, entry) {
+  const e = entry || {};
+  const weekKey = String(e.weekKey || "").trim();
+  const updatedAt = e.updatedAt ? Date.parse(String(e.updatedAt)) : Date.now();
+  return stripUndefinedDeep({
+    openid,
+    weekKey,
+    statsHash: String(e.statsHash || ""),
+    status: String(e.status || "open"),
+    closedAt: e.closedAt != null ? String(e.closedAt) : "",
+    bullets: Array.isArray(e.bullets) ? e.bullets : [],
+    statusDesc: String(e.statusDesc || ""),
+    careText: String(e.careText || ""),
+    source: String(e.source || ""),
+    finalStatusTitle: String(e.finalStatusTitle || ""),
+    extremeLine: e.extremeLine != null ? String(e.extremeLine) : "",
+    validDayCount: Number(e.validDayCount) || 0,
+    updatedAt: Number.isFinite(updatedAt) ? updatedAt : Date.now(),
+  });
+}
+
+const saveBodyWeekArchive = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  const entry = event && event.entry;
+  const weekKey = entry && String(entry.weekKey || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(weekKey)) {
+    return { success: false, errMsg: "invalid weekKey" };
+  }
+  const data = archiveDocFromEntry(openid, entry);
+  if (!data.statsHash || !data.source || !data.finalStatusTitle) {
+    return { success: false, errMsg: "invalid archive entry" };
+  }
+  try {
+    const existed = await db
+      .collection(BODY_WEEK_ARCHIVE_COLL)
+      .where({ openid, weekKey: data.weekKey })
+      .limit(1)
+      .get();
+    if (existed.data && existed.data[0]) {
+      await db.collection(BODY_WEEK_ARCHIVE_COLL).doc(existed.data[0]._id).update({ data });
+    } else {
+      await db.collection(BODY_WEEK_ARCHIVE_COLL).add({ data });
+    }
+    return { success: true };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+const listBodyWeekArchives = async () => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  try {
+    const res = await db
+      .collection(BODY_WEEK_ARCHIVE_COLL)
+      .where({ openid })
+      .orderBy("updatedAt", "desc")
+      .limit(104)
+      .get();
+    return { success: true, entries: res.data || [] };
   } catch (e) {
     return { success: false, errMsg: e && e.message ? e.message : String(e) };
   }
@@ -570,6 +643,10 @@ exports.main = async (event, context) => {
       return await saveTask(event);
     case "saveBodyRecord":
       return await saveBodyRecord(event);
+    case "saveBodyWeekArchive":
+      return await saveBodyWeekArchive(event);
+    case "listBodyWeekArchives":
+      return await listBodyWeekArchives();
     case "getMascotCopy":
       return await mascotCopy.generateMascotCopy(event, cloud.getWXContext());
     case "getTaskQuizCopy":

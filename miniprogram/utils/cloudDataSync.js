@@ -333,6 +333,10 @@ function runStartupSync() {
     Promise.resolve()
       .then(() => runFullSyncIfNeeded())
       .then(() => runIncrementalSync())
+      .then(() => {
+        const archiveCloud = require("./bodyWeekArchiveCloud");
+        return archiveCloud.pullAndMergeFromCloud();
+      })
       .catch((e) => console.warn("[cloudDataSync] runStartupSync", e));
   }, 400);
 }

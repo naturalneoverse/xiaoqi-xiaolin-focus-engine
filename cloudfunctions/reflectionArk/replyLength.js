@@ -1,7 +1,13 @@
 "use strict";
 
 const { charCount } = require("./normalizeText");
-const { REPLY_MIN_CHARS, REPLY_MAX_CHARS } = require("./constants");
+const {
+  ARK_PROMPT_MAX_SHORT,
+  ARK_Q2_SOFT_MAX,
+  ARK_DISPLAY_MIN_CHARS,
+  REPLY_MIN_CHARS,
+  REPLY_MAX_CHARS,
+} = require("./constants");
 
 const SENTENCE_END_RE = /[。！？；.!?;]/;
 const PAD_CLAUSES = [
@@ -41,13 +47,66 @@ function truncateToCompleteSentence(text, maxChars) {
 }
 
 /**
+ * 观心明己：超上限时优先在句末符处截断（补丁 P3 / 软上限 P9）
+ * @param {string} text
+ * @param {number} maxChars
+ * @returns {{ ok: boolean, text?: string, reason?: string }}
+ */
+function truncateToCompleteSentenceStrict(text, maxChars) {
+  const chars = Array.from(text);
+  if (chars.length <= maxChars) {
+    return { ok: true, text: String(text || "") };
+  }
+  const slice = chars.slice(0, maxChars).join("");
+  const endIdx = lastSentenceEndIndex(slice);
+  if (endIdx >= 0) {
+    return { ok: true, text: slice.slice(0, endIdx + 1) };
+  }
+  return { ok: false, reason: "TRUNCATE_NO_SENTENCE_END" };
+}
+
+/**
+ * 观心明己软截断：≤max 原样；max+1–softMax 容忍；>softMax 在 softMax 内句末截断，禁止整段作废
+ * @param {string} raw
+ * @param {{ min?: number, max?: number }} bounds
+ * @returns {{ ok: boolean, text: string, reason?: string }}
+ */
+function enforceReplyLengthQ2Soft(raw, bounds) {
+  const maxChars = bounds && bounds.max != null ? bounds.max : ARK_PROMPT_MAX_SHORT;
+  const softMax =
+    bounds && bounds.softMax != null ? Number(bounds.softMax) : ARK_Q2_SOFT_MAX;
+  let text = String(raw || "").replace(/\s+/g, " ").trim();
+  const n = charCount(text);
+  if (n <= maxChars) {
+    return { ok: true, text };
+  }
+  if (n <= softMax) {
+    return { ok: true, text };
+  }
+  const strict = truncateToCompleteSentenceStrict(text, softMax);
+  if (strict.ok && strict.text) {
+    return { ok: true, text: strict.text };
+  }
+  const relaxed = truncateToCompleteSentence(text, softMax);
+  if (charCount(relaxed) >= ARK_DISPLAY_MIN_CHARS) {
+    return { ok: true, text: relaxed };
+  }
+  return { ok: false, text: "", reason: "TRUNCATE_NO_SENTENCE_END" };
+}
+
+/** @deprecated 使用 enforceReplyLengthQ2Soft */
+function enforceReplyLengthQ2Strict(raw, bounds) {
+  return enforceReplyLengthQ2Soft(raw, bounds);
+}
+
+/**
  * @param {string} text
  * @param {number} minChars
  * @param {number} maxChars
  * @returns {string}
  */
 function padToMinLength(text, minChars, maxChars) {
-  const max = maxChars > 0 ? maxChars : REPLY_MAX_CHARS;
+  const max = maxChars > 0 ? maxChars : ARK_PROMPT_MAX_SHORT;
   let out = String(text || "");
   let guard = 0;
   while (charCount(out) < minChars && guard < 24) {
@@ -60,25 +119,22 @@ function padToMinLength(text, minChars, maxChars) {
   return out;
 }
 
-/** 短档不硬垫套话，避免与「精炼回应」冲突 */
-const NO_PAD_TIERS = new Set(["xs", "s"]);
-
 /**
- * 字数后处理（支持按用户输入动态 min/max）
+ * 字数后处理：规范化空白 + 超 max 截断；合格与否由 replyCompleteness 判定（步骤 4）
  * @param {string} raw
  * @param {{ min?: number, max?: number, tier?: string }} [bounds]
+ * @param {{ neverPad?: boolean }} [options]
  * @returns {string}
  */
-function enforceReplyLength(raw, bounds) {
+function enforceReplyLength(raw, bounds, options) {
+  const maxChars = bounds && bounds.max != null ? bounds.max : ARK_PROMPT_MAX_SHORT;
   const minChars = bounds && bounds.min != null ? bounds.min : REPLY_MIN_CHARS;
-  const maxChars = bounds && bounds.max != null ? bounds.max : REPLY_MAX_CHARS;
-  const tier = bounds && bounds.tier ? String(bounds.tier) : "";
-  const skipPad = NO_PAD_TIERS.has(tier);
+  const neverPad = !!(options && options.neverPad);
   let text = String(raw || "").replace(/\s+/g, " ").trim();
   if (charCount(text) > maxChars) {
     text = truncateToCompleteSentence(text, maxChars);
   }
-  if (!skipPad && charCount(text) < minChars) {
+  if (!neverPad && charCount(text) < minChars) {
     text = padToMinLength(text, minChars, maxChars);
   }
   if (charCount(text) > maxChars) {
@@ -89,23 +145,27 @@ function enforceReplyLength(raw, bounds) {
 
 /**
  * @param {string} text
- * @param {{ min?: number, max?: number }} [bounds]
+ * @param {{ min?: number, max?: number, tier?: string }} [bounds]
+ * @param {{ neverPad?: boolean }} [options]
  * @returns {{ ok: boolean, reason?: string }}
  */
-function validateReplyLengthRange(text, bounds) {
+function validateReplyLengthRange(text, bounds, options) {
+  const maxChars = bounds && bounds.max != null ? bounds.max : ARK_PROMPT_MAX_SHORT;
   const minChars = bounds && bounds.min != null ? bounds.min : REPLY_MIN_CHARS;
-  const maxChars = bounds && bounds.max != null ? bounds.max : REPLY_MAX_CHARS;
-  const tier = bounds && bounds.tier ? String(bounds.tier) : "";
+  const neverPad = !!(options && options.neverPad);
   const n = charCount(text);
-  if (!NO_PAD_TIERS.has(tier) && n < minChars) return { ok: false, reason: "TOO_SHORT" };
+  if (n < 1) return { ok: false, reason: "EMPTY" };
   if (n > maxChars + 2) return { ok: false, reason: "TOO_LONG" };
-  if (NO_PAD_TIERS.has(tier) && n < 1) return { ok: false, reason: "TOO_SHORT" };
+  if (!neverPad && n < minChars) return { ok: false, reason: "TOO_SHORT" };
   return { ok: true };
 }
 
 module.exports = {
   enforceReplyLength,
+  enforceReplyLengthQ2Soft,
+  enforceReplyLengthQ2Strict,
   validateReplyLengthRange,
   truncateToCompleteSentence,
+  truncateToCompleteSentenceStrict,
   padToMinLength,
 };

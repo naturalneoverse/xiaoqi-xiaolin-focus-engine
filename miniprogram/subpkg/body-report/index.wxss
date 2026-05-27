@@ -23,6 +23,14 @@ page {
   border: 1rpx solid rgba(255, 255, 255, 0.6);
 }
 
+.layout-fixture-banner {
+  display: block;
+  margin-top: 12rpx;
+  color: #b45309;
+  font-size: 22rpx;
+  line-height: 1.45;
+}
+
 .main-card {
   background: rgba(255, 255, 255, 0.7);
   border-radius: 32rpx;
@@ -201,6 +209,14 @@ page {
 
 .ai-bubble-wrap {
   flex: 1;
+}
+
+.care-loading-hint {
+  display: block;
+  margin-bottom: 12rpx;
+  color: #6f86a0;
+  font-size: 24rpx;
+  line-height: 1.5;
 }
 
 .ai-bubble-wrap chat-bubble {

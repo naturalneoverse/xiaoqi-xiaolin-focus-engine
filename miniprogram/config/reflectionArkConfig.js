@@ -8,8 +8,16 @@ const CACHE_COLLECTION = "reflection_ark_cache";
 /** 内容安全校验（云函数 openapi） */
 const MSG_SEC_TIMEOUT_MS = 12000;
 
-/** 测试档：批量生成略大于云函数 60s，避免客户端先断 */
+/** 批量生成略大于云函数 60s，避免客户端先断 */
 const GENERATE_REPLY_TIMEOUT_MS = 65000;
+
+/** Q2 分阶段调用（每阶段独享云函数 60s） */
+/** 略小于云函数 60s，两阶段各一次调用 */
+const Q2_PHASE_TIMEOUT_MS = 59000;
+
+/** 与云函数 constants.DEPLOY_TAG 对齐，用于核对是否已部署最新包 */
+/** 与云函数 constants.DEPLOY_TAG 对齐 */
+const EXPECTED_Q2_DEPLOY_TAG = "q3-s2-q1q4-models-r9";
 
 /** 审核不通过时温和提示（前端展示，无技术字段） */
 const MSG_SEC_REJECT_HINT = "您填写的内容暂未通过审核，请调整用语后再提交。";
@@ -34,6 +42,8 @@ module.exports = {
   CACHE_COLLECTION,
   MSG_SEC_TIMEOUT_MS,
   GENERATE_REPLY_TIMEOUT_MS,
+  Q2_PHASE_TIMEOUT_MS,
+  EXPECTED_Q2_DEPLOY_TAG,
   MSG_SEC_REJECT_HINT,
   MSG_SEC_ERROR_HINT,
   MSG_SEC_STALE_SESSION_HINT,

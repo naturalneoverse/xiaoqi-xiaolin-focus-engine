@@ -31,6 +31,11 @@
   gap: 12rpx;
 }
 
+/* 观心明己：多行居中时小麟与气泡顶对齐，避免贴底 */
+.rc-stage.rc-stage--centered {
+  align-items: flex-start;
+}
+
 .rc-mascot {
   flex-shrink: 0;
   width: 168rpx;

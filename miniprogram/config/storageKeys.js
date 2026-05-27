@@ -26,6 +26,8 @@ const STORAGE_KEYS = {
   USER_OPENID: "user_openid",
   /** 哲思复盘记录：ReflectionRecord[]，按 taskId 聚合四象限 */
   REFLECTION_RECORDS: "reflection_records",
+  /** 身体边界周报周存档 { version, weeks: { [weekMondayKey]: ArchiveEntry } } */
+  BODY_WEEK_ARCHIVE_V1: "body_week_archive_v1",
 };
 
 module.exports = STORAGE_KEYS;

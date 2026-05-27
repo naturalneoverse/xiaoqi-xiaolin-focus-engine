@@ -331,6 +331,7 @@ module.exports = {
   getLast7DayRange,
   buildSevenDaySummary,
   buildWeekReportPayload,
+  buildWeekXiaolinCare,
   parseDateKeyToDate,
   SLEEP_OPTIONS,
   SPORT_OPTIONS,

@@ -4,7 +4,7 @@ page {
 
 .page {
   min-height: 100vh;
-  padding: 16rpx 30rpx 48rpx;
+  padding: 16rpx 30rpx 0;
   box-sizing: border-box;
 }
 
@@ -304,6 +304,7 @@ page {
 
 .report-card {
   margin-top: 24rpx;
+  margin-bottom: 16rpx;
   border-radius: 20px;
   padding: 30rpx 30rpx;
   background: rgba(205, 222, 239, 0.52);

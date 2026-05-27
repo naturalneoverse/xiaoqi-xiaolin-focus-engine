@@ -1,6 +1,6 @@
 <view wx:if="{{visible}}" class="rc-mask" catchtouchmove="noop">
   <view class="rc-modal" catchtap="noop">
-    <view class="rc-stage">
+    <view class="rc-stage {{stageClass}}">
       <view class="rc-mascot">
         <view class="mascot-float-3d {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
           <image
@@ -17,6 +17,7 @@
           arrowPosition="left"
           keepManualBreak="{{true}}"
           maxLength="{{200}}"
+          textLayout="{{bubbleTextLayout}}"
         />
       </view>
     </view>

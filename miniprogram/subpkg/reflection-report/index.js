@@ -4,6 +4,7 @@ const { buildReportViewModel } = require("../../utils/reflectionReport");
 const { safeDecodeURIComponent } = require("../../utils/safeDecodeURIComponent");
 const reflectionManager = require("../../utils/reflectionManager");
 const { computeQuadrantScores } = require("../../utils/reflectionScore");
+const { hasGeneratingWorkForTask } = require("../../utils/reflectionArkBackground");
 
 Page({
   data: {
@@ -16,9 +17,13 @@ Page({
     reportIntro: "",
     reportOutro: "",
     donutScores: { q1: 0, q2: 0, q3: 0, q4: 0 },
-    saving: false,
     reportLoading: false,
+    reportPendingHint: "",
   },
+
+  _reportPollTimer: null,
+  _fallbackVisitSeed: "",
+  _reportWasHidden: false,
 
   onLoad(options) {
     if (!requireLoginOnLoad()) return;
@@ -26,24 +31,63 @@ Page({
     const taskTitle = safeDecodeURIComponent(options && options.taskTitle);
     this._taskId = taskId;
     this._taskTitle = taskTitle;
+    this._fallbackVisitSeed = String(Date.now());
     this._loadReport();
   },
 
   onShow() {
     applyReflectionNavBar();
+    if (this._reportWasHidden) {
+      this._fallbackVisitSeed = String(Date.now());
+      this._reportWasHidden = false;
+    }
+    if (!this._fallbackVisitSeed) {
+      this._fallbackVisitSeed = String(Date.now());
+    }
     this._loadReport();
   },
 
-  async _loadReport() {
+  onHide() {
+    this._reportWasHidden = true;
+    this._stopReportPoll();
+  },
+
+  onUnload() {
+    this._stopReportPoll();
+  },
+
+  _stopReportPoll() {
+    if (this._reportPollTimer) {
+      clearInterval(this._reportPollTimer);
+      this._reportPollTimer = null;
+    }
+  },
+
+  _syncReportPoll(taskId) {
+    this._stopReportPoll();
+    if (!taskId || !hasGeneratingWorkForTask(taskId)) return;
+    this._reportPollTimer = setInterval(() => {
+      if (!hasGeneratingWorkForTask(this._taskId || this.data.taskId)) {
+        this._stopReportPoll();
+        return;
+      }
+      this._loadReport(true);
+    }, 4500);
+  },
+
+  async _loadReport(fromPoll) {
     const taskId = this._taskId || this.data.taskId;
     if (!taskId) {
       wx.showToast({ title: "任务信息缺失", icon: "none" });
       return;
     }
+    if (!fromPoll && !this._fallbackVisitSeed) {
+      this._fallbackVisitSeed = String(Date.now());
+    }
     this.setData({ reportLoading: true });
     let vm;
     try {
-      vm = await buildReportViewModel(taskId);
+      vm = await buildReportViewModel(taskId, this._fallbackVisitSeed);
     } catch (err) {
       console.error("[reflection-report] buildReportViewModel", err && (err.stack || err.message || err));
       wx.showToast({ title: "报告加载失败", icon: "none" });
@@ -101,11 +145,13 @@ Page({
       generalEcho: vm.generalEcho,
       reportIntro: vm.reportIntro || "",
       reportOutro: vm.reportOutro || "",
+      reportPendingHint: vm.reportPendingHint || "",
       donutScores,
     };
     payload.reportLoading = false;
     try {
       this.setData(payload);
+      this._syncReportPoll(taskId);
     } catch (err) {
       console.error("[reflection-report] setData", err && (err.stack || err.message || err));
       wx.showToast({ title: "报告加载失败", icon: "none" });
@@ -122,40 +168,5 @@ Page({
       return;
     }
     this.__reportVm = Object.assign({}, vm, { sections, donutScores });
-  },
-
-  async onSaveAlbum() {
-    if (this.data.saving) return;
-    const vm = this.__reportVm;
-    if (!vm || !vm.hasAnyQuadrant) {
-      wx.showToast({ title: "暂无可保存内容", icon: "none" });
-      return;
-    }
-    this.setData({ saving: true });
-    wx.showLoading({ title: "生成中...", mask: true });
-    try {
-      const { exportReportImage, saveImageToAlbum } = require("../../utils/reflectionReportCanvas");
-      const filePath = await exportReportImage(this, vm);
-      await saveImageToAlbum(filePath);
-      wx.showToast({ title: "已保存到相册", icon: "success" });
-    } catch (err) {
-      const msg = (err && err.errMsg) || "";
-      if (msg.indexOf("auth deny") >= 0 || msg.indexOf("authorize") >= 0) {
-        wx.showModal({
-          title: "需要相册权限",
-          content: "请在设置中允许保存到相册后重试",
-          confirmText: "去设置",
-          success: (res) => {
-            if (res.confirm) wx.openSetting({});
-          },
-        });
-      } else {
-        wx.showToast({ title: "保存失败，请重试", icon: "none" });
-        console.warn("[reflection-report] save album", err);
-      }
-    } finally {
-      wx.hideLoading();
-      this.setData({ saving: false });
-    }
   },
 });

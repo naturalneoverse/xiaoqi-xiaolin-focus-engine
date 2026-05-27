@@ -3,7 +3,9 @@
  */
 
 const { CACHE_COLLECTION } = require("../config/reflectionArkConfig");
+const { isFallbackReply } = require("../config/reflectionArkFallback");
 const { buildTextHash } = require("./reflectionArkTextHash");
+const { assessArkReplyForCard } = require("./reflectionArkReplyQuality");
 const { isCloudReady } = require("./cloudCall");
 
 /** 进程内短缓存，减少报告页重复读库 */
@@ -111,12 +113,26 @@ function fetchQuadrantCacheRows(taskId, quadrantId) {
  * @param {object[]} rows
  * @returns {Record<string, string>}
  */
-function buildReplyMapFromRows(rows) {
+/**
+ * 仅纳入可展示的方舟缓存；无效方舟残句不进入 map（报告走六套兜底）
+ * @param {object[]} rows
+ * @param {number} [quadrantId] Q2 全卡、Q1 仅 c2 末字须句末符（R3）
+ * @returns {Record<string, string>}
+ */
+function buildReplyMapFromRows(rows, quadrantId) {
+  const q = qId(quadrantId);
   const map = Object.create(null);
   (rows || []).forEach((doc) => {
     if (!doc || !doc.cardField || !doc.textHash) return;
     const key = `${doc.cardField}:${doc.textHash}`;
-    if (typeof doc.replyContent === "string") {
+    if (typeof doc.replyContent !== "string") return;
+    const content = String(doc.replyContent).trim();
+    if (!content) return;
+    if (isFallbackReply(content)) {
+      map[key] = doc.replyContent;
+      return;
+    }
+    if (assessArkReplyForCard(q, doc.cardField, content).ok) {
       map[key] = doc.replyContent;
     }
   });
@@ -156,6 +172,14 @@ function clearMemoryCacheForTask(taskId) {
   });
 }
 
+/** 象限重新提交后清内存缓存，报告页会重新读库 */
+function clearMemoryCacheForQuadrant(taskId, quadrantId) {
+  const prefix = `${String(taskId || "").trim()}|${qId(quadrantId)}|`;
+  Object.keys(memoryCache).forEach((k) => {
+    if (k.indexOf(prefix) === 0) delete memoryCache[k];
+  });
+}
+
 module.exports = {
   fetchCacheEntry,
   fetchQuadrantCacheRows,
@@ -163,5 +187,6 @@ module.exports = {
   lookupReplyContent,
   rememberReplyInMemory,
   clearMemoryCacheForTask,
+  clearMemoryCacheForQuadrant,
   buildTextHash,
 };

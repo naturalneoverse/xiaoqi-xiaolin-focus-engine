@@ -7,7 +7,7 @@ const SHORT_TH = 10;
 const LONG_TH = 50;
 
 const REPORT_COMBO_INTRO = "说实话，下面这些比哲学书好看\n——因为是您写的。";
-const REPORT_COMBO_OUTRO = "——小麟 & 小麒，溜了溜了";
+const REPORT_COMBO_OUTRO = "小麒&小麟，吃茶去，吃茶去～";
 
 const QUADRANT_1 = {
   single_choice_mapping: {
@@ -36,8 +36,8 @@ const QUADRANT_2 = {
   output_by_card: {
     card0:
       "您承认了自己卡住。说真的，这比假装没事强一百倍。『卡住，说明您在意。不在意的事，卡不住您。』",
-    card1: "您追问了：这份卡顿里，我到底在乎什么？『您在乎的地方，就是答案藏的地方。』",
-    card2: "您问了个很猛的问题：如果这是生命在练我，它在练什么？『困境不是惩罚，是私教课。』",
+    card1: "您回答了：卡在这里，最在意的是什么。『在意的地方，往往就是答案冒头的地方。』",
+    card2: "您给未来的自己留了一句提醒。『能写下来的话，下次就不会白卡这一遭。』",
   },
   length_short: "行，您留了个记号。『一句话，够了。』",
   length_long: "写了这么多，您是认真的。『认真的人，运气都不差。』",
@@ -78,18 +78,18 @@ const QUADRANT_3 = {
 
 const QUADRANT_4 = {
   output_by_selection: {
-    has_experience: "您想带走一个经验。经验不是负担，是走过的证据。",
-    has_feeling: "您想带走一个感受。感受是当下最真实的坐标。",
-    has_decision: "您想带走一个决定。决定，是改变的第一帧。",
-    only_nothing: "您选择什么都不带走。不带走，也是一种诚实。有些事，不需要总结。",
-    mixed: "您挑了几样带走。不用全带走，带走一个就够了。",
+    has_experience: "您想带给自己一个经验。经验不是负担，是走过的证据。",
+    has_feeling: "您想带给自己一个感受。感受是当下最真实的坐标。",
+    has_decision: "您想带给自己一个决定。决定，是改变的第一帧。",
+    only_nothing: "您选择什么都不留。不留，也是一种诚实。有些事，不需要总结。",
+    mixed: "您挑了几样带给自己。不用全选，留下一样就够了。",
   },
   echo_by_selection: {
     has_experience: "『经验，是走过的证明。』",
     has_feeling: "『感受，是活着的证据。』",
     has_decision: "『决定，是改变的开始。』",
     only_nothing: "『停留，不是放弃，是尊重自己的节奏。』",
-    mixed: "『您不必带走全部，带走一个就够。』",
+    mixed: "『您不必全选，留给自己的，一个就够。』",
   },
   experience_long_th: 30,
   experience_long_style: "这个经验您写得很细。认真的人，运气都不差。",
@@ -98,7 +98,7 @@ const QUADRANT_4 = {
 };
 
 const GENERAL_SUMMARY = {
-  part_1: "看见事实 → 听见自己 → 分清边界 → 迈出一小步",
+  part_1: "觉察真正的重点→觉醒真实的期许→解绑被带的节奏→行动行动再行动",
   part_2: "这不是答案，而是一套您可以反复使用的心智框架。",
   part_3: "『人的成长，不是消除困惑，而是学会和重要的问题相处。』",
 };

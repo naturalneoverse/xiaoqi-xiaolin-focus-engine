@@ -7,27 +7,34 @@
       </view>
     </block>
     <block wx:else>
-      <view
-        wx:for="{{records}}"
-        wx:key="taskId"
-        class="list-card tap-target"
-        bindtap="onTapRecord"
-        data-task-id="{{item.taskId}}"
-        data-task-title="{{item.taskTitle}}"
-      >
-        <view class="list-card-head">
-          <text class="list-task-title">{{item.taskTitle}}</text>
-          <text class="list-arrow">›</text>
-        </view>
-        <text wx:if="{{item.reportTime}}" class="list-time">{{item.reportTime}}</text>
-        <view wx:if="{{item.tags.length}}" class="tag-row">
-          <text
-            wx:for="{{item.tags}}"
-            wx:for-item="tag"
-            wx:key="id"
-            class="tag-pill"
-            style="color: {{tag.accent}}; border-color: {{tag.accent}};"
-          >{{tag.title}}</text>
+      <view wx:for="{{sections}}" wx:key="sectionKey" class="list-section">
+        <text class="list-section-title">{{item.title}}</text>
+        <view
+          wx:for="{{item.items}}"
+          wx:for-item="card"
+          wx:key="taskId"
+          class="list-card tap-target"
+          bindtap="onTapRecord"
+          bindlongpress="onRecordLongPress"
+          data-task-id="{{card.taskId}}"
+          data-task-title="{{card.taskTitle}}"
+          hover-class="row-hover"
+        >
+          <view class="list-card-head">
+            <text class="list-task-title">{{card.taskTitle}}</text>
+            <text class="list-arrow">›</text>
+          </view>
+          <text wx:if="{{card.cardTime || card.reportTime}}" class="list-time">{{card.cardTime || card.reportTime}}</text>
+          <text wx:if="{{card.progressLabel}}" class="list-progress">{{card.progressLabel}}</text>
+          <view wx:if="{{card.tags.length}}" class="tag-row">
+            <text
+              wx:for="{{card.tags}}"
+              wx:for-item="tag"
+              wx:key="id"
+              class="tag-pill"
+              style="color: {{tag.accent}}; border-color: {{tag.accent}};"
+            >{{tag.title}}</text>
+          </view>
         </view>
       </view>
     </block>

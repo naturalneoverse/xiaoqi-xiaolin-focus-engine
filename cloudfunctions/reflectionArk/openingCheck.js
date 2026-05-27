@@ -1,8 +1,15 @@
 "use strict";
 
 const { getAgentKeyword, getPersonaSystem, isValidAgentType } = require("./personas");
-const { enforceReplyLength, validateReplyLengthRange } = require("./replyLength");
+const { enforceReplyLength, enforceReplyLengthQ2Soft } = require("./replyLength");
 const { getReplyLengthBounds } = require("./replyLengthPolicy");
+const {
+  isArkReplyAcceptable,
+  completenessOptionsForCard,
+  patchStrictTerminalEnd,
+} = require("./replyCompleteness");
+const { ARK_Q2_SOFT_MAX } = require("./constants");
+const { QUADRANT_Q2_ID } = require("./constants");
 const { charCount } = require("./normalizeText");
 const { stripLegacyOpening } = require("./stripLegacyOpening");
 
@@ -41,24 +48,58 @@ function validatePersonaSystem(agentType) {
 }
 
 /**
- * 后处理：剥离开篇套话 + 按用户输入长度约束正文字数
+ * 后处理：剥离开篇套话 + 按档位截断（观心明己用严格截断）
  * @param {string} raw
  * @param {"xiaoqi"|"xiaolin"|string} agentType
  * @param {string} [userText]
+ * @param {number} [quadrantId]
  * @returns {string}
  */
-function finalizeReplyContent(raw, agentType, userText) {
-  const bounds = getReplyLengthBounds(userText);
+function finalizeReplyContent(raw, agentType, userText, quadrantId) {
+  const bounds = getReplyLengthBounds(userText, quadrantId);
   let text = stripLegacyOpening(String(raw || ""), agentType);
-  text = enforceReplyLength(text, bounds);
-  if (!validateReplyLengthRange(text, bounds).ok) {
-    text = enforceReplyLength(text, bounds);
+  if (Number(quadrantId) === QUADRANT_Q2_ID) {
+    const soft = enforceReplyLengthQ2Soft(text, bounds);
+    return soft.ok ? soft.text : "";
   }
-  return text;
+  return enforceReplyLength(text, bounds, { neverPad: true });
+}
+
+/**
+ * finalize + 完整性验收（供 generateReply 使用）
+ * @param {string} raw
+ * @param {"xiaoqi"|"xiaolin"|string} agentType
+ * @param {string} [userText]
+ * @param {number} [quadrantId]
+ * @param {string} [cardField] 缺省时不启用 Q1·c2 末字严格（防误伤 c0）
+ * @returns {{ text: string, ok: boolean, reason?: string }}
+ */
+function finalizeAndAssessReply(raw, agentType, userText, quadrantId, cardField) {
+  const bounds = getReplyLengthBounds(userText, quadrantId);
+  let text = finalizeReplyContent(raw, agentType, userText, quadrantId);
+  if (Number(quadrantId) === QUADRANT_Q2_ID && !text) {
+    return { text: "", ok: false, reason: "TRUNCATE_NO_SENTENCE_END" };
+  }
+  const completenessOpts = completenessOptionsForCard(quadrantId, cardField);
+  text = patchStrictTerminalEnd(text, completenessOpts);
+  if (Number(quadrantId) === QUADRANT_Q2_ID) {
+    const softCap =
+      bounds.softMax != null ? Number(bounds.softMax) : ARK_Q2_SOFT_MAX;
+    if (charCount(text) > softCap + 2) {
+      return { text: "", ok: false, reason: "TOO_LONG" };
+    }
+  }
+  const assessment = isArkReplyAcceptable(text, completenessOpts);
+  return {
+    text,
+    ok: assessment.ok,
+    reason: assessment.reason,
+  };
 }
 
 module.exports = {
   PERSONA_REQUIRED_SECTIONS,
   validatePersonaSystem,
   finalizeReplyContent,
+  finalizeAndAssessReply,
 };

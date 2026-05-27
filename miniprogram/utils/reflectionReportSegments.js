@@ -2,10 +2,13 @@
  * 复盘报告分段：选择题本地段 + 手写段（解读由缓存/兜底拼装，不走 echoQ* 长文）
  */
 
-const { getQuadrantCards, resolveSingleSelected } = require("../config/reflectionQuadrantCards");
+const {
+  getQuadrantCards,
+  resolveSingleSelected,
+} = require("../config/reflectionQuadrantCards");
+const { formatSingleChoiceUserText } = require("../config/reflectionArkApiMap");
 const { getQuadrantMeta } = require("../config/reflectionTheme");
 const {
-  QUADRANT_1,
   QUADRANT_2,
   QUADRANT_3,
   QUADRANT_4,
@@ -62,14 +65,19 @@ function agentForQuadrant(quadrantId) {
   return meta && meta.agent ? meta.agent : "xiaolin";
 }
 
-function pushHandwriting(segments, cardField, userText, quadrantId) {
+function pushHandwriting(segments, cardField, userText, quadrantId, extra) {
   if (!hasAnyText(userText)) return;
-  segments.push({
-    type: "handwriting",
-    cardField: String(cardField),
-    userText: String(userText).trim(),
-    agentType: agentForQuadrant(quadrantId),
-  });
+  segments.push(
+    Object.assign(
+      {
+        type: "handwriting",
+        cardField: String(cardField),
+        userText: String(userText).trim(),
+        agentType: agentForQuadrant(quadrantId),
+      },
+      extra || null,
+    ),
+  );
 }
 
 function pushChoice(segments, echoText) {
@@ -92,16 +100,9 @@ function segmentQ1(cards, cardResponses) {
   if (card1 && card1.type === "single" && r1 && r1.type === "single") {
     const id = resolveSingleSelected(card1, r1);
     if (id) {
-      const mapDisp = QUADRANT_1.single_choice_mapping[id];
-      const label = mapDisp || optionLabel(card1, id) || id;
-      const out = QUADRANT_1.output_by_choice[id];
-      const echo = QUADRANT_1.echo_by_choice[id];
-      if (out && echo) {
-        const scan = `${normalizeQuoteText(t0)} ${normalizeQuoteText(t2)}`.trim();
-        let body = [out, echo, QUADRANT_1.statistics_humorous].join("\n");
-        body = appendEmotion(body, scan);
-        pushChoice(segments, `您说：「${label}」\n\n${body}`);
-      }
+      const label = optionLabel(card1, id) || id;
+      const userText = formatSingleChoiceUserText(card1.question, label);
+      pushHandwriting(segments, "c1", userText, 1, { choiceLabel: label });
     }
   }
 
@@ -133,16 +134,9 @@ function segmentQ3(cards, cardResponses) {
   if (card1 && card1.type === "single" && r1 && r1.type === "single") {
     const id = resolveSingleSelected(card1, r1);
     if (id) {
-      const mapDisp = QUADRANT_3.single_choice_mapping[id];
-      const label = mapDisp || optionLabel(card1, id) || id;
-      const out = QUADRANT_3.output_by_choice[id];
-      const echo = QUADRANT_3.echo_by_choice[id];
-      if (out && echo) {
-        const scan = `${normalizeQuoteText(t0)} ${normalizeQuoteText(t2)}`.trim();
-        let body = [out, echo, QUADRANT_3.statistics_humorous].join("\n");
-        body = appendEmotion(body, scan);
-        pushChoice(segments, `您说：「${label}」\n\n${body}`);
-      }
+      const label = optionLabel(card1, id) || id;
+      const userText = formatSingleChoiceUserText(card1.question, label);
+      pushHandwriting(segments, "c1", userText, 3, { choiceLabel: label });
     }
   }
 
@@ -167,13 +161,13 @@ function q4SelectionKey(selected, hasEx, hasFe, hasDe) {
 function q4MultiLead(selected) {
   const types = (selected || []).filter((id) => id && id !== "nothing");
   if (!types.length) {
-    if ((selected || []).indexOf("nothing") >= 0) return "您选择：什么也不带走";
+    if ((selected || []).indexOf("nothing") >= 0) return "您选择：什么也不留";
     return "";
   }
   if (types.length === 1) {
-    if (types[0] === "experience") return "您想带走一个经验";
-    if (types[0] === "feeling") return "您想带走一个感受";
-    if (types[0] === "decision") return "您想带走一个决定";
+    if (types[0] === "experience") return "您想带给自己一个经验";
+    if (types[0] === "feeling") return "您想带给自己一个感受";
+    if (types[0] === "decision") return "您想带给自己一个决定";
   }
   const brief = types
     .map((id) => {
@@ -183,7 +177,7 @@ function q4MultiLead(selected) {
       return "";
     })
     .filter(Boolean);
-  return `您想带走：${brief.join("、")}`;
+  return `您想带给自己：${brief.join("、")}`;
 }
 
 function segmentQ4(cards, cardResponses) {
@@ -212,7 +206,7 @@ function segmentQ4(cards, cardResponses) {
     const out = selKey ? QUADRANT_4.output_by_selection[selKey] : "";
     const echo = selKey ? QUADRANT_4.echo_by_selection[selKey] : "";
     if (onlyNothing && out && echo) {
-      const lead = "您选择：什么也不带走";
+      const lead = "您选择：什么也不留";
       let body = `${out}\n${echo}`;
       body = appendEmotion(body, `${ex} ${fe} ${de}`.trim());
       pushChoice(segments, `${lead}\n\n${body}`);

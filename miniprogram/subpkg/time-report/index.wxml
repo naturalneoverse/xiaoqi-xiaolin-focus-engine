@@ -41,24 +41,34 @@
   </view>
 
   <view class="card">
-    <text class="card-title card-title-history">历史报告</text>
+    <text class="card-title card-title-history">上周报告</text>
     <view class="line"></view>
     <view
-      wx:for="{{historyReports}}"
-      wx:key="weekMondayKey"
-      class="history-row {{index < historyReports.length - 1 ? 'history-row-border' : ''}}"
-      data-index="{{index}}"
-      bindtap="goHistoryReport"
+      wx:if="{{lastWeekReport}}"
+      class="history-row"
+      bindtap="goLastWeekReport"
       hover-class="row-hover"
     >
-      <text class="history-left">{{item.range}}</text>
+      <text class="history-left">{{lastWeekReport.range}}</text>
       <view class="history-right-wrap">
         <view class="history-right-col">
-          <text class="history-right">真我时刻 {{item.moments}}次</text>
-          <text class="history-presence">当下质地 {{item.presenceName}}</text>
+          <text class="history-right">真我时刻 {{lastWeekReport.moments}}次</text>
+          <text class="history-presence">当下质地 {{lastWeekReport.presenceName}}</text>
         </view>
         <text class="history-arrow">›</text>
       </view>
+    </view>
+    <view wx:else class="history-empty">
+      <text class="history-empty-text">{{lastWeekEmptyHint}}</text>
+    </view>
+    <view
+      wx:if="{{showAllPastLink}}"
+      class="history-more-row tap-target"
+      bindtap="goAllPastReports"
+      hover-class="row-hover"
+    >
+      <text class="history-more-text">查看全部往期</text>
+      <text class="history-arrow">›</text>
     </view>
   </view>
 

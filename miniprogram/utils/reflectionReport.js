@@ -7,10 +7,17 @@ const {
   REPORT_COMBO_OUTRO,
 } = require("./reflectionReportNarrative");
 const { assembleQuadrantEchoParagraphs, stripEmoji } = require("./reflectionReportAssembly");
+const { buildGroupedReflectionList } = require("./reflectionListGroups");
 const {
   fetchQuadrantCacheRows,
   buildReplyMapFromRows,
 } = require("./reflectionArkCache");
+const {
+  getPendingCardFields,
+  hasGeneratingWorkForTask,
+  resumePendingGenerationsForTask,
+} = require("./reflectionArkBackground");
+const { resolveReportFallbackSetIndex } = require("../config/reflectionArkFallback");
 
 const EMPTY_LABEL = "暂未填写";
 
@@ -19,7 +26,7 @@ const EMPTY_LABEL = "暂未填写";
  * @param {number} quadrantId
  * @returns {Promise<object>}
  */
-async function buildQuadrantSection(record, quadrantId) {
+async function buildQuadrantSection(record, quadrantId, fallbackSetIndex) {
   const meta = getQuadrantMeta(quadrantId);
   const entry = record ? reflectionManager.getQuadrantEntry(record, quadrantId) : null;
   const filled = record ? reflectionManager.isQuadrantComplete(record, quadrantId) : false;
@@ -35,6 +42,7 @@ async function buildQuadrantSection(record, quadrantId) {
     completedAt: filled && entry ? entry.completedAt || "" : "",
     emptyLabel: EMPTY_LABEL,
     echoParagraphs: [],
+    handwritingPending: false,
   };
 
   if (!filled || !entry || !record) {
@@ -43,12 +51,16 @@ async function buildQuadrantSection(record, quadrantId) {
 
   try {
     const rows = await fetchQuadrantCacheRows(record.taskId, quadrantId);
-    const cacheMap = buildReplyMapFromRows(rows);
+    const cacheMap = buildReplyMapFromRows(rows, quadrantId);
+    const pendingCardFields = getPendingCardFields(record.taskId, quadrantId);
     section.echoParagraphs = assembleQuadrantEchoParagraphs(
       quadrantId,
       entry.cardResponses,
       cacheMap,
+      pendingCardFields,
+      fallbackSetIndex,
     );
+    section.handwritingPending = pendingCardFields.length > 0;
   } catch (e) {
     console.warn("[reflectionReport] assemble quadrant", quadrantId, e && (e.message || e));
     section.echoParagraphs = [
@@ -66,9 +78,10 @@ async function buildQuadrantSection(record, quadrantId) {
  * @param {string} taskId
  * @returns {Promise<object|null>}
  */
-async function buildReportViewModel(taskId) {
+async function buildReportViewModel(taskId, visitSeed) {
   if (!taskId) return null;
   const record = reflectionManager.findByTaskId(taskId);
+  const fallbackSetIndex = resolveReportFallbackSetIndex(taskId, visitSeed);
   if (!record) {
     return {
       taskId: String(taskId),
@@ -94,7 +107,7 @@ async function buildReportViewModel(taskId) {
   }
 
   const sections = await Promise.all(
-    QUADRANT_IDS.map((id) => buildQuadrantSection(record, id)),
+    QUADRANT_IDS.map((id) => buildQuadrantSection(record, id, fallbackSetIndex)),
   );
 
   let generalEcho = null;
@@ -108,6 +121,10 @@ async function buildReportViewModel(taskId) {
   }
 
   const hasAnyQuadrant = reflectionManager.getCompletedQuadrantIds(record).length > 0;
+  resumePendingGenerationsForTask(record.taskId);
+  const reportPendingHint = hasGeneratingWorkForTask(record.taskId)
+    ? "部分手写解读正在后台生成，稍后会自动更新。"
+    : "";
   return {
     taskId: record.taskId,
     taskTitle: record.taskTitle || "未命名任务",
@@ -117,29 +134,17 @@ async function buildReportViewModel(taskId) {
     generalEcho,
     reportIntro: hasAnyQuadrant ? stripEmoji(REPORT_COMBO_INTRO) : "",
     reportOutro: hasAnyQuadrant ? stripEmoji(REPORT_COMBO_OUTRO) : "",
+    reportPendingHint,
   };
 }
 
 function buildListItems() {
-  return reflectionManager
-    .listRecordsSorted()
-    .filter((record) => reflectionManager.getCompletedQuadrantIds(record).length > 0)
-    .map((record) => {
-      const completedIds = reflectionManager.getCompletedQuadrantIds(record);
-      return {
-        taskId: record.taskId,
-        taskTitle: record.taskTitle || "未命名任务",
-        reportTime: record.latestCompletedAt || "",
-        tags: completedIds.map((id) => {
-          const meta = getQuadrantMeta(id);
-          return {
-            id,
-            title: meta ? meta.title : `象限${id}`,
-            accent: meta ? meta.accent : "#184061",
-          };
-        }),
-      };
-    });
+  const { sections } = buildGroupedReflectionList();
+  const flat = [];
+  sections.forEach((sec) => {
+    sec.items.forEach((item) => flat.push(item));
+  });
+  return flat;
 }
 
 module.exports = {

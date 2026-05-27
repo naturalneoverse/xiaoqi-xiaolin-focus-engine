@@ -96,6 +96,16 @@ function buildReportDisplayLines(text) {
 
 function applyTextState(comp, text, keepManualBreak, maxLength, textLayout) {
   const normalized = buildBubbleText(text, keepManualBreak, maxLength);
+  if (textLayout === "center") {
+    comp.setData({
+      normalizedText: normalized,
+      useReportBlocks: false,
+      reportLines: [],
+      shellLayoutClass: "",
+      textLayoutClass: "bubble-text-center",
+    });
+    return;
+  }
   const isReport = textLayout === "report";
   if (!isReport) {
     comp.setData({

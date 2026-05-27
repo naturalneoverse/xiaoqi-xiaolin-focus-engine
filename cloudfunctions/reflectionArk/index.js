@@ -6,9 +6,11 @@
 
  * 部署：微信开发者工具 → cloudfunctions/reflectionArk → 上传并部署（云端安装依赖）
 
- * 环境变量（云开发控制台）：ARK_API_KEY、ARK_BASE_URL、ARK_MODEL_ID
+ * 环境变量：ARK_API_KEY、ARK_BASE_URL、ARK_MODEL_ID、ARK_MODEL_ID_Q2_DEEP；
+ * DASHSCOPE_API_KEY、DASHSCOPE_MODEL_Q1（qwen3.7-max）、DASHSCOPE_MODEL_Q4（deepseek-v4-pro）；
+ * generateBodyWeekCare / bodyWeekCareProbe：身体周报 statusDesc + careText（百炼 Q1 模型）
 
- * 超时（测试档）：config.json 60s；双卡 generateQuadrantBatch 并行，每张 25s
+ * 超时：config.json / 控制台 60s；generateQuadrantBatch 串行 + 超时卡补打一轮
 
  */
 
@@ -21,9 +23,24 @@ const cloud = require("wx-server-sdk");
 const { handleGenerateReply } = require("./generateReply");
 
 const { handleGenerateQuadrantBatch } = require("./generateQuadrantBatch");
+const {
+  handleGenerateQuadrantQ2StageA,
+  handleGenerateQuadrantQ2StageB,
+} = require("./generateQuadrantQ2S2");
+const {
+  handleGenerateQuadrantQ3StageA,
+  handleGenerateQuadrantQ3StageB,
+} = require("./generateQuadrantQ3S2");
 
 const { handleMsgSecCheck } = require("./msgSecCheck");
-const { handleArkProbe } = require("./arkProbe");
+const { handleArkProbe, handleArkEnvCheck } = require("./arkProbe");
+const { handleDashscopeProbe } = require("./arkProbeDashscope");
+const { handleGenerateBodyWeekCare } = require("./generateBodyWeekCare");
+const { handleBodyWeekCareProbe } = require("./bodyWeekCareProbe");
+const { handleArkProbeQ2 } = require("./arkProbeQ2");
+const { handleArkProbeQ2StageA } = require("./arkProbeQ2StageA");
+const { handleArkProbeQ3StageA } = require("./arkProbeQ3StageA");
+const { DEPLOY_TAG } = require("./constants");
 
 
 
@@ -37,9 +54,31 @@ const ACTIONS = {
 
   generateQuadrantBatch: handleGenerateQuadrantBatch,
 
+  generateQuadrantQ2StageA: handleGenerateQuadrantQ2StageA,
+
+  generateQuadrantQ2StageB: handleGenerateQuadrantQ2StageB,
+
+  generateQuadrantQ3StageA: handleGenerateQuadrantQ3StageA,
+
+  generateQuadrantQ3StageB: handleGenerateQuadrantQ3StageB,
+
   msgSecCheck: async (_db, event) => handleMsgSecCheck(event || {}),
 
   arkProbe: async (_db, _event) => handleArkProbe(),
+
+  arkEnvCheck: async (_db, _event) => handleArkEnvCheck(),
+
+  dashscopeProbe: async (_db, _event) => handleDashscopeProbe(),
+
+  generateBodyWeekCare: async (_db, event) => handleGenerateBodyWeekCare(null, event || {}),
+
+  bodyWeekCareProbe: async (_db, _event) => handleBodyWeekCareProbe(),
+
+  arkProbeQ2: async (_db, _event) => handleArkProbeQ2(),
+
+  arkProbeQ2StageA: (db, _event) => handleArkProbeQ2StageA(db),
+
+  arkProbeQ3StageA: (db, _event) => handleArkProbeQ3StageA(db),
 
 };
 
@@ -74,6 +113,7 @@ exports.main = async (event) => {
       cardField: (event && event.cardField) || "",
 
       batchSize,
+      deployTag: DEPLOY_TAG,
 
     }),
 
@@ -101,8 +141,20 @@ exports.main = async (event) => {
 
   try {
 
-    if (action === "arkProbe") {
+    if (
+      action === "arkProbe" ||
+      action === "arkProbeQ2" ||
+      action === "arkEnvCheck" ||
+      action === "dashscopeProbe" ||
+      action === "bodyWeekCareProbe"
+    ) {
       return await handler(null, event);
+    }
+
+    const db = cloud.database();
+
+    if (action === "arkProbeQ2StageA" || action === "arkProbeQ3StageA") {
+      return await handler(db, event);
     }
 
     if (action === "msgSecCheck") {
@@ -127,15 +179,36 @@ exports.main = async (event) => {
 
     }
 
-
-
-    const db = cloud.database();
-
     const out = await handler(db, event);
 
+    if (action === "generateBodyWeekCare") {
+      if (!out.ok) {
+        return {
+          ok: false,
+          action,
+          errCode: out.errCode || "BODY_WEEK_CARE_FAILED",
+          errMsg: "身体周报成文失败",
+          deployTag: DEPLOY_TAG,
+        };
+      }
+      return {
+        ok: true,
+        action,
+        deployTag: DEPLOY_TAG,
+        statusDesc: out.statusDesc,
+        careText: out.careText,
+        statusDescChars: out.statusDescChars,
+        careTextChars: out.careTextChars,
+      };
+    }
 
-
-    if (action === "generateQuadrantBatch") {
+    if (
+      action === "generateQuadrantBatch" ||
+      action === "generateQuadrantQ2StageA" ||
+      action === "generateQuadrantQ2StageB" ||
+      action === "generateQuadrantQ3StageA" ||
+      action === "generateQuadrantQ3StageB"
+    ) {
 
       if (!out.ok) {
 
@@ -143,7 +216,7 @@ exports.main = async (event) => {
 
           ok: false,
 
-          action: "generateQuadrantBatch",
+          action,
 
           errCode: out.errCode || "BATCH_FAILED",
 
@@ -153,21 +226,14 @@ exports.main = async (event) => {
 
       }
 
-      return {
-
-        ok: true,
-
-        action: "generateQuadrantBatch",
-
-        replies: out.replies || [],
-
-        fallbackCount: out.fallbackCount != null ? out.fallbackCount : 0,
-
-        batchMode: out.batchMode || "",
-
-        arkTimeoutMs: out.arkTimeoutMs || 0,
-
-      };
+      return Object.assign(
+        {
+          ok: true,
+          action,
+          deployTag: DEPLOY_TAG,
+        },
+        out,
+      );
 
     }
 

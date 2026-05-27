@@ -3,7 +3,7 @@
     <block wx:if="{{empty}}">
       <view class="list-empty">
         <text class="list-empty-title">暂无往周记录</text>
-        <text class="list-empty-desc">本周及之后请在时间编织图等处查看；历史周在完成任务后会出现在这里</text>
+        <text class="list-empty-desc">本周请在时间 Tab「时间编织图」查看；往周在完成任务后会出现在这里</text>
       </view>
     </block>
     <block wx:else>

@@ -7,7 +7,7 @@ const EXPAND_ROWS = [
   {
     key: "experience",
     optionId: "experience",
-    label: "带走一个经验",
+    label: "带给自己一个经验",
     placeholder: "值得继续的做法，或下次可以调整的地方",
     maxLength: EXPERIENCE_MAX,
     multiline: true,
@@ -15,7 +15,7 @@ const EXPAND_ROWS = [
   {
     key: "feeling",
     optionId: "feeling",
-    label: "带走一个感受",
+    label: "带给自己一个感受",
     placeholder: "某个难忘的时刻...",
     maxLength: EXPAND_SHORT_MAX,
     multiline: false,
@@ -23,7 +23,7 @@ const EXPAND_ROWS = [
   {
     key: "decision",
     optionId: "decision",
-    label: "带走一个决定",
+    label: "带给自己一个决定",
     placeholder: "接下来要做什么或不再做什么...",
     maxLength: EXPAND_SHORT_MAX,
     multiline: false,

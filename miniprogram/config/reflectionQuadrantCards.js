@@ -3,6 +3,7 @@
  */
 
 const { createEmptyMultiExpandValues } = require("./reflectionMultiExpand");
+const { Q1_BUBBLE2 } = require("./reflectionConclusions");
 
 const TEXT_MAX = 300;
 
@@ -31,8 +32,8 @@ const QUADRANT_1_CARDS = [
   {
     field: "c2",
     type: "text",
-    question: "抛开好坏对错，你看见了什么？",
-    placeholder: "悬置评判之后的样子",
+    question: "这件事，去掉你的评价，还剩下什么？",
+    placeholder: Q1_BUBBLE2,
     maxLength: TEXT_MAX,
   },
 ];
@@ -42,22 +43,22 @@ const QUADRANT_2_CARDS = [
   {
     field: "c0",
     type: "text",
-    question: "今天有什么让你觉得「卡住了」？",
-    placeholder: "不是解决，只是看见",
+    question: "这件事有什么让你觉得「卡住了」？",
+    placeholder: "例如话到嘴边说不出口，感觉哪里不对又说不上来，不敢面对，突发意外……写下来",
     maxLength: TEXT_MAX,
   },
   {
     field: "c1",
     type: "text",
-    question: "这份卡顿里，藏着什么你真正在乎的东西？",
-    placeholder: "困境的另一面，是你没被满足的需要",
+    question: "这件事，碰到了你心里的哪根弦？",
+    placeholder: "它可能叫：面子、公平，也可能叫：在意、期待、想做得更好。写下来就好。",
     maxLength: TEXT_MAX,
   },
   {
     field: "c2",
     type: "text",
-    question: "如果这是你生命里一次重要的练习，它在练什么？",
-    placeholder: "痛苦也有它想教会你的东西",
+    question: "在这件事里，你觉得什么是你真正在意的？",
+    placeholder: "你真正不想妥协的那个东西，叫什么？",
     maxLength: TEXT_MAX,
   },
 ];
@@ -68,7 +69,7 @@ const Q3_SINGLE_OPTIONS = [
   { id: "none", label: "没有，我就是想做这件事本身" },
 ];
 
-/** 象限三：明辨本心 — 文本 + 三选一 + 文本 */
+/** 象限三：自我主宰 — 文本 + 三选一 + 文本 */
 const QUADRANT_3_CARDS = [
   {
     field: "c0",
@@ -86,16 +87,16 @@ const QUADRANT_3_CARDS = [
   {
     field: "c2",
     type: "text",
-    question: "放下不属于你的，你最想怎么做？",
-    placeholder: "不是逃避，是收回属于自己的力量",
+    question: "放下不属于你的，你最想做什么，怎么做？",
+    placeholder: "松开一直端着的肩膀。写下你放下的，再写下你拿起的第一步——步子小没关系，迈出去就行。",
     maxLength: TEXT_MAX,
   },
 ];
 
 const Q4_MULTI_OPTIONS = [
-  { id: "experience", label: "带走一个经验（下次遇到类似的事，知道怎么做更好）" },
-  { id: "feeling", label: "带走一个感受（做这件事的时候，某个时刻让你难忘）" },
-  { id: "decision", label: "带走一个决定（通过这件事，你决定了接下来要做什么或不再做什么）" },
+  { id: "experience", label: "带给自己一个经验（下次遇到类似的事，知道怎么做更好）" },
+  { id: "feeling", label: "带给自己一个感受（做这件事的时候，某个时刻让你难忘）" },
+  { id: "decision", label: "带给自己一个决定（通过这件事，你决定了接下来要做什么或不再做什么）" },
   { id: "nothing", label: "什么也不留，让它过去（放下一件事，也是一种选择）" },
 ];
 
@@ -118,7 +119,7 @@ const QUADRANT_4_CARDS = [
   {
     field: "c2",
     type: "multi",
-    question: "你想从这件事里，带走什么？",
+    question: "你想从这件事里，带给自己什么？",
     options: Q4_MULTI_OPTIONS,
     exclusiveId: "nothing",
     hasExpand: true,

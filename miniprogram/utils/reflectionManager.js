@@ -130,6 +130,24 @@ function removeByTaskId(taskId) {
   }
 }
 
+/** 用户从「哲思复盘报告」删除：本地记录 + 后台生成状态 + 内存缓存 */
+function purgeRecordByTaskId(taskId) {
+  const id = String(taskId || "").trim();
+  if (!id) return false;
+  const removed = removeByTaskId(id);
+  try {
+    require("./reflectionArkBackground").clearAllWorkForTask(id);
+  } catch (e) {
+    console.warn("[reflectionManager] purge clearAllWorkForTask", e);
+  }
+  try {
+    require("./reflectionArkCache").clearMemoryCacheForTask(id);
+  } catch (e) {
+    console.warn("[reflectionManager] purge clearMemoryCacheForTask", e);
+  }
+  return removed;
+}
+
 module.exports = {
   readAll,
   writeAll,
@@ -141,4 +159,5 @@ module.exports = {
   isAllQuadrantsComplete,
   getQuadrantEntry,
   removeByTaskId,
+  purgeRecordByTaskId,
 };

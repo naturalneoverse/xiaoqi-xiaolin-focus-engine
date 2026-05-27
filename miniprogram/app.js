@@ -6,11 +6,11 @@ const CUSTOM_NAV_ROUTES = new Set([
   "pages/agreement/index",
   "pages/my/index",
   "pages/task-create/index",
+  "pages/task-detail/index",
   "subpkg/time-report/index",
   "subpkg/poster/index",
   "pages/settings/index",
   "pages/privacy/index",
-  /** navigationStyle: custom，与设置页共用顶栏样式，须与 settings 同等 top inset，否则会顶到状态栏、关闭难点 */
   "pages/profile-edit-menu/index",
   "pages/profile-nickname/index",
   "pages/profile-signature/index",
@@ -34,7 +34,7 @@ const DEFAULT_SETTINGS = {
 };
 
 /** 产品版本：关于页、设置页展示；与 miniprogram/package.json 的 version 同步 */
-const APP_VERSION = "1.1.6";
+const APP_VERSION = "1.2.0";
 
 function getWindowInfoSafe() {
   try {
@@ -94,17 +94,20 @@ function getTabBarExtraBottom(route, windowWidth) {
   const r = normalizeRoute(route);
   if (!TAB_PAGE_ROUTES.has(r)) return 0;
   const unit = windowWidth / 750;
-  return Math.ceil(unit * 160);
+  /** tab 壳 148rpx + 底距 12rpx + 与内容间距 44rpx */
+  return Math.ceil(unit * 204);
 }
 
 function buildSafeAreaStyle(route) {
   const r = normalizeRoute(route);
   const insets = computeSafeAreaInsets();
   let bottom = insets.bottom + getTabBarExtraBottom(r, insets.windowWidth);
-  const MAX_TOTAL_BOTTOM_PADDING = TAB_PAGE_ROUTES.has(r) ? 220 : 160;
+  const MAX_TOTAL_BOTTOM_PADDING = TAB_PAGE_ROUTES.has(r) ? 300 : 160;
   if (bottom > MAX_TOTAL_BOTTOM_PADDING) {
     bottom = Math.min(insets.bottom, 80) + getTabBarExtraBottom(r, insets.windowWidth);
-    if (bottom > MAX_TOTAL_BOTTOM_PADDING) bottom = 34;
+    if (bottom > MAX_TOTAL_BOTTOM_PADDING) {
+      bottom = getTabBarExtraBottom(r, insets.windowWidth) + Math.min(insets.bottom, 34);
+    }
   }
   let topPx = 0;
   if (NO_TOP_SAFE_AREA_ROUTES.has(r)) {

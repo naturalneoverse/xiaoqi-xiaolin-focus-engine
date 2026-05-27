@@ -1,6 +1,13 @@
 @import "../../styles/reflection-page.wxss";
 
+/* 复盘报告正文字号 ×1.2（仅 .report-page 内生效） */
 .report-page {
+  --reflection-report-font-title: 43rpx;
+  --reflection-report-font-sub: 31rpx;
+  --reflection-report-font-body: 34rpx;
+  --reflection-report-font-meta: 26rpx;
+  --reflection-report-font-combo: 34rpx;
+  --reflection-empty-label-size: 34rpx;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -22,7 +29,7 @@
 
 .report-task-name {
   display: block;
-  font-size: 34rpx;
+  font-size: 41rpx;
   font-weight: 500;
   color: #184061;
   line-height: var(--reflection-report-line-title);
@@ -35,6 +42,22 @@
   font-weight: 400;
   color: var(--reflection-empty-label-color);
   line-height: var(--reflection-report-line-sub);
+}
+
+.report-pending-hint {
+  margin: 16rpx 32rpx 0;
+  padding: 20rpx 28rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid rgba(24, 64, 97, 0.12);
+  box-sizing: border-box;
+}
+
+.report-pending-hint-text {
+  display: block;
+  font-size: 31rpx;
+  line-height: 1.5;
+  color: #3d5f7a;
 }
 
 .report-combo {
@@ -179,50 +202,7 @@
 }
 
 .report-foot-space {
-  height: calc(160rpx + env(safe-area-inset-bottom));
-}
-
-.report-footer {
-  flex-shrink: 0;
-  position: relative;
-  z-index: 20;
-  padding: 16rpx 40rpx calc(24rpx + env(safe-area-inset-bottom));
-  box-sizing: border-box;
-  background: linear-gradient(180deg, rgba(239, 247, 253, 0) 0%, rgba(239, 247, 253, 0.92) 24%);
-}
-
-.report-save-btn {
-  width: 100%;
-  max-width: 700rpx;
-  margin: 0 auto;
-  height: 96rpx;
-  line-height: 96rpx;
-  border-radius: 48rpx;
-  background: #12598f !important;
-  color: #ffffff !important;
-  font-size: 32rpx;
-  font-weight: 500;
-  border: none !important;
-  padding: 0 !important;
-}
-
-.report-save-btn::after {
-  display: none !important;
-  border: none !important;
-}
-
-.report-save-btn-hover {
-  background: #0e4a75 !important;
-}
-
-.report-canvas-offscreen {
-  position: fixed;
-  left: -9999px;
-  top: 0;
-  width: 750px;
-  height: 1200px;
-  opacity: 0;
-  pointer-events: none;
+  height: calc(48rpx + env(safe-area-inset-bottom));
 }
 
 .report-loading-mask {

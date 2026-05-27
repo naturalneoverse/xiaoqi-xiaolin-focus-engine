@@ -100,6 +100,7 @@
     agent="{{conclusionAgent}}"
     bubbleColor="{{conclusionBubbleColor}}"
     accentColor="{{conclusionAccent}}"
+    bubbleCenter="{{conclusionBubbleCenter}}"
     bindcomplete="onConclusionComplete"
   />
 </view>

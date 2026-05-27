@@ -30,6 +30,7 @@ function normalizeQuoteText(s) {
 }
 
 const USER_PREFIX = "您说：";
+const USER_CHOICE_PREFIX = "您选择：";
 const QUOTE_OPEN = "「";
 const QUOTE_CLOSE = "」";
 
@@ -37,6 +38,13 @@ function formatUserSays(text) {
   const t = normalizeQuoteText(text);
   if (!t) return "";
   return `${USER_PREFIX}${QUOTE_OPEN}${t}${QUOTE_CLOSE}`;
+}
+
+/** 单选题报告行：仅展示选项文案 */
+function formatUserChoice(label) {
+  const t = normalizeQuoteText(label);
+  if (!t) return "";
+  return `${USER_CHOICE_PREFIX}${QUOTE_OPEN}${t}${QUOTE_CLOSE}`;
 }
 
 /** 只取第一条匹配（顺序由 spec 定义） */
@@ -242,13 +250,13 @@ function q4SelectionKey(selected, hasEx, hasFe, hasDe) {
 function q4MultiLead(selected) {
   const types = (selected || []).filter((id) => id && id !== "nothing");
   if (!types.length) {
-    if ((selected || []).indexOf("nothing") >= 0) return "您选择：什么也不带走";
+    if ((selected || []).indexOf("nothing") >= 0) return "您选择：什么也不留";
     return "";
   }
   if (types.length === 1) {
-    if (types[0] === "experience") return "您想带走一个经验";
-    if (types[0] === "feeling") return "您想带走一个感受";
-    if (types[0] === "decision") return "您想带走一个决定";
+    if (types[0] === "experience") return "您想带给自己一个经验";
+    if (types[0] === "feeling") return "您想带给自己一个感受";
+    if (types[0] === "decision") return "您想带给自己一个决定";
   }
   const brief = types
     .map((id) => {
@@ -258,7 +266,7 @@ function q4MultiLead(selected) {
       return "";
     })
     .filter(Boolean);
-  return `您想带走：${brief.join("、")}`;
+  return `您想带给自己：${brief.join("、")}`;
 }
 
 /** 象限四 */
@@ -309,7 +317,7 @@ function echoQ4(cards, cardResponses) {
     const out = selKey ? QUADRANT_4.output_by_selection[selKey] : "";
     const echo = selKey ? QUADRANT_4.echo_by_selection[selKey] : "";
     if (onlyNothing && out && echo) {
-      const lead = "您选择：什么也不带走";
+      const lead = "您选择：什么也不留";
       let body = `${out}\n${echo}`;
       const scan = `${ex} ${fe} ${de}`.trim();
       body = appendEmotion(body, scan);
@@ -395,6 +403,7 @@ function buildGeneralClosingEcho() {
 
 module.exports = {
   formatUserSays,
+  formatUserChoice,
   buildQuadrantEchoParagraphs,
   buildQuadrantEchoSegments: require("./reflectionReportSegments").buildQuadrantEchoSegments,
   buildGeneralClosingEcho,

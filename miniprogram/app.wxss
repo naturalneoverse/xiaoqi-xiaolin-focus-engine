@@ -93,7 +93,7 @@ page {
 
 /* Global helper for pages that need to avoid overlap with custom tabbar */
 .with-custom-tabbar {
-  padding-bottom: calc(130rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(204rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
 

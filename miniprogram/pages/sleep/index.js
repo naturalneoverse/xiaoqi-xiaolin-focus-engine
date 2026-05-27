@@ -1,5 +1,4 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
-const reflectionManager = require("../../utils/reflectionManager");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 const { getTodayKey } = require("../../utils/dateKeys");
@@ -169,11 +168,6 @@ Page({
           console.error("delete task setStorageSync", err);
           wx.showToast({ title: "删除失败", icon: "none" });
           return;
-        }
-        try {
-          reflectionManager.removeByTaskId(taskId);
-        } catch (e) {
-          console.warn("[sleep] remove reflection after task delete", e);
         }
         this.loadTasks();
         wx.showToast({

@@ -107,11 +107,17 @@ function isRetryableStatus(code) {
 async function callArkResponses(env, params, options) {
   const timeoutMs =
     options && Number(options.timeoutMs) > 0 ? Number(options.timeoutMs) : ARK_TIMEOUT_MS;
+  const modelId =
+    options && options.modelId ? String(options.modelId).trim() : env.modelId;
+  const maxOutputTokens =
+    options && Number(options.maxOutputTokens) > 0
+      ? Number(options.maxOutputTokens)
+      : ARK_MAX_OUTPUT_TOKENS;
   const body = {
-    model: env.modelId,
+    model: modelId,
     instructions: params.instructions,
     input: [{ role: "user", content: params.userContent }],
-    max_output_tokens: ARK_MAX_OUTPUT_TOKENS,
+    max_output_tokens: maxOutputTokens,
     stream: false,
   };
 
@@ -148,14 +154,28 @@ async function callArkResponses(env, params, options) {
             quadrantId: params.meta && params.meta.quadrantId,
             cardField: params.meta && params.meta.cardField,
             textHash: params.meta && params.meta.textHash,
+            phase: params.meta && params.meta.phase,
+            modelId,
           });
           return { ok: true, text, httpStatus: res.statusCode };
         }
         lastErr = "ARK_EMPTY_OUTPUT";
       } else {
-        lastErr =
-          (parsed && parsed.error && (parsed.error.code || parsed.error.message)) ||
-          `ARK_HTTP_${res.statusCode}`;
+        const errObj = parsed && parsed.error;
+        const errMsg =
+          errObj && typeof errObj.message === "string" ? errObj.message.trim() : "";
+        const errCode = errObj && errObj.code ? String(errObj.code) : "";
+        if (res.statusCode === 401 || res.statusCode === 403) {
+          lastErr = "ARK_AUTH_FAILED";
+        } else if (res.statusCode === 404) {
+          lastErr = "ARK_MODEL_NOT_FOUND";
+        } else if (errCode) {
+          lastErr = `ARK_${errCode}`.slice(0, 48);
+        } else if (errMsg) {
+          lastErr = `ARK_HTTP_${res.statusCode}`;
+        } else {
+          lastErr = `ARK_HTTP_${res.statusCode}`;
+        }
         if (attempt < ARK_MAX_RETRIES && isRetryableStatus(res.statusCode)) continue;
       }
     } catch (e) {

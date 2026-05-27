@@ -35,6 +35,23 @@
   line-height: 1.55;
 }
 
+.list-section {
+  margin-bottom: 8rpx;
+}
+
+.list-section-title {
+  display: block;
+  padding: 8rpx 4rpx 16rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #577388;
+  line-height: 1.4;
+}
+
+.list-section .list-card:last-child {
+  margin-bottom: 28rpx;
+}
+
 .list-card {
   margin-bottom: 20rpx;
   padding: 28rpx 28rpx 24rpx;
@@ -74,6 +91,18 @@
   font-weight: 400;
   color: #8a9cb0;
   line-height: 1.4;
+}
+
+.list-progress {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #2a6a9a;
+  line-height: 1.4;
+}
+
+.row-hover {
+  opacity: 0.92;
 }
 
 .tag-row {

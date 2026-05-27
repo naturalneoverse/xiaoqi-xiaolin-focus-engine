@@ -11,7 +11,7 @@ const { getFallbackReply, FALLBACK_REPLY } = require("./reflectionArkFallback");
 const { stripLegacyOpening } = require("./stripLegacyOpening");
 const { getPersonaSystem, isValidAgentType } = require("./personas");
 const { charCount } = require("./normalizeText");
-const { REPLY_MIN_CHARS, REPLY_MAX_CHARS } = require("./constants");
+const { ARK_PROMPT_MAX_SHORT, ARK_PROMPT_MAX_LONG, REPLY_MIN_CHARS } = require("./constants");
 const { validateGenerateReplyParams } = require("./validate");
 const { loadArkEnv, isArkEnvReady, DEFAULT_MODEL_ID } = require("./env");
 const { finalizeReplyContent } = require("./openingCheck");
@@ -51,9 +51,9 @@ assert(stripped.indexOf("静守本心") < 0, "strip legacy");
 assert(stripped.indexOf("正文保留") >= 0, "strip keeps body");
 
 const shortBounds = getReplyLengthBounds("难");
-const adjusted = enforceReplyLength("短。", shortBounds);
-assert(charCount(adjusted) <= shortBounds.max + 2, "enforce short tier max");
-assert(adjusted === "短。", "short tier no pad");
+const adjusted = enforceReplyLength("短。", shortBounds, { neverPad: true });
+assert(charCount(adjusted) <= ARK_PROMPT_MAX_SHORT + 2, "enforce short tier max");
+assert(adjusted === "短。", "neverPad no pad");
 assert(adjusted.indexOf("静守本心") < 0, "enforce no opening");
 
 const finalized = finalizeReplyContent(
@@ -62,7 +62,7 @@ const finalized = finalizeReplyContent(
   "难",
 );
 assert(finalized.indexOf("心怀远志") < 0, "finalize no opening");
-assert(charCount(finalized) <= shortBounds.max + 2, "finalize short user max");
+assert(charCount(finalized) <= ARK_PROMPT_MAX_SHORT + 2, "finalize short user max");
 
 const env = loadArkEnv();
 assert(env.modelId === DEFAULT_MODEL_ID, "default model id when env unset");

@@ -1,5 +1,6 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const momentScore = require("../../utils/momentScore");
+const { buildPastWeeklyReportRows } = require("../../utils/reportHistoryLists");
 const { goSleepHome } = require("../../utils/goTabHome");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
@@ -77,10 +78,29 @@ function buildEmptyLatest(curSummary) {
   };
 }
 
+function previousWeekMondayKey(refDate) {
+  const mon = momentScore.getIsoWeekMonday(refDate || new Date());
+  const prev = new Date(mon);
+  prev.setDate(prev.getDate() - 7);
+  return momentScore.weekMondayKey(prev);
+}
+
+function summaryToHistoryRow(summary, tasks) {
+  const createdCount = momentScore.countCreatedInWeek(tasks, summary.weekMonday);
+  return {
+    range: summary.rangeLabel,
+    moments: summary.momentScore,
+    presenceName: presenceTierName(summary.doneCount, createdCount),
+    weekMondayKey: summary.weekMondayKey,
+  };
+}
+
 Page({
   data: {
     latest: buildEmptyLatest(),
-    historyReports: [],
+    lastWeekReport: null,
+    showAllPastLink: false,
+    lastWeekEmptyHint: "上周暂无完成任务记录",
     pastTaskGroups: [{ range: "暂无完成任务", expanded: true, tasks: [] }],
   },
 
@@ -107,7 +127,9 @@ Page({
     const presenceName = presenceTierName(cur.doneCount, cur.createdCount);
     const presenceHint = presenceHintFor(cur.doneCount, cur.createdCount);
     const summaries = momentScore.buildWeekSummaries(tasks);
-    const rest = summaries.filter((s) => s.weekMondayKey !== cur.weekMondayKey);
+    const prevKey = previousWeekMondayKey(new Date());
+    const prevSummary = summaries.find((s) => s.weekMondayKey === prevKey) || null;
+    const pastRows = buildPastWeeklyReportRows(tasks);
     const latest = {
       range: cur.rangeLabel,
       moments: cur.momentScore,
@@ -116,15 +138,13 @@ Page({
       presenceHint,
       weekMondayKey: cur.weekMondayKey,
     };
-    const historyReports = rest.map((s) => ({
-      range: s.rangeLabel,
-      moments: s.momentScore,
-      presenceName: presenceTierName(s.doneCount, s.createdCount),
-      weekMondayKey: s.weekMondayKey,
-    }));
     this.setData({
       latest,
-      historyReports,
+      lastWeekReport: prevSummary ? summaryToHistoryRow(prevSummary, tasks) : null,
+      showAllPastLink: pastRows.length > 0,
+      lastWeekEmptyHint: pastRows.length > 0
+        ? "上周暂无完成任务记录，更早的周报在下方查看"
+        : "上周暂无完成任务记录",
       pastTaskGroups: groups.length ? groups : [{ range: "暂无完成任务", expanded: true, tasks: [] }],
     });
   },
@@ -146,12 +166,17 @@ Page({
     });
   },
 
-  goHistoryReport(e) {
-    const index = Number(e.currentTarget.dataset.index);
-    const item = this.data.historyReports[index];
+  goLastWeekReport() {
+    const item = this.data.lastWeekReport;
     if (!item || !item.weekMondayKey) return;
     wx.navigateTo({
       url: `/subpkg/weekly-report/index?weekStart=${encodeURIComponent(item.weekMondayKey)}`,
+    });
+  },
+
+  goAllPastReports() {
+    wx.navigateTo({
+      url: "/subpkg/weekly-report-list/index",
     });
   },
 

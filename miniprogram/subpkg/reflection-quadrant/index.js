@@ -5,7 +5,11 @@ const {
   getQuadrantOptionSelectedBg,
   getQuadrantBubbleColor,
 } = require("../../config/reflectionTheme");
-const { buildQuadrantConclusions, GENERAL_SUMMARY } = require("../../config/reflectionConclusions");
+const {
+  buildQuadrantConclusions,
+  GENERAL_SUMMARY,
+  isQuadrantConclusionBubbleCentered,
+} = require("../../config/reflectionConclusions");
 const { isValidQuadrantId } = require("../../config/reflectionRecordSchema");
 const {
   getQuadrantCards,
@@ -17,11 +21,77 @@ const reflectionManager = require("../../utils/reflectionManager");
 const speechRecognition = require("../../utils/speechRecognition");
 const { safeDecodeURIComponent } = require("../../utils/safeDecodeURIComponent");
 const { isCloudReady } = require("../../utils/cloudCall");
-const {
-  collectHandwritingApiTargets,
-  getCardFieldProgressLabel,
-} = require("../../config/reflectionArkApiMap");
+const { collectHandwritingApiTargets } = require("../../config/reflectionArkApiMap");
 const reflectionArk = require("../../utils/reflectionArkClient");
+const reflectionArkBackground = require("../../utils/reflectionArkBackground");
+const { clearMemoryCacheForQuadrant } = require("../../utils/reflectionArkCache");
+const { EXPECTED_Q2_DEPLOY_TAG } = require("../../config/reflectionArkConfig");
+
+const Q2_BLOCKING_SUBMIT_HINT = "回响生成未完成，请稍后再试";
+const Q2_GENERATING_PROGRESS_TEXT = "正在生成回响，请稍候…";
+
+function pickQ2BatchMeta(replies) {
+  const list = Array.isArray(replies) ? replies : [];
+  const row = list.find((r) => r && r._batchMeta) || list[0];
+  return (row && row._batchMeta) || {};
+}
+
+function hintForQ2BatchFailure(replies, batchMeta) {
+  const meta = batchMeta || pickQ2BatchMeta(replies) || {};
+  const code =
+    meta.primaryErrCode ||
+    ((replies || []).find((r) => r && !r.ok && r.errCode) || {}).errCode ||
+    "";
+  if (meta.deployMismatch || (meta.deployTag && meta.deployTag !== EXPECTED_Q2_DEPLOY_TAG)) {
+    return `云函数未更新（${meta.deployTag || "未知"}），请部署 reflectionArk 并重新编译小程序`;
+  }
+  if (!meta.deployTag && code !== "GENERATE_NETWORK") {
+    return "未检测到云函数版本，请部署 reflectionArk 并重新编译小程序";
+  }
+  if (code === "UNKNOWN_ACTION") {
+    return "云函数缺少 Q2 接口，请部署最新 reflectionArk";
+  }
+  if (code === "INTERNAL_ERROR") {
+    return "云函数异常，请查看云开发日志";
+  }
+  if (code === "ARK_Q2_DEEP_MISSING") {
+    return "AI 服务未配置完整，请检查云函数环境变量 ARK_MODEL_ID_Q2_DEEP";
+  }
+  if (code === "ARK_ENV_MISSING") {
+    return "AI 服务未就绪，请稍后再试";
+  }
+  if (code === "Q2_PARSE_FAILED") {
+    return "回响格式异常，请重试";
+  }
+  if (code === "ARK_TIMEOUT") {
+    return "生成超时，请稍后重试";
+  }
+  if (code === "GENERATE_NETWORK") {
+    return "网络超时，请检查网络后重试";
+  }
+  if (code === "ARK_MODEL_NOT_FOUND" || code === "ARK_HTTP_404") {
+    return "模型 ID 无效，请在云函数环境变量填写火山 Endpoint ID（ep- 开头）";
+  }
+  if (code === "ARK_AUTH_FAILED" || code === "ARK_HTTP_401" || code === "ARK_HTTP_403") {
+    return "ARK_API_KEY 无效或无权访问该模型";
+  }
+  if (code === "ARK_FAILED") {
+    return "模型调用失败，请用云开发测试 arkProbe / arkProbeQ2";
+  }
+  if (code === "REPLY_INCOMPLETE" || code === "TOO_SHORT_DISPLAY") {
+    return "回响未通过校验，请重试";
+  }
+  if (code === "Q2_STAGE_A_FAILED" || code === "Q2_STAGE_A_MISSING") {
+    return "第一段回响生成失败，请重试";
+  }
+  if (code === "Q2_STAGE_B_FAILED") {
+    return "后两段回响生成失败，请重试";
+  }
+  if (code === "BATCH_FAILED" || code === "INVALID_ITEM") {
+    return "提交版本与服务不一致，请重新编译小程序并部署云函数";
+  }
+  return Q2_BLOCKING_SUBMIT_HINT;
+}
 
 const TOAST_TEXT_FULL = "已达字数上限，无法继续添加";
 
@@ -70,6 +140,7 @@ Page({
     conclusionAgent: "xiaolin",
     conclusionBubbleColor: "#b7d6ea",
     conclusionAccent: "#12598f",
+    conclusionBubbleCenter: false,
     submitLoading: false,
     submitProgressText: "",
     submitProgressIndex: 0,
@@ -401,7 +472,7 @@ Page({
       if (selected.indexOf("experience") < 0) continue;
       const expand = Object.assign(createEmptyMultiExpandValues(), multiExpandValues[card.field] || {});
       if (!String(expand.experience || "").trim()) {
-        wx.showToast({ title: "请填写带走的经验", icon: "none" });
+        wx.showToast({ title: "请填写带给自己的经验", icon: "none" });
         return false;
       }
     }
@@ -428,21 +499,147 @@ Page({
     }
   },
 
-  /**
-   * 内容安全通过且（如有）API/缓存完成后，落库并展示结语气泡
-   */
-  _persistAndShowConclusion(cardResponses, recordBefore, completedBefore) {
+  /** Q2 结语为固定文案，不依赖 AI；先落库出气泡，回响后台两阶段生成 */
+  _usesBlockingBatchSubmit(_quadrantId) {
+    return false;
+  },
+
+  _handwritingReplySucceeded(reply) {
+    if (!reply || reply.ok === false) return false;
+    if (reply.fallback) return false;
+    return String(reply.replyContent || "").trim().length > 0;
+  },
+
+  _submitQ2BlockingBatch(cardResponses, recordBefore, completedBefore, form, apiTargets) {
     const { taskId, taskTitle, quadrantId } = this.data;
+    const apiTotal = (apiTargets || []).length;
+
+    reflectionArk
+      .msgSecCheckBatch(apiTargets)
+      .then((sec) => {
+        if (!sec || !sec.ok) {
+          const hint = (sec && sec.hint) || reflectionArk.MSG_SEC_REJECT_HINT;
+          this._abortSubmit(hint);
+          return null;
+        }
+        this._setSubmitLoading(true, {
+          submitProgressTotal: apiTotal,
+          submitProgressIndex: 0,
+          submitProgressText: Q2_GENERATING_PROGRESS_TEXT,
+        });
+        const enriched = (apiTargets || []).map((t) =>
+          Object.assign({ taskId, quadrantId: Number(quadrantId) }, t),
+        );
+        return reflectionArk.generateQ2S2Blocking(taskId, enriched, {
+          taskTitle: taskTitle || "未命名任务",
+          onProgress: (step, total, text) => {
+            this.setData({
+              submitProgressIndex: step,
+              submitProgressTotal: total,
+              submitProgressText: text || Q2_GENERATING_PROGRESS_TEXT,
+            });
+          },
+        });
+      })
+      .then((replies) => {
+        if (!Array.isArray(replies)) {
+          console.warn("[reflection-quadrant] Q2 batch invalid replies", replies);
+          this._abortSubmit("回响生成异常，请重试");
+          return;
+        }
+        const list = replies;
+        const targets = apiTargets || [];
+        const allOk =
+          targets.length > 0 &&
+          targets.every((t) => {
+            const row = list.find((r) => r && r.cardField === t.cardField);
+            return row && this._handwritingReplySucceeded(row);
+          });
+        if (!allOk) {
+          const batchMeta = pickQ2BatchMeta(list);
+          console.warn("[reflection-quadrant] Q2 batch failed", {
+            deployTag: batchMeta.deployTag,
+            expectedDeployTag: EXPECTED_Q2_DEPLOY_TAG,
+            primaryErrCode: batchMeta.primaryErrCode,
+            errCodes: list.map((r) => ({ field: r.cardField, ok: r.ok, errCode: r.errCode })),
+          });
+          this._abortSubmit(hintForQ2BatchFailure(list, batchMeta));
+          return;
+        }
+        this._persistAndShowConclusion(cardResponses, recordBefore, completedBefore);
+      })
+      .catch((err) => {
+        console.warn("[reflection-quadrant] Q2 submit rejected", err);
+        this._abortSubmit("网络异常，请稍后重试");
+      });
+  },
+
+  _saveQuadrantResponses(cardResponses) {
+    const { taskId, taskTitle, quadrantId } = this.data;
+    reflectionManager.upsertQuadrant(taskId, taskTitle, quadrantId, { cardResponses });
+    this._submitting = false;
+    this._formDirty = false;
+    this._setSubmitLoading(false);
+    this.setData({
+      isCompleted: true,
+      submitLabel: "保存修改",
+    });
+  },
+
+  _commitQuadrantAfterSec(cardResponses, recordBefore, completedBefore, form, wasCompleted) {
+    const { taskId, quadrantId } = this.data;
     try {
-      reflectionManager.upsertQuadrant(taskId, taskTitle, quadrantId, { cardResponses });
+      this._saveQuadrantResponses(cardResponses);
     } catch (e) {
       this._abortSubmit("保存失败，请重试");
       return;
     }
-    this._submitting = false;
-    this._formDirty = false;
-    this._setSubmitLoading(false);
+    if (wasCompleted) {
+      clearMemoryCacheForQuadrant(taskId, quadrantId);
+    }
+    const apiTargets = collectHandwritingApiTargets(quadrantId, form);
+    if (apiTargets.length) {
+      reflectionArkBackground.enqueueQuadrantHandwritingGeneration(taskId, quadrantId, form, {
+        taskTitle: this.data.taskTitle || "未命名任务",
+      });
+    }
+    if (wasCompleted) {
+      this._returnToSelect();
+      return;
+    }
+    try {
+      this._showConclusionAfterSave(cardResponses, recordBefore, completedBefore);
+    } catch (e) {
+      console.warn("[reflection-quadrant] showConclusionAfterSave", e);
+      wx.showToast({ title: "已保存，请从选象限页查看", icon: "none", duration: 2600 });
+      this._returnToSelect();
+    }
+  },
 
+  _submitWithBackgroundGeneration(cardResponses, recordBefore, completedBefore, form) {
+    const wasCompleted = !!this.data.isCompleted;
+
+    reflectionArk
+      .msgSecCheckBatch(collectHandwritingApiTargets(this.data.quadrantId, form))
+      .then((sec) => {
+        if (!sec || !sec.ok) {
+          const hint = (sec && sec.hint) || reflectionArk.MSG_SEC_REJECT_HINT;
+          this._abortSubmit(hint);
+          return;
+        }
+        this._commitQuadrantAfterSec(cardResponses, recordBefore, completedBefore, form, wasCompleted);
+      })
+      .catch((err) => {
+        console.warn("[reflection-quadrant] submitWithBackground", err);
+        this._abortSubmit("提交失败，请稍后重试");
+      });
+  },
+
+  /**
+   * 已落库后展示结语气泡（不再写入 storage）
+   */
+  _showConclusionAfterSave(cardResponses, recordBefore, completedBefore) {
+    const { taskId, quadrantId } = this.data;
     const recordAfter = reflectionManager.findByTaskId(taskId);
     this._showGeneralSummaryNext =
       reflectionManager.isAllQuadrantsComplete(recordAfter) && completedBefore < 4;
@@ -458,6 +655,7 @@ Page({
         conclusionAgent: meta ? meta.agent : "xiaolin",
         conclusionBubbleColor: getQuadrantBubbleColor(quadrantId),
         conclusionAccent: meta ? meta.accent : "#12598f",
+        conclusionBubbleCenter: isQuadrantConclusionBubbleCentered(quadrantId),
       });
       return;
     }
@@ -466,6 +664,16 @@ Page({
       return;
     }
     this.setData({ isCompleted: true, submitLabel: "保存修改" }, () => this._returnToSelect());
+  },
+
+  _persistAndShowConclusion(cardResponses, recordBefore, completedBefore) {
+    try {
+      this._saveQuadrantResponses(cardResponses);
+    } catch (e) {
+      this._abortSubmit("保存失败，请重试");
+      return;
+    }
+    this._showConclusionAfterSave(cardResponses, recordBefore, completedBefore);
   },
 
   onSubmit() {
@@ -481,7 +689,8 @@ Page({
     const recordBefore = reflectionManager.findByTaskId(taskId);
     const completedBefore = reflectionManager.getCompletedQuadrantIds(recordBefore).length;
 
-    const form = { textValues, multiValues, multiExpandValues };
+    /** collectHandwritingApiTargets / 后台生成共用；Q3 c1 单选依赖 singleValues */
+    const form = { textValues, singleValues, multiValues, multiExpandValues };
     const apiTargets = collectHandwritingApiTargets(quadrantId, form);
     const apiTotal = apiTargets.length;
 
@@ -493,60 +702,26 @@ Page({
     });
 
     if (!apiTotal || !isCloudReady()) {
+      if (this._usesBlockingBatchSubmit(quadrantId) && apiTotal) {
+        this._abortSubmit("网络未就绪，请稍后再试");
+        return;
+      }
       this._persistAndShowConclusion(cardResponses, recordBefore, completedBefore);
       return;
     }
 
-    let progressIndex = 0;
-    reflectionArk
-      .submitQuadrantHandwritingPipeline(taskId, quadrantId, form, {
-        onCardStart: (item) => {
-          progressIndex += 1;
-          const label = getCardFieldProgressLabel(item && item.cardField);
-          this.setData({
-            submitProgressIndex: progressIndex,
-            submitProgressText: `正在生成${label}（${progressIndex}/${apiTotal}）…`,
-          });
-        },
-      })
-      .then((pipe) => {
-        if (!pipe || !pipe.sec || !pipe.sec.ok) {
-          const hint =
-            (pipe && pipe.sec && pipe.sec.hint) || reflectionArk.MSG_SEC_REJECT_HINT;
-          this._abortSubmit(hint);
-          return;
-        }
-        const replies = (pipe && pipe.replies) || [];
-        if (apiTotal > 0 && replies.length) {
-          const failed = replies.filter((r) => !r || !r.ok);
-          const fallbacks = replies.filter((r) => r && r.ok && r.fallback);
-          if (failed.length) {
-            console.warn(
-              "[reflection-quadrant] generateReply 未到达云端或失败",
-              failed.map((r) => r.errCode || "UNKNOWN"),
-            );
-          }
-          if (fallbacks.length > 0 && !failed.length) {
-            console.warn(
-              "[reflection-quadrant] 部分手写未生成成功，条数:",
-              fallbacks.length,
-              "/",
-              replies.length,
-            );
-          }
-          if (fallbacks.length === replies.length && !failed.length) {
-            console.warn(
-              "[reflection-quadrant] 全部为兜底，请在云函数日志搜索 generateQuadrantBatch 与 errCode",
-            );
-          }
-        } else if (apiTotal > 0 && !replies.length) {
-          console.warn("[reflection-quadrant] 审核已通过但未执行 generateReply");
-        }
-        this._persistAndShowConclusion(cardResponses, recordBefore, completedBefore);
-      })
-      .catch(() => {
-        this._abortSubmit("提交未完成，请稍后再试");
-      });
+    if (this._usesBlockingBatchSubmit(quadrantId)) {
+      this._submitQ2BlockingBatch(
+        cardResponses,
+        recordBefore,
+        completedBefore,
+        form,
+        apiTargets,
+      );
+      return;
+    }
+
+    this._submitWithBackgroundGeneration(cardResponses, recordBefore, completedBefore, form);
   },
 
   _presentGeneralSummary() {

@@ -1,6 +1,7 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="range-wrap">
     <text class="range-text">{{rangeText}}</text>
+    <text wx:if="{{layoutFixtureBanner}}" class="layout-fixture-banner">{{layoutFixtureBanner}}</text>
   </view>
 
   <view class="main-card">
@@ -70,6 +71,7 @@
         </view>
       </view>
       <view class="ai-bubble-wrap">
+        <text wx:if="{{careLoading}}" class="care-loading-hint">小麟正在写本周回响…</text>
         <chat-bubble
           text="{{careText}}"
           color="#b7d6ea"
