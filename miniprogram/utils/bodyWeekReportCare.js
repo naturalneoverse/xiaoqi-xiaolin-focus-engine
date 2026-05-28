@@ -97,7 +97,7 @@ function buildRuleCareCopy(stats, rep) {
     careText = fallback;
   }
   if (!careText || !C.findForbiddenUserCopyHits(careText).ok) {
-    careText = "小麟在这儿陪着你。这一周，先照顾好此刻的自己。";
+    careText = "小麟在这儿陪着您。这一周，先照顾好此刻的自己。";
   }
   return {
     statusDesc: rep.statusDesc || "",

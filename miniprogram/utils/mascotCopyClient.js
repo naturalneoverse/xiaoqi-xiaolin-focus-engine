@@ -11,8 +11,8 @@ const RULE_TEXT = {
   ...BODY_WEEK_WEEKLY_RULE_TEXT,
   body_daily_no_checkin: "今天还没和身体打招呼。有空时，给身体留个空白也好。",
   infra_error: "小麟暂时走神了。稍等片刻，或者下拉刷新一下。",
-  neutral_xiaolin: "小麟在这儿陪着你。这一周，先照顾好此刻的自己。",
-  neutral_xiaoqi: "小麒在这儿。按你的节奏来，一步一步就好。",
+  neutral_xiaolin: "小麟在这儿陪着您。这一周，先照顾好此刻的自己。",
+  neutral_xiaoqi: "小麒在这儿。按您的节奏来，一步一步就好。",
 };
 
 function normalizeHits(hits) {
@@ -30,10 +30,10 @@ function pickRuleHit(scene, hits) {
 function buildContinuation(scene) {
   if (scene === "body_week" || scene === "weekly_time") return "";
   if (scene === "task_create") {
-    return "小麒陪你从当下这一刻开始，不必急着证明什么。";
+    return "小麒陪您从当下这一刻开始，不必急着证明什么。";
   }
   if (scene === "body_daily") {
-    return "小麟在这儿，陪你慢慢听一听身体的边界。";
+    return "小麟在这儿，陪您慢慢听一听身体的边界。";
   }
   return "";
 }

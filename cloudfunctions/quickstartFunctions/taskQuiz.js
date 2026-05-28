@@ -46,7 +46,7 @@ function buildFallbackClosing(code) {
   const c = Number(code[1]) || 1;
   const l = Number(code[2]) || 1;
   const mid = `${PRIORITY_TAIL[p]}${CIRCLE_TAIL[c]}${LAYER_TAIL[l]}`;
-  return `${mid}小麒在这儿，陪你把这一笔安放好。`;
+  return `${mid}小麒在这儿，陪您把这一笔安放好。`;
 }
 
 function buildFallbackInsight(labels) {

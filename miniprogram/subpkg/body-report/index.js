@@ -173,7 +173,7 @@ Page({
     const filledCard = {
       hasRecords: true,
       rangeText,
-      reviewText: `这周你记录了 ${rep.dayCount} 天，共提交 ${rep.totalSubmits} 次。`,
+      reviewText: `这周您记录了 ${rep.dayCount} 天，共提交 ${rep.totalSubmits} 次。`,
       sleepStats: buildStatRows(deduped, "sleep", SLEEP_OPTIONS),
       sportStats: buildStatRows(deduped, "sport", SPORT_OPTIONS),
       signalStats: buildStatRows(deduped, "signal", SIGNAL_OPTIONS),

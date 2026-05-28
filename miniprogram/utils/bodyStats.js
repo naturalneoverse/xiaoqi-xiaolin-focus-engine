@@ -215,21 +215,21 @@ function buildWeekXiaolinCare(deduped, averageScore, extremeLine) {
   const ins = countDaysWithValue(deduped, "sleep", "睡不着");
   const pa = countDaysWithValue(deduped, "signal", "疼了");
   if (averageScore >= 70 && !extremeLine) {
-    return "这周大多数时候你在好好照顾自己，节奏不错，继续保持这份觉察。";
+    return "这周大多数时候您在好好照顾自己，节奏不错，继续保持这份觉察。";
   }
   if (ins && pa) {
-    return `本周大多数时候你在好好照顾自己。那${ins}天失眠和${pa}天疼痛，身体在提醒你留意，下周可以睡早一点、疼了就停一停。`;
+    return `本周大多数时候您在好好照顾自己。那${ins}天失眠和${pa}天疼痛，身体在提醒您留意，下周可以睡早一点、疼了就停一停。`;
   }
   if (ins) {
-    return `本周大多数时候你在好好照顾自己。有${ins}天睡眠偏吃力，身体在提醒你留意休息窗口。`;
+    return `本周大多数时候您在好好照顾自己。有${ins}天睡眠偏吃力，身体在提醒您留意休息窗口。`;
   }
   if (pa) {
-    return `本周大多数时候你在好好照顾自己。有${pa}天疼痛信号，记得给身体多一点缓冲。`;
+    return `本周大多数时候您在好好照顾自己。有${pa}天疼痛信号，记得给身体多一点缓冲。`;
   }
   if (countDaysWithValue(deduped, "sport", "动过头了")) {
-    return "本周你在动与歇之间找平衡。有过运动偏猛的日子，记得穿插恢复，下周更轻松一点。";
+    return "本周您在动与歇之间找平衡。有过运动偏猛的日子，记得穿插恢复，下周更轻松一点。";
   }
-  return `这周你记录了 ${dayCount} 天的身体边界，平均分在 ${averageScore} 分左右。慢慢调整，一步一步来。`;
+  return `这周您记录了 ${dayCount} 天的身体边界，平均分在 ${averageScore} 分左右。慢慢调整，一步一步来。`;
 }
 
 /**

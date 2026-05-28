@@ -12,7 +12,7 @@ const STATUS_OPTIONS = ["进行中", "已完成", "已延期", "已取消"];
 /** 提交成功气泡：两行小麒模式（与副标题「小麒来为您庆祝啦」分工） */
 const TASK_SUCCESS_LINE1 = "恭喜您完成全部选择～";
 const TASK_SUCCESS_INTRO_CORE = "恭喜您完成全部选择";
-const TASK_SUCCESS_LINE2_DEFAULT = "小麒陪你从当下这一刻开始，不必急着证明什么。";
+const TASK_SUCCESS_LINE2_DEFAULT = "小麒陪您从当下这一刻开始，不必急着证明什么。";
 
 /** 云端 taskReply.fullPrefix 已含祝贺语时，不再由前端重复拼接 */
 function hasTaskSuccessIntro(text) {

@@ -28,11 +28,11 @@ const BODY_WEEK_WEEKLY_RULE_TEXT = Object.freeze({
   insufficient_data: "这周的身体记录有点稀疏。没关系，下周从一次呼吸开始就够了。",
   multi_metric_fluctuation: "身体这周有好几处在说话。不用同时回应所有，先顾好睡眠就好。",
   sleep_persistently_poor: "睡眠这周像摇晃的钟摆，身体或许还在找节奏。先留一点空白给休息。",
-  signal_cluster: "身体这周有了新的表达。小麟记下了，会帮你留意它的变化。",
-  moment_zero: "这周真我时刻很少。也许你在忙别的事，也值得留一点空白给自己。",
+  signal_cluster: "身体这周有了新的表达。小麟记下了，会帮您留意它的变化。",
+  moment_zero: "这周真我时刻很少。也许您在忙别的事，也值得留一点空白给自己。",
   deep_work_low_or_delay_cluster:
     "这周大多是浅层流淌的时间。下周试试给自己留一两个不被打扰的钟头。",
-  moment_high: "这周有很多时刻，你完全属于你自己。它们像散落的珍珠，串起了这一周。",
+  moment_high: "这周有很多时刻，您完全属于您自己。它们像散落的珍珠，串起了这一周。",
   no_time_logs: "这周没有留下时间的足迹。没记录也不代表这周空白。",
   delay_cluster:
     "有一类事这周总被轻轻绕过。它可能不是不想做，而是需要一种还没到来的能量。",
