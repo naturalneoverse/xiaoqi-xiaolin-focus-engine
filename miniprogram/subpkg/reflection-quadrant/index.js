@@ -173,6 +173,8 @@ Page({
 
     const cards = getQuadrantCards(quadrantId);
     this._formDirty = false;
+    this._submitting = false;
+    this._returningToSelect = false;
     this._applyFormFromStorage(taskId, quadrantId, cards, {
       taskTitle,
       accent: meta ? meta.accent : "#12598F",
@@ -183,6 +185,11 @@ Page({
   onShow() {
     applyReflectionNavBar();
     speechRecognition.prepare();
+    this._returningToSelect = false;
+    if (this._submitting) {
+      this._ready = true;
+      return;
+    }
     if (this._ready && !this._formDirty && this.data.taskId && this.data.quadrantId) {
       this._applyFormFromStorage(this.data.taskId, this.data.quadrantId, this.data.cards);
     }
@@ -208,6 +215,8 @@ Page({
           multiExpandValues,
           isCompleted,
           submitLabel: isCompleted ? "保存修改" : "提交本象限",
+          showConclusion: false,
+          submitLoading: false,
           accent,
           submitAccent: accent,
           optionSelectedBg:
@@ -479,6 +488,23 @@ Page({
     return true;
   },
 
+  /** 观心明己 Q2：三题手写须齐，与云函数 generateQuadrantQ2 成套生成一致 */
+  _validateRequiredTextCards() {
+    const quadrantId = Number(this.data.quadrantId);
+    if (quadrantId !== 2) return true;
+    const cards = this.data.cards || [];
+    const textValues = this.data.textValues || {};
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      if (!card || card.type !== "text") continue;
+      if (!String(textValues[card.field] || "").trim()) {
+        wx.showToast({ title: "请完成本象限全部题目后再提交", icon: "none", duration: 2800 });
+        return false;
+      }
+    }
+    return true;
+  },
+
   _setSubmitLoading(active, patch) {
     const base = {
       submitLoading: !!active,
@@ -601,9 +627,16 @@ Page({
     if (apiTargets.length) {
       reflectionArkBackground.enqueueQuadrantHandwritingGeneration(taskId, quadrantId, form, {
         taskTitle: this.data.taskTitle || "未命名任务",
+        forceRegenerate: wasCompleted,
       });
     }
     if (wasCompleted) {
+      this.setData({ showConclusion: false });
+      try {
+        wx.showToast({ title: "已保存，正在重新生成回响", icon: "none", duration: 2200 });
+      } catch (e) {
+        /* ignore */
+      }
       this._returnToSelect();
       return;
     }
@@ -684,6 +717,7 @@ Page({
     if (!this._validateSingleCards()) return;
     if (!this._validateMultiCards()) return;
     if (!this._validateMultiExpand()) return;
+    if (!this._validateRequiredTextCards()) return;
 
     const cardResponses = buildCardResponses(cards, textValues, singleValues, multiValues, multiExpandValues);
     const recordBefore = reflectionManager.findByTaskId(taskId);
@@ -736,7 +770,6 @@ Page({
   },
 
   onConclusionComplete() {
-    if (this._returningToSelect) return;
     if (this._showGeneralSummaryNext) {
       this.setData({ showConclusion: false }, () => this._presentGeneralSummary());
       return;
@@ -745,18 +778,25 @@ Page({
   },
 
   _returnToSelect() {
-    if (this._returningToSelect) return;
-    this._returningToSelect = true;
-
     const { taskId, taskTitle } = this.data;
     const pages = getCurrentPages();
     const selectIndex = findSelectPageIndex(pages);
+
+    const finishReturn = () => {
+      this._returningToSelect = false;
+    };
+
+    this._returningToSelect = true;
 
     if (selectIndex >= 0) {
       const delta = pages.length - 1 - selectIndex;
       wx.navigateBack({
         delta,
-        fail: () => this._redirectToSelect(taskId, taskTitle),
+        complete: finishReturn,
+        fail: () => {
+          finishReturn();
+          this._redirectToSelect(taskId, taskTitle);
+        },
       });
       return;
     }
@@ -766,6 +806,9 @@ Page({
   _redirectToSelect(taskId, taskTitle) {
     wx.redirectTo({
       url: `/subpkg/reflection-select/index?taskId=${encodeURIComponent(taskId || "")}&taskTitle=${encodeURIComponent(taskTitle || "")}`,
+      complete: () => {
+        this._returningToSelect = false;
+      },
       fail: () => {
         this._returningToSelect = false;
       },

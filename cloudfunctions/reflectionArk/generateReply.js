@@ -279,10 +279,13 @@ async function handleGenerateReply(db, params, options) {
   }
 
   const { taskId, quadrantId, cardField, userText, agentType, taskTitle, question } = v.payload;
+  const forceRegenerate = !!(params && params.forceRegenerate);
   const { normalized, hash: textHash } = buildTextHash(userText);
   const dashscope = usesDashscope(quadrantId);
 
-  const cached = await findCache(db, { taskId, quadrantId, cardField, textHash });
+  const cached = forceRegenerate
+    ? null
+    : await findCache(db, { taskId, quadrantId, cardField, textHash });
   if (cached && !isFallbackReply(cached.replyContent)) {
     const cacheCheck = assessArkReplyForCard(quadrantId, cardField, cached.replyContent);
     if (cacheCheck.ok) {

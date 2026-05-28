@@ -41,7 +41,7 @@ function writePendingStore(store) {
  * @param {number} quadrantId
  * @param {{ cardField: string }[]} targets
  */
-function markPending(taskId, quadrantId, targets) {
+function markPending(taskId, quadrantId, targets, genId) {
   const tid = String(taskId || "").trim();
   if (!tid) return;
   const store = readPendingStore();
@@ -49,6 +49,7 @@ function markPending(taskId, quadrantId, targets) {
   store[tid][String(Number(quadrantId))] = {
     cardFields: (targets || []).map((t) => String(t.cardField || "")).filter(Boolean),
     startedAt: Date.now(),
+    genId: genId != null ? genId : 0,
   };
   writePendingStore(store);
 }
@@ -57,12 +58,17 @@ function markPending(taskId, quadrantId, targets) {
  * @param {string} taskId
  * @param {number} quadrantId
  */
-function clearPending(taskId, quadrantId) {
+function clearPending(taskId, quadrantId, genId) {
   const tid = String(taskId || "").trim();
   if (!tid) return;
   const store = readPendingStore();
   if (!store[tid]) return;
-  delete store[tid][String(Number(quadrantId))];
+  const qKey = String(Number(quadrantId));
+  const row = store[tid][qKey];
+  if (genId != null && row && row.genId != null && row.genId !== genId) {
+    return;
+  }
+  delete store[tid][qKey];
   if (!Object.keys(store[tid]).length) delete store[tid];
   writePendingStore(store);
 }
@@ -91,7 +97,8 @@ function hasPendingForTask(taskId) {
 }
 
 function isJobActive(taskId, quadrantId) {
-  return !!activeJobs[jobKey(taskId, quadrantId)];
+  const slot = activeJobs[jobKey(taskId, quadrantId)];
+  return !!(slot && slot.promise);
 }
 
 /** 选择页/报告页：是否仍有后台生成在进行 */
@@ -163,7 +170,7 @@ function notifyBackgroundGenResult(quadrantId, ok) {
  * @param {string} taskId
  * @param {number} quadrantId
  * @param {{ textValues?: object, multiValues?: object, multiExpandValues?: object }} form
- * @param {{ taskTitle?: string }} [opts]
+ * @param {{ taskTitle?: string, forceRegenerate?: boolean }} [opts]
  * @returns {Promise<object>}
  */
 function enqueueQuadrantHandwritingGeneration(taskId, quadrantId, form, opts) {
@@ -174,10 +181,15 @@ function enqueueQuadrantHandwritingGeneration(taskId, quadrantId, form, opts) {
     return Promise.resolve({ ok: true, skipped: true });
   }
 
+  const forceRegenerate = !!(opts && opts.forceRegenerate);
   const key = jobKey(tid, q);
-  if (activeJobs[key]) return activeJobs[key];
+  const existing = activeJobs[key];
+  if (existing && existing.promise && !forceRegenerate) {
+    return existing.promise;
+  }
 
-  markPending(tid, q, targets);
+  const genId = Date.now();
+  markPending(tid, q, targets, genId);
   clearGenerationFailed(tid, q);
 
   const enriched = targets.map((t) =>
@@ -187,12 +199,14 @@ function enqueueQuadrantHandwritingGeneration(taskId, quadrantId, form, opts) {
   const taskTitle =
     opts && opts.taskTitle != null ? String(opts.taskTitle).trim() : "未命名任务";
 
+  const genOpts = { taskTitle, forceRegenerate };
+
   const generatePromise =
     q === 2
-      ? reflectionArk.generateQ2S2Blocking(tid, enriched, { taskTitle })
+      ? reflectionArk.generateQ2S2Blocking(tid, enriched, genOpts)
       : q === 3
-        ? reflectionArk.generateQ3S2Blocking(tid, enriched, { taskTitle })
-        : reflectionArk.generateQuadrantBatch(tid, q, enriched, null, { taskTitle });
+        ? reflectionArk.generateQ3S2Blocking(tid, enriched, genOpts)
+        : reflectionArk.generateQuadrantBatch(tid, q, enriched, null, genOpts);
 
   const job = generatePromise
     .then((replies) => {
@@ -235,11 +249,14 @@ function enqueueQuadrantHandwritingGeneration(taskId, quadrantId, form, opts) {
       return { ok: false };
     })
     .finally(() => {
-      delete activeJobs[key];
-      clearPending(tid, q);
+      const slot = activeJobs[key];
+      if (slot && slot.genId === genId) {
+        delete activeJobs[key];
+      }
+      clearPending(tid, q, genId);
     });
 
-  activeJobs[key] = job;
+  activeJobs[key] = { genId, promise: job };
   return job;
 }
 
@@ -270,6 +287,12 @@ function clearAllWorkForTask(taskId) {
   });
 }
 
+function hasGenerationFailed(taskId, quadrantId) {
+  const tid = String(taskId || "").trim();
+  const store = readFailedStore();
+  return !!(store[tid] && store[tid][String(Number(quadrantId))]);
+}
+
 function resumePendingGenerationsForTask(taskId) {
   const tid = String(taskId || "").trim();
   if (!tid || !isCloudReady()) return;
@@ -283,8 +306,7 @@ function resumePendingGenerationsForTask(taskId) {
 
   Object.keys(pending).forEach((qStr) => {
     const quadrantId = Number(qStr);
-    const key = jobKey(tid, quadrantId);
-    if (activeJobs[key]) return;
+    if (isJobActive(tid, quadrantId)) return;
 
     const entry = reflectionManager.getQuadrantEntry(record, quadrantId);
     if (!entry || !Array.isArray(entry.cardResponses)) {
@@ -310,4 +332,5 @@ module.exports = {
   clearPending,
   clearGenerationFailed,
   clearAllWorkForTask,
+  hasGenerationFailed,
 };

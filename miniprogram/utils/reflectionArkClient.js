@@ -185,6 +185,9 @@ function generateQuadrantBatch(taskId, quadrantId, targets, hooks, opts) {
     const title = opts && opts.taskTitle != null ? String(opts.taskTitle).trim() : "";
     data.taskTitle = title || "未命名任务";
   }
+  if (opts && opts.forceRegenerate) {
+    data.forceRegenerate = true;
+  }
 
   return callFunction(
     {
@@ -257,9 +260,9 @@ function generateQuadrantBatch(taskId, quadrantId, targets, hooks, opts) {
     );
 }
 
-function buildQ2CloudData(taskId, targets, taskTitle) {
+function buildQ2CloudData(taskId, targets, taskTitle, opts) {
   const list = Array.isArray(targets) ? targets.slice() : [];
-  return {
+  const data = {
     taskId: String(taskId || "").trim(),
     quadrantId: 2,
     taskTitle: String(taskTitle || "").trim() || "未命名任务",
@@ -273,6 +276,10 @@ function buildQ2CloudData(taskId, targets, taskTitle) {
       return row;
     }),
   };
+  if (opts && opts.forceRegenerate) {
+    data.forceRegenerate = true;
+  }
+  return data;
 }
 
 function mergeQ2ReplyRow(item, row, batchMeta) {
@@ -306,6 +313,7 @@ function generateQ2S2Blocking(taskId, targets, opts) {
     taskId,
     list,
     opts && opts.taskTitle != null ? opts.taskTitle : "",
+    opts,
   );
   const onProgress = opts && typeof opts.onProgress === "function" ? opts.onProgress : null;
 
@@ -466,6 +474,9 @@ function generateQ3S2Blocking(taskId, targets, opts) {
       return row;
     }),
   };
+  if (opts && opts.forceRegenerate) {
+    dataBase.forceRegenerate = true;
+  }
 
   return callFunction(
     { name: CLOUD_FUNCTION_NAME, data: Object.assign({ action: "generateQuadrantQ3StageA" }, dataBase) },

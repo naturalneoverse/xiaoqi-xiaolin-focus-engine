@@ -121,7 +121,8 @@ function validateGenerateQuadrantBatchParams(event) {
     items.push(payload);
   }
 
-  const payload = { taskId, quadrantId, items };
+  const forceRegenerate = !!(event && event.forceRegenerate);
+  const payload = { taskId, quadrantId, items, forceRegenerate };
   if (needsMeta) {
     payload.taskTitle = taskTitle;
   }

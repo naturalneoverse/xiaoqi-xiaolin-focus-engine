@@ -15,13 +15,13 @@ const PENDING_HANDWRITING_REPLY =
   "正在为您整理回应，请稍后再看本页，内容会自动更新。";
 
 /** 观心明己 Q2：报告无缓存时的手写段提示（非六套兜底） */
-const Q2_MISSING_HANDWRITING_REPLY = "回响尚未生成，请返回观心明己重新提交。";
+const Q2_MISSING_HANDWRITING_REPLY = "回响尚未生成，请返回观心明己，点「保存修改」再试。";
 
-const Q1_MISSING_HANDWRITING_REPLY = "回响尚未生成，请返回观实归真重新提交。";
+const Q1_MISSING_HANDWRITING_REPLY = "回响尚未生成，请返回观实归真，点「保存修改」再试。";
 
-const Q3_MISSING_HANDWRITING_REPLY = "回响尚未生成，请返回自我主宰重新提交。";
+const Q3_MISSING_HANDWRITING_REPLY = "回响尚未生成，请返回自我主宰，点「保存修改」再试。";
 
-const Q4_MISSING_HANDWRITING_REPLY = "回响尚未生成，请返回踏实前行重新提交。";
+const Q4_MISSING_HANDWRITING_REPLY = "回响尚未生成，请返回踏实前行，点「保存修改」再试。";
 
 const FALLBACK_REPLY_SET = new Set(listAllFallbackLines());
 

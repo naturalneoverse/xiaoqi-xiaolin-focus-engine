@@ -68,6 +68,7 @@ function runOneCard(db, item, ctx) {
       agentType: item.agentType,
       taskTitle: item.taskTitle || ctx.taskTitle,
       question: item.question,
+      forceRegenerate: !!ctx.forceRegenerate,
     },
     {
       arkTimeoutMs: ctx.arkTimeoutMs,
@@ -90,7 +91,7 @@ async function handleGenerateQuadrantBatch(db, event) {
     return { ok: false, errCode: v.errCode };
   }
 
-  const { taskId, quadrantId, items } = v.payload;
+  const { taskId, quadrantId, items, forceRegenerate } = v.payload;
 
   if (Number(quadrantId) === QUADRANT_Q2_ID) {
     return handleGenerateQuadrantQ2S2(db, event);
@@ -110,7 +111,14 @@ async function handleGenerateQuadrantBatch(db, event) {
     errCode: "serial",
   });
 
-  const ctx = { taskId, quadrantId, items, arkTimeoutMs, taskTitle: v.payload.taskTitle };
+  const ctx = {
+    taskId,
+    quadrantId,
+    items,
+    arkTimeoutMs,
+    taskTitle: v.payload.taskTitle,
+    forceRegenerate: !!forceRegenerate,
+  };
   const rows = [];
 
   for (let i = 0; i < items.length; i++) {

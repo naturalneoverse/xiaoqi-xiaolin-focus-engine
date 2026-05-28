@@ -199,7 +199,9 @@ function canRetryStage(attempt, maxAttempts, wallEnd, minRemainMs) {
 
 async function runStageA(db, env, ctx) {
   const item = ctx.byField.c0;
-  const cached = await loadValidCache(db, ctx.taskId, "c0", item.userText);
+  const cached = ctx.forceRegenerate
+    ? null
+    : await loadValidCache(db, ctx.taskId, "c0", item.userText);
   if (cached) return cached;
 
   const maxAttempts = 2;
@@ -261,8 +263,12 @@ async function runStageB(db, env, ctx) {
   const hashC1 = buildTextHash(itemC1.userText).hash;
   const hashC2 = buildTextHash(itemC2.userText).hash;
 
-  const cachedC1 = await loadValidCache(db, ctx.taskId, "c1", itemC1.userText);
-  const cachedC2 = await loadValidCache(db, ctx.taskId, "c2", itemC2.userText);
+  const cachedC1 = ctx.forceRegenerate
+    ? null
+    : await loadValidCache(db, ctx.taskId, "c1", itemC1.userText);
+  const cachedC2 = ctx.forceRegenerate
+    ? null
+    : await loadValidCache(db, ctx.taskId, "c2", itemC2.userText);
   if (cachedC1 && cachedC2) {
     return {
       c1: okRow("c1", cachedC1.replyContent, hashC1, true),
@@ -371,7 +377,7 @@ function prepareQ3Context(event) {
   if (!v.ok) {
     return { ok: false, errCode: v.errCode };
   }
-  const { taskId, items, taskTitle } = v.payload;
+  const { taskId, items, taskTitle, forceRegenerate } = v.payload;
   const byField = indexQ3Items(items);
   if (!byField) {
     return { ok: false, errCode: "Q3_INCOMPLETE_ITEMS" };
@@ -388,6 +394,7 @@ function prepareQ3Context(event) {
     env,
     payload: { taskId, items, taskTitle: taskTitle || "未命名任务" },
     byField,
+    forceRegenerate: !!forceRegenerate,
   };
 }
 
@@ -396,7 +403,7 @@ async function handleGenerateQuadrantQ3StageA(db, event) {
   if (!prep.ok) {
     return { ok: false, errCode: prep.errCode || "Q3_PREP_FAILED" };
   }
-  const { env, payload, byField } = prep;
+  const { env, payload, byField, forceRegenerate } = prep;
   const batchStarted = Date.now();
   const wallEnd = batchStarted + ARK_BATCH_WALL_BUDGET_MS;
   const ctx = {
@@ -405,6 +412,7 @@ async function handleGenerateQuadrantQ3StageA(db, event) {
     byField,
     stageATimeoutMs: Q3_STAGE_A_TIMEOUT_MS,
     wallEnd,
+    forceRegenerate: !!forceRegenerate,
   };
 
   logEvent({
@@ -436,7 +444,7 @@ async function handleGenerateQuadrantQ3StageB(db, event) {
   if (!prep.ok) {
     return { ok: false, errCode: prep.errCode || "Q3_PREP_FAILED" };
   }
-  const { env, payload, byField } = prep;
+  const { env, payload, byField, forceRegenerate } = prep;
   const batchStarted = Date.now();
   const wallEnd = batchStarted + ARK_BATCH_WALL_BUDGET_MS;
   const ctx = {
@@ -445,6 +453,7 @@ async function handleGenerateQuadrantQ3StageB(db, event) {
     byField,
     stageBTimeoutMs: Q3_STAGE_B_TIMEOUT_MAX_MS,
     wallEnd,
+    forceRegenerate: !!forceRegenerate,
   };
 
   logEvent({
@@ -477,7 +486,7 @@ async function handleGenerateQuadrantQ3S2(db, event) {
   if (!prep.ok) {
     return { ok: false, errCode: prep.errCode };
   }
-  const { env, payload, byField } = prep;
+  const { env, payload, byField, forceRegenerate } = prep;
   const batchStarted = Date.now();
   const wallEnd = batchStarted + ARK_BATCH_WALL_BUDGET_MS;
   const ctx = {
@@ -486,6 +495,7 @@ async function handleGenerateQuadrantQ3S2(db, event) {
     byField,
     stageATimeoutMs: Q3_STAGE_A_TIMEOUT_MS,
     wallEnd,
+    forceRegenerate: !!forceRegenerate,
   };
 
   logEvent({
