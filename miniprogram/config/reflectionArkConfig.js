@@ -17,7 +17,7 @@ const Q2_PHASE_TIMEOUT_MS = 59000;
 
 /** 与云函数 constants.DEPLOY_TAG 对齐，用于核对是否已部署最新包 */
 /** 与云函数 constants.DEPLOY_TAG 对齐 */
-const EXPECTED_Q2_DEPLOY_TAG = "q3-s2-q1q4-models-r9";
+const EXPECTED_Q2_DEPLOY_TAG = "body-week-care-r1";
 
 /** 审核不通过时温和提示（前端展示，无技术字段） */
 const MSG_SEC_REJECT_HINT = "您填写的内容暂未通过审核，请调整用语后再提交。";
