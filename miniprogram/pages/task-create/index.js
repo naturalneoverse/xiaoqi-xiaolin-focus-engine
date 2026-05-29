@@ -123,6 +123,7 @@ Page({
 
   onShow() {
     speechRecognition.prepare();
+    speechRecognition.warmUp().catch(() => {});
   },
 
   onUnload() {
@@ -228,15 +229,18 @@ Page({
     }
     if (this.data.speechRecordingTarget) return;
 
-    const started = speechRecognition.start(field, (result) => this._onSpeechAutoEnd(field, result));
-    if (started) {
-      this.setData(
-        Object.assign(
-          { speechRecordingTarget: field },
-          this._syncSpeechMicState({ speechRecordingTarget: field }),
-        ),
-      );
-    }
+    speechRecognition
+      .start(field, (result) => this._onSpeechAutoEnd(field, result))
+      .then((started) => {
+        if (!started) return;
+        this.setData(
+          Object.assign(
+            { speechRecordingTarget: field },
+            this._syncSpeechMicState({ speechRecordingTarget: field }),
+          ),
+        );
+      })
+      .catch(() => {});
   },
 
   onSpeechTouchEnd(e) {

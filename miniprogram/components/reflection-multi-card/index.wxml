@@ -50,28 +50,48 @@
             bindinput="onExpandInput"
           />
           <view class="limit-row">
-            <text class="limit-tip">{{m.expandLen(lengthMap, expandMetaMap[item.id].key)}}/{{expandMetaMap[item.id].maxLength}}</text>
+            <text class="limit-tip {{m.isRecording(speechRecordingKey, field, expandMetaMap[item.id].key) ? 'speech-layer-hidden' : ''}}">{{m.expandLen(lengthMap, expandMetaMap[item.id].key)}}/{{expandMetaMap[item.id].maxLength}}</text>
             <view
-              class="speech-mic-hit {{speechMicMap[m.speechKey(field, expandMetaMap[item.id].key)] ? 'speech-mic-hit-disabled' : ''}}"
-              data-key="{{expandMetaMap[item.id].key}}"
-              catchlongpress="onSpeechLongPress"
-              catchtouchend="onSpeechTouchEnd"
-              catchtouchcancel="onSpeechTouchEnd"
+              class="speech-hold-bar {{m.isRecording(speechRecordingKey, field, expandMetaMap[item.id].key) ? '' : 'speech-layer-hidden'}}"
+              style="--speech-mic-color: {{accent}};"
             >
-              <view
-                class="speech-wave {{m.isRecording(speechRecordingKey, field, expandMetaMap[item.id].key) ? '' : 'speech-layer-hidden'}}"
-                style="--accent: {{accent}};"
-              >
-                <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
-                <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
-                <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
-                <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
-                <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+              <view class="speech-hold-wave">
+                <view class="speech-hold-wave-bar" style="animation-delay: 0ms"></view>
+                <view class="speech-hold-wave-bar" style="animation-delay: 100ms"></view>
+                <view class="speech-hold-wave-bar" style="animation-delay: 200ms"></view>
+                <view class="speech-hold-wave-bar" style="animation-delay: 300ms"></view>
+                <view class="speech-hold-wave-bar" style="animation-delay: 400ms"></view>
+                <view class="speech-hold-wave-bar" style="animation-delay: 500ms"></view>
               </view>
-              <view
-                class="speech-mic-icon {{m.isRecording(speechRecordingKey, field, expandMetaMap[item.id].key) ? 'speech-layer-hidden' : ''}}"
-                style="--accent: {{accent}};"
-              ></view>
+              <text class="speech-hold-tip">松手填入</text>
+            </view>
+            <view
+              class="speech-mic-corner speech-mic-corner--expand"
+              style="--speech-mic-color: {{accent}};"
+            >
+              <button
+                class="speech-mic-btn {{m.isRecording(speechRecordingKey, field, expandMetaMap[item.id].key) ? 'speech-mic-btn-recording' : ''}} {{speechMicMap[m.speechKey(field, expandMetaMap[item.id].key)] ? 'speech-mic-btn-disabled' : ''}}"
+                plain
+                hover-class="none"
+                disabled="{{speechMicMap[m.speechKey(field, expandMetaMap[item.id].key)]}}"
+                data-key="{{expandMetaMap[item.id].key}}"
+                catchlongpress="onSpeechLongPress"
+                catchtouchend="onSpeechTouchEnd"
+                catchtouchcancel="onSpeechTouchEnd"
+              >
+                <view
+                  class="speech-wave {{m.isRecording(speechRecordingKey, field, expandMetaMap[item.id].key) ? '' : 'speech-layer-hidden'}}"
+                >
+                  <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+                  <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+                  <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+                  <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+                  <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+                </view>
+                <view
+                  class="speech-mic-icon {{m.isRecording(speechRecordingKey, field, expandMetaMap[item.id].key) ? 'speech-layer-hidden' : ''}}"
+                ></view>
+              </button>
             </view>
           </view>
         </view>

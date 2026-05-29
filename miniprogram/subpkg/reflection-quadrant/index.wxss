@@ -1,5 +1,15 @@
 @import "../../styles/reflection-quadrant-shell.wxss";
 
+.quadrant-speech-release-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 90;
+  background: transparent;
+}
+
 .quadrant-submit-mask {
   position: fixed;
   left: 0;

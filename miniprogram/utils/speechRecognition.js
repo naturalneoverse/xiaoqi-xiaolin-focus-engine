@@ -10,8 +10,17 @@ const SCOPE_RECORD = "scope.record";
 
 const TOAST_NO_PERM = "请授权麦克风权限后重试";
 const TOAST_FAIL = "语音识别失败，请重试";
-const TOAST_TOO_SHORT = "说话时间太短";
-const TOAST_NETWORK = "网络异常，请检查网络";
+const TOAST_TOO_SHORT = "说话时间太短，请再说一遍";
+const TOAST_NETWORK = "网络异常，请检查网络后重试";
+const TOAST_NO_RESULT = "未识别到内容，请重试";
+const TOAST_PLUGIN_NOT_READY = "语音功能未就绪，请稍后再试";
+
+const PERM_CACHE_MS = 60000;
+
+/** @type {boolean | null} */
+let recordPermissionGranted = null;
+let recordPermissionDeniedExplicit = false;
+let recordPermissionCacheAt = 0;
 
 /** @type {{ field: string, ending: boolean, started: boolean, pendingStop: boolean, silent: boolean, onAutoEnd?: Function, latestResult?: string, recordStartAt?: number } | null} */
 let session = null;
@@ -69,7 +78,14 @@ function bindManagerEvents(mgr) {
       finishSession(sess, buildResult(sess, false, "", ""));
       return;
     }
-    finishSession(sess, buildResult(sess, false, "", mapErrorToast(res)));
+    const toastMsg = mapErrorToast(res);
+    if (toastMsg === TOAST_NO_PERM) {
+      setPermissionCache(false, true);
+      finishSession(sess, buildResult(sess, false, "", toastMsg));
+      schedulePermissionSettingPrompt();
+      return;
+    }
+    finishSession(sess, buildResult(sess, false, "", toastMsg));
   };
 }
 
@@ -135,7 +151,7 @@ function handleStopResult(sess, rawText, stopRes) {
 
   const text = String(rawText || sess.latestResult || "").trim();
   if (!text) {
-    return finishSession(sess, buildResult(sess, false, "", TOAST_FAIL));
+    return finishSession(sess, buildResult(sess, false, "", TOAST_NO_RESULT));
   }
   return finishSession(sess, buildResult(sess, true, text, ""));
 }
@@ -164,10 +180,67 @@ function warmUp() {
   });
 }
 
+function setPermissionCache(granted, explicitlyDenied) {
+  recordPermissionGranted = !!granted;
+  recordPermissionDeniedExplicit = explicitlyDenied === true && !granted;
+  recordPermissionCacheAt = Date.now();
+}
+
+function isPermissionCacheFresh() {
+  return recordPermissionCacheAt > 0 && Date.now() - recordPermissionCacheAt < PERM_CACHE_MS;
+}
+
+function schedulePermissionSettingPrompt() {
+  setTimeout(() => {
+    try {
+      wx.hideToast();
+    } catch (e) {
+      /* ignore */
+    }
+    promptRecordPermissionSetting();
+  }, 1500);
+}
+
+function notifyPermissionDenied() {
+  setPermissionCache(false, true);
+  toast(TOAST_NO_PERM);
+  schedulePermissionSettingPrompt();
+}
+
+function promptRecordPermissionSetting() {
+  try {
+    wx.showModal({
+      title: "需要麦克风权限",
+      content: "请在设置中开启「麦克风」，以便使用语音输入",
+      confirmText: "去设置",
+      cancelText: "取消",
+      success(res) {
+        if (!res.confirm || typeof wx.openSetting !== "function") return;
+        wx.openSetting({
+          success(settingRes) {
+            const auth = (settingRes && settingRes.authSetting) || {};
+            const granted = auth[SCOPE_RECORD] === true;
+            const denied = auth[SCOPE_RECORD] === false;
+            setPermissionCache(granted, denied);
+          },
+        });
+      },
+    });
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+function denyStartForPermission() {
+  notifyPermissionDenied();
+  return false;
+}
+
 function ensureRecordPermission() {
   return new Promise((resolve) => {
     try {
       if (typeof wx.getSetting !== "function") {
+        setPermissionCache(true, false);
         resolve(true);
         return;
       }
@@ -175,26 +248,39 @@ function ensureRecordPermission() {
         success: (res) => {
           const auth = (res && res.authSetting) || {};
           if (auth[SCOPE_RECORD] === true) {
+            setPermissionCache(true, false);
             resolve(true);
             return;
           }
           if (auth[SCOPE_RECORD] === false) {
+            setPermissionCache(false, true);
             resolve(false);
             return;
           }
           if (typeof wx.authorize !== "function") {
+            setPermissionCache(true, false);
             resolve(true);
             return;
           }
           wx.authorize({
             scope: SCOPE_RECORD,
-            success: () => resolve(true),
-            fail: () => resolve(false),
+            success: () => {
+              setPermissionCache(true, false);
+              resolve(true);
+            },
+            fail: () => {
+              setPermissionCache(false, true);
+              resolve(false);
+            },
           });
         },
-        fail: () => resolve(true),
+        fail: () => {
+          setPermissionCache(true, false);
+          resolve(true);
+        },
       });
     } catch (e) {
+      setPermissionCache(true, false);
       resolve(true);
     }
   });
@@ -219,6 +305,16 @@ function invokeStop(sess) {
   }
 }
 
+function hapticOnRecordStart() {
+  try {
+    if (typeof wx.vibrateShort === "function") {
+      wx.vibrateShort({ type: "medium" });
+    }
+  } catch (e) {
+    /* ignore */
+  }
+}
+
 function beginSession(field, onAutoEnd) {
   const mgr = manager;
   if (!mgr) return false;
@@ -237,6 +333,7 @@ function beginSession(field, onAutoEnd) {
 
   try {
     mgr.start({ duration: MAX_DURATION_MS, lang: "zh_CN" });
+    hapticOnRecordStart();
     return true;
   } catch (e) {
     session = null;
@@ -244,12 +341,9 @@ function beginSession(field, onAutoEnd) {
   }
 }
 
-function start(field, onAutoEnd) {
-  if (session && !session.ending) {
-    abort();
-  }
+function startRecording(field, onAutoEnd) {
   if (!ensureManagerReady()) {
-    toast(TOAST_FAIL);
+    toast(TOAST_PLUGIN_NOT_READY);
     return false;
   }
   if (beginSession(field, onAutoEnd)) return true;
@@ -258,10 +352,29 @@ function start(field, onAutoEnd) {
   manager = null;
   managerReady = false;
   if (!ensureManagerReady() || !beginSession(field, onAutoEnd)) {
-    toast(TOAST_FAIL);
+    toast(TOAST_PLUGIN_NOT_READY);
     return false;
   }
   return true;
+}
+
+async function start(field, onAutoEnd) {
+  if (session && !session.ending) {
+    abort();
+  }
+
+  if (isPermissionCacheFresh() && recordPermissionGranted === true) {
+    return startRecording(field, onAutoEnd);
+  }
+  if (isPermissionCacheFresh() && recordPermissionGranted === false) {
+    return denyStartForPermission();
+  }
+
+  const permitted = await ensureRecordPermission();
+  if (!permitted) {
+    return denyStartForPermission();
+  }
+  return startRecording(field, onAutoEnd);
 }
 
 function stopForField(field) {
@@ -303,6 +416,10 @@ module.exports = {
   abort,
   TOAST_NO_PERM,
   TOAST_FAIL,
+  TOAST_TOO_SHORT,
+  TOAST_NETWORK,
+  TOAST_NO_RESULT,
+  TOAST_PLUGIN_NOT_READY,
   TOAST_CONTENT_FULL: "已达 600 字上限，无法继续添加",
   TOAST_NAME_FULL: "已达 25 字上限，无法继续添加",
 };

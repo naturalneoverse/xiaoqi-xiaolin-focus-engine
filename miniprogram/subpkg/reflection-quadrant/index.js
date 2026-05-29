@@ -185,6 +185,7 @@ Page({
   onShow() {
     applyReflectionNavBar();
     speechRecognition.prepare();
+    speechRecognition.warmUp().catch(() => {});
     this._returningToSelect = false;
     if (this._submitting) {
       this._ready = true;
@@ -384,7 +385,8 @@ Page({
     speechRecognition.stopForField("content") || speechRecognition.stopActive();
   },
 
-  onGlobalSpeechTouchEnd() {
+  /** 仅录音中铺透明层：松手任意处结束，平时不拦截触摸（鸿蒙输入兼容） */
+  onSpeechReleaseOverlayEnd() {
     this._stopSpeechRecording();
   },
 
@@ -430,12 +432,22 @@ Page({
     if (this.data.speechRecordingField) return;
 
     this._speechField = speechKey;
-    const started = speechRecognition.start("content", (result) => this._onSpeechAutoEnd(result));
-    if (started) {
-      this.setData(this._syncSpeechState({ speechRecordingField: speechKey }));
-    } else {
-      this._speechField = "";
-    }
+    speechRecognition
+      .start("content", (result) => this._onSpeechAutoEnd(result))
+      .then((started) => {
+        if (started) {
+          this.setData(this._syncSpeechState({ speechRecordingField: speechKey }));
+          return;
+        }
+        if (this._speechField === speechKey) {
+          this._speechField = "";
+        }
+      })
+      .catch(() => {
+        if (this._speechField === speechKey) {
+          this._speechField = "";
+        }
+      });
   },
 
   onSpeechTouchEnd() {
@@ -478,20 +490,21 @@ Page({
       const card = cards[i];
       if (!card || card.type !== "multi" || !card.hasExpand) continue;
       const selected = multiValues[card.field] || [];
-      if (selected.indexOf("experience") < 0) continue;
       const expand = Object.assign(createEmptyMultiExpandValues(), multiExpandValues[card.field] || {});
-      if (!String(expand.experience || "").trim()) {
-        wx.showToast({ title: "请填写带给自己的经验", icon: "none" });
-        return false;
+      for (let j = 0; j < EXPAND_ROWS.length; j++) {
+        const row = EXPAND_ROWS[j];
+        if (!row || selected.indexOf(row.optionId) < 0) continue;
+        if (!String(expand[row.key] || "").trim()) {
+          wx.showToast({ title: `请填写${row.label}`, icon: "none" });
+          return false;
+        }
       }
     }
     return true;
   },
 
-  /** 观心明己 Q2：三题手写须齐，与云函数 generateQuadrantQ2 成套生成一致 */
+  /** 四象限：本象限全部手写题须填写（与云端成套生成一致） */
   _validateRequiredTextCards() {
-    const quadrantId = Number(this.data.quadrantId);
-    if (quadrantId !== 2) return true;
     const cards = this.data.cards || [];
     const textValues = this.data.textValues || {};
     for (let i = 0; i < cards.length; i++) {

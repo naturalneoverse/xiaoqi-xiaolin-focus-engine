@@ -27,8 +27,22 @@
           bindinput="onTaskNameInput"
         />
       </view>
-      <text class="limit-tip limit-tip-corner {{taskNameLength > taskNameMax ? 'limit-tip-exceeded' : ''}}">{{taskNameLength}}/{{taskNameMax}}</text>
-      <view class="speech-mic-hit speech-mic-corner">
+      <text class="limit-tip limit-tip-corner {{speechRecordingTarget === 'name' ? 'speech-layer-hidden' : ''}} {{taskNameLength > taskNameMax ? 'limit-tip-exceeded' : ''}}">{{taskNameLength}}/{{taskNameMax}}</text>
+      <view
+        class="speech-hold-bar {{speechRecordingTarget === 'name' ? '' : 'speech-layer-hidden'}}"
+        style="--speech-mic-color: #6c92b1;"
+      >
+        <view class="speech-hold-wave">
+          <view class="speech-hold-wave-bar" style="animation-delay: 0ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 100ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 200ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 300ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 400ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 500ms"></view>
+        </view>
+        <text class="speech-hold-tip">松手填入</text>
+      </view>
+      <view class="speech-mic-corner speech-mic-corner--card" style="--speech-mic-color: #6c92b1;">
         <button
           class="speech-mic-btn {{speechRecordingTarget === 'name' ? 'speech-mic-btn-recording' : ''}} {{speechNameMicDisabled ? 'speech-mic-btn-disabled' : ''}}"
           plain
@@ -72,8 +86,22 @@
           bindinput="onTaskContentInput"
         />
       </view>
-      <text class="limit-tip limit-tip-corner {{taskContentLength > taskContentMax ? 'limit-tip-exceeded' : ''}}">{{taskContentLength}}/{{taskContentMax}}</text>
-      <view class="speech-mic-hit speech-mic-corner">
+      <text class="limit-tip limit-tip-corner {{speechRecordingTarget === 'content' ? 'speech-layer-hidden' : ''}} {{taskContentLength > taskContentMax ? 'limit-tip-exceeded' : ''}}">{{taskContentLength}}/{{taskContentMax}}</text>
+      <view
+        class="speech-hold-bar speech-hold-bar--wide-counter {{speechRecordingTarget === 'content' ? '' : 'speech-layer-hidden'}}"
+        style="--speech-mic-color: #6c92b1;"
+      >
+        <view class="speech-hold-wave">
+          <view class="speech-hold-wave-bar" style="animation-delay: 0ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 100ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 200ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 300ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 400ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 500ms"></view>
+        </view>
+        <text class="speech-hold-tip">松手填入</text>
+      </view>
+      <view class="speech-mic-corner speech-mic-corner--card" style="--speech-mic-color: #6c92b1;">
         <button
           class="speech-mic-btn {{speechRecordingTarget === 'content' ? 'speech-mic-btn-recording' : ''}} {{speechContentMicDisabled ? 'speech-mic-btn-disabled' : ''}}"
           plain

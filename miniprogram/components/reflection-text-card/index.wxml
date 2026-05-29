@@ -15,22 +15,38 @@
       bindinput="onInput"
     />
     <view class="limit-row">
-      <text class="limit-tip limit-tip-corner">{{displayLength}}/{{maxLength}}</text>
-      <view
-        class="speech-mic-hit speech-mic-corner {{speechMicDisabled ? 'speech-mic-hit-disabled' : ''}}"
-        data-field="{{field}}"
-        catchlongpress="onSpeechLongPress"
-        catchtouchend="onSpeechTouchEnd"
-        catchtouchcancel="onSpeechTouchEnd"
-      >
-        <view class="speech-wave {{speechRecording ? '' : 'speech-layer-hidden'}}">
-          <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
-          <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
-          <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
-          <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
-          <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+      <text class="limit-tip limit-tip-corner {{speechRecording ? 'speech-layer-hidden' : ''}}">{{displayLength}}/{{maxLength}}</text>
+      <view class="speech-hold-bar {{speechRecording ? '' : 'speech-layer-hidden'}}">
+        <view class="speech-hold-wave">
+          <view class="speech-hold-wave-bar" style="animation-delay: 0ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 100ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 200ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 300ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 400ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 500ms"></view>
         </view>
-        <view class="speech-mic-icon {{speechRecording ? 'speech-layer-hidden' : ''}}"></view>
+        <text class="speech-hold-tip">松手填入</text>
+      </view>
+      <view class="speech-mic-corner speech-mic-corner--card">
+        <button
+          class="speech-mic-btn {{speechRecording ? 'speech-mic-btn-recording' : ''}} {{speechMicDisabled ? 'speech-mic-btn-disabled' : ''}}"
+          plain
+          hover-class="none"
+          disabled="{{speechMicDisabled}}"
+          data-field="{{field}}"
+          catchlongpress="onSpeechLongPress"
+          catchtouchend="onSpeechTouchEnd"
+          catchtouchcancel="onSpeechTouchEnd"
+        >
+          <view class="speech-wave {{speechRecording ? '' : 'speech-layer-hidden'}}">
+            <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+          </view>
+          <view class="speech-mic-icon {{speechRecording ? 'speech-layer-hidden' : ''}}"></view>
+        </button>
       </view>
     </view>
   </view>

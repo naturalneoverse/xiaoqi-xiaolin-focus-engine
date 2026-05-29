@@ -76,6 +76,11 @@
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2",
+  "permission": {
+    "scope.record": {
+      "desc": "你的语音将转写为文字，填入任务或哲思复盘输入框"
+    }
+  },
   "plugins": {
     "WechatSI": {
       "version": "0.3.7",

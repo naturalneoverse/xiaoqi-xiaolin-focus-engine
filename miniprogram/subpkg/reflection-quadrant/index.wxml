@@ -1,16 +1,5 @@
-<view
-  class="quadrant-page reflection-page"
-  catchtouchend="onGlobalSpeechTouchEnd"
-  catchtouchcancel="onGlobalSpeechTouchEnd"
->
-  <scroll-view
-    class="quadrant-scroll"
-    scroll-y
-    enhanced
-    show-scrollbar="{{false}}"
-    catchtouchend="onGlobalSpeechTouchEnd"
-    catchtouchcancel="onGlobalSpeechTouchEnd"
-  >
+<view class="quadrant-page reflection-page">
+  <scroll-view class="quadrant-scroll" scroll-y show-scrollbar="{{false}}">
     <view class="quadrant-scroll-inner">
       <block wx:for="{{cards}}" wx:key="field">
         <reflection-text-card
@@ -77,6 +66,13 @@
       {{submitLabel}}
     </button>
   </view>
+
+  <view
+    wx:if="{{speechRecordingField}}"
+    class="quadrant-speech-release-layer"
+    catchtouchend="onSpeechReleaseOverlayEnd"
+    catchtouchcancel="onSpeechReleaseOverlayEnd"
+  />
 
   <view
     wx:if="{{submitLoading}}"
