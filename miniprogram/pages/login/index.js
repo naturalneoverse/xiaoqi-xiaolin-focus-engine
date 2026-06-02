@@ -59,6 +59,10 @@ Page({
   },
 
   getHasLoggedIn() {
+    const auth = require("../../utils/authSession");
+    if (auth && typeof auth.isLoggedIn === "function" && auth.isLoggedIn()) {
+      return true;
+    }
     const app = getApp();
     if (app && app.globalData && typeof app.globalData.hasLoggedIn === "boolean") {
       return app.globalData.hasLoggedIn;
@@ -185,10 +189,16 @@ Page({
         if (app && app.globalData) {
           app.globalData.userTagsComplete = tagsComplete;
         }
+        if (!tagsComplete && authSession.isLocalTagsComplete()) {
+          tagsComplete = true;
+          if (app && app.globalData) {
+            app.globalData.userTagsComplete = true;
+          }
+        }
         try {
           if (tagsComplete) {
             wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
-          } else {
+          } else if (!authSession.isLocalTagsComplete()) {
             wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
           }
         } catch (e) {

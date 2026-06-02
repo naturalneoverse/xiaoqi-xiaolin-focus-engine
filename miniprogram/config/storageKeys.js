@@ -1,6 +1,8 @@
 const STORAGE_KEYS = {
   REMINDER_ENABLED: "reminder_enabled",
   USER_PROFILE: "user_profile",
+  /** 用户曾在「我的」主动改过资料（launch 合并时以 user_profile 为准） */
+  PROFILE_CUSTOMIZED: "profile_customized",
   HAS_LOGGED_IN: "has_logged_in",
   TASKS_DATA: "sleep_tasks",
   BODY_RECORDS: "body_records",

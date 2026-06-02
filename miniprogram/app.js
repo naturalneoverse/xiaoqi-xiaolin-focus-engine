@@ -501,9 +501,12 @@ App({
     };
   },
 
-  setUserProfile(nextPatch) {
+  setUserProfile(nextPatch, options) {
     const previous = this.getUserProfile();
     const patch = { ...(nextPatch || {}) };
+    const opt = options || {};
+    const markCustomized = opt.markCustomized !== false;
+    const syncUserInfo = opt.syncUserInfo !== false;
     if (Object.prototype.hasOwnProperty.call(patch, "nickname")) {
       patch.nickname = clampNickname(patch.nickname != null ? String(patch.nickname) : "");
     }
@@ -517,6 +520,13 @@ App({
     try {
       wx.setStorageSync(STORAGE_KEYS.USER_PROFILE, nextProfile);
       this.globalData.userProfile = nextProfile;
+      const auth = require("./utils/authSession");
+      if (markCustomized && typeof auth.markProfileCustomized === "function") {
+        auth.markProfileCustomized(true);
+      }
+      if (syncUserInfo && typeof auth.syncUserInfoFromProfile === "function") {
+        auth.syncUserInfoFromProfile(nextProfile);
+      }
       const pages = getCurrentPages();
       pages.forEach((page) => {
         if (page && typeof page.onGlobalUserProfileChange === "function") {

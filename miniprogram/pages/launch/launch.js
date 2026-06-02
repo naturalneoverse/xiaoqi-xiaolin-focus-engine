@@ -76,24 +76,31 @@ Page({
     }
 
     try {
-      const ui = authSession.readUserInfo();
-      if (ui && typeof ui === "object" && app && typeof app.setUserProfile === "function") {
-        app.setUserProfile({
-          nickname: ui.nickName || "",
-          avatarUrl: ui.avatarUrl || "",
-          signature: ui.signature || "",
-        });
-      }
+      authSession.reconcileProfileAtLaunch(app);
     } catch (e2) {
       /* ignore */
     }
 
+    const resolveTagsComplete = (cloudComplete) => {
+      if (cloudComplete) return true;
+      if (authSession.isLocalTagsComplete()) {
+        try {
+          wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
+        } catch (e) {
+          /* ignore */
+        }
+        return true;
+      }
+      return false;
+    };
+
     const finish = (tagsComplete) => {
+      const complete = resolveTagsComplete(!!tagsComplete);
       if (app && app.globalData) {
-        app.globalData.userTagsComplete = !!tagsComplete;
+        app.globalData.userTagsComplete = complete;
       }
       try {
-        if (tagsComplete) {
+        if (complete) {
           wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
         } else {
           wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
@@ -103,7 +110,7 @@ Page({
       }
 
       wx.nextTick(() => {
-        if (!tagsComplete) {
+        if (!complete) {
           wx.redirectTo({ url: "/pages/onboarding-tags/index" });
           return;
         }
@@ -112,13 +119,7 @@ Page({
     };
 
     if (!wx.cloud || typeof wx.cloud.callFunction !== "function") {
-      let tagsComplete = false;
-      try {
-        tagsComplete = !!wx.getStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
-      } catch (e4) {
-        tagsComplete = false;
-      }
-      finish(tagsComplete);
+      finish(authSession.isLocalTagsComplete());
       return;
     }
 

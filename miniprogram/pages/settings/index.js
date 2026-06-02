@@ -1,6 +1,6 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
-const CLEAR_OPTIONS = ["清除图片缓存", "清除全部记录"];
+const CLEAR_OPTIONS = ["清除图片缓存", "清除任务与哲思本地记录"];
 
 Page({
   data: {
@@ -109,8 +109,8 @@ Page({
 
   confirmClearAllRecords() {
     wx.showModal({
-      title: "清空提醒",
-      content: "即将清空所有任务数据，数据删除后不可找回，是否继续？",
+      title: "清除任务与哲思记录",
+      content: "将清除本机任务与哲思复盘本地记录，资料和问卷保留。删除后不可恢复，是否继续？",
       cancelText: "取消",
       confirmText: "继续清空",
       confirmColor: "#dc2626",
@@ -118,7 +118,7 @@ Page({
         if (!res.confirm) return;
         wx.showModal({
           title: "最终确认",
-          content: "此操作不可逆，所有任务记录将彻底删除，确定执行清空吗？",
+          content: "此操作不可逆，任务与哲思本地记录将删除（资料与问卷保留），确定继续吗？",
           cancelText: "再想想",
           confirmText: "确认清空",
           confirmColor: "#dc2626",
@@ -155,8 +155,12 @@ Page({
     });
   },
 
-  /** 仅跳转登录页，不清理 token / 缓存 / 用户资料（与产品约定一致） */
+  /** 退出：清会话 token，保留资料/问卷/业务数据与 pending_referrer（再登录可补分享归因） */
   onLogout() {
+    const authSession = require("../../utils/authSession");
+    if (authSession && typeof authSession.logout === "function") {
+      authSession.logout();
+    }
     wx.reLaunch({
       url: "/pages/login/index",
     });

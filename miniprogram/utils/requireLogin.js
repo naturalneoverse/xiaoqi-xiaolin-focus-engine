@@ -3,7 +3,6 @@
  */
 
 const authSession = require("./authSession");
-const STORAGE_KEYS = require("../config/storageKeys");
 
 const LOGIN_URL = "/pages/login/index";
 
@@ -11,12 +10,7 @@ const LOGIN_URL = "/pages/login/index";
  * @returns {boolean} true 可继续执行本页 onLoad 后续逻辑；false 已发起 reLaunch
  */
 function requireLoginOnLoad() {
-  if (authSession.hasValidTokenAndUserInfo()) return true;
-  try {
-    if (wx.getStorageSync(STORAGE_KEYS.HAS_LOGGED_IN)) return true;
-  } catch (e) {
-    /* ignore */
-  }
+  if (authSession.isLoggedIn()) return true;
   wx.reLaunch({ url: LOGIN_URL });
   return false;
 }
