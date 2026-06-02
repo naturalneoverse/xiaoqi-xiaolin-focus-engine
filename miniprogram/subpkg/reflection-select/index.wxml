@@ -26,7 +26,8 @@
 
     <view class="select-footer">
       <view wx:if="{{showStatusGenerating}}" class="select-status select-status--generating">
-        <text class="select-status-text">部分手写解读正在生成（约 1～3 分钟），您可先填其它象限</text>
+        <text class="select-status-text">小麒小麟正在细细酝酿回响（约 1～3 分钟）。</text>
+        <text class="select-status-text">喝口水，等它完成，再开下一个象限——按这个节奏，每一个回响都不会漏。</text>
       </view>
 
       <view wx:if="{{showStatusReady}}" class="select-status select-status--ready">

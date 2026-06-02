@@ -123,7 +123,7 @@ async function buildReportViewModel(taskId, visitSeed) {
   const hasAnyQuadrant = reflectionManager.getCompletedQuadrantIds(record).length > 0;
   resumePendingGenerationsForTask(record.taskId);
   const reportPendingHint = hasGeneratingWorkForTask(record.taskId)
-    ? "部分手写解读正在后台生成，稍后会自动更新。"
+    ? "小麒小麟正在酝酿回响（约 1～3 分钟），稍后会自动更新。"
     : "";
   return {
     taskId: record.taskId,

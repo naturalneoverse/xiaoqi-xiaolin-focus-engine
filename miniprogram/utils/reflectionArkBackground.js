@@ -12,8 +12,8 @@ const STORAGE_KEY = "reflection_ark_pending_v1";
 const FAILED_STORAGE_KEY = "reflection_ark_gen_failed_v1";
 const activeJobs = Object.create(null);
 
-const BACKGROUND_GEN_TOAST_OK = "回响正在后台生成，约半分钟后可在报告中查看";
-const BACKGROUND_GEN_TOAST_FAIL = "回响生成未完成，请稍后在象限页重试保存";
+const BACKGROUND_GEN_TOAST_OK = "回响正在后台生成，约 1～3 分钟后可在报告中查看";
+const BACKGROUND_GEN_TOAST_FAIL = "回响生成未完成，请回该象限点「保存修改」";
 
 function jobKey(taskId, quadrantId) {
   return `${String(taskId || "").trim()}:${Number(quadrantId)}`;
