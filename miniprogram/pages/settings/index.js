@@ -1,5 +1,11 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
+const {
+  executeClearPreset,
+  buildClearConfirmContent,
+  buildClearFinalConfirmContent,
+  CLEAR_PRESET_IDS,
+} = require("../../utils/localDataClear");
 const CLEAR_OPTIONS = ["清除图片缓存", "清除任务与哲思本地记录"];
 
 Page({
@@ -79,30 +85,23 @@ Page({
   confirmClearImageCache() {
     wx.showModal({
       title: "清除图片缓存",
-      content: "确定清除图片缓存吗？",
+      content: buildClearConfirmContent(CLEAR_PRESET_IDS.IMAGE_CACHE),
       confirmColor: "#dc2626",
       success: (res) => {
         if (!res.confirm) return;
-        try {
-          wx.removeStorageSync(STORAGE_KEYS.CACHE_IMAGES);
-          const storageInfo = wx.getStorageInfoSync ? wx.getStorageInfoSync() : null;
-          const keys = (storageInfo && storageInfo.keys) || [];
-          keys.forEach((key) => {
-            if (/^(temp_image_|image_temp_|draft_image_)/.test(key)) {
-              wx.removeStorageSync(key);
-            }
-          });
-          wx.showToast({
-            title: "图片缓存已清除",
-            icon: "success",
-          });
-        } catch (e) {
+        const result = executeClearPreset(CLEAR_PRESET_IDS.IMAGE_CACHE);
+        if (!result.ok) {
           wx.showModal({
             title: "清除失败",
             content: "图片缓存清除失败，请稍后重试",
             showCancel: false,
           });
+          return;
         }
+        wx.showToast({
+          title: "图片缓存已清除",
+          icon: "success",
+        });
       },
     });
   },
@@ -110,7 +109,7 @@ Page({
   confirmClearAllRecords() {
     wx.showModal({
       title: "清除任务与哲思记录",
-      content: "将清除本机任务与哲思复盘本地记录，资料和问卷保留。删除后不可恢复，是否继续？",
+      content: buildClearConfirmContent(CLEAR_PRESET_IDS.TASKS_REFLECTION),
       cancelText: "取消",
       confirmText: "继续清空",
       confirmColor: "#dc2626",
@@ -118,7 +117,7 @@ Page({
         if (!res.confirm) return;
         wx.showModal({
           title: "最终确认",
-          content: "此操作不可逆，任务与哲思本地记录将删除（资料与问卷保留），确定继续吗？",
+          content: buildClearFinalConfirmContent(CLEAR_PRESET_IDS.TASKS_REFLECTION),
           cancelText: "再想想",
           confirmText: "确认清空",
           confirmColor: "#dc2626",
@@ -132,20 +131,19 @@ Page({
   },
 
   _executeClearAllTasks() {
-    try {
-      wx.removeStorageSync(STORAGE_KEYS.TASKS_DATA);
-      wx.removeStorageSync(STORAGE_KEYS.REFLECTION_RECORDS);
-      wx.showToast({
-        title: "任务已清空",
-        icon: "success",
-      });
-    } catch (e) {
+    const result = executeClearPreset(CLEAR_PRESET_IDS.TASKS_REFLECTION);
+    if (!result.ok) {
       wx.showModal({
         title: "清除失败",
-        content: "任务清空失败，请稍后重试",
+        content: "任务与哲思记录清空失败，请稍后重试",
         showCancel: false,
       });
+      return;
     }
+    wx.showToast({
+      title: "任务已清空",
+      icon: "success",
+    });
   },
 
   onTapVersion() {
