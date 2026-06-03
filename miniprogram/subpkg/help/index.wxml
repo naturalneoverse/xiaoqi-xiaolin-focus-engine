@@ -32,6 +32,22 @@
     </view>
   </view>
 
+  <view class="card">
+    <text class="section-title">数据保存在哪</text>
+    <text class="data-notes-intro">以下说明帮助您了解本机与云端数据的范围（当前版本）。</text>
+
+    <view class="faq-item" wx:for="{{dataNotesList}}" wx:key="question">
+      <view class="faq-cell" bindtap="toggleDataNote" data-index="{{index}}">
+        <text class="faq-text">{{item.question}}</text>
+        <text class="faq-arrow">{{dataNotesOpen[index] ? "⌃" : "›"}}</text>
+      </view>
+      <view wx:if="{{dataNotesOpen[index]}}" class="faq-answer-wrap">
+        <text class="faq-answer">{{item.answer}}</text>
+      </view>
+      <view wx:if="{{index !== dataNotesList.length - 1}}" class="line"></view>
+    </view>
+  </view>
+
   <view class="card contact-card">
     <text class="section-title">联系我们</text>
     <text class="contact-guide">如以上未能解决您的问题，请通过下方式联系我们</text>

@@ -56,7 +56,8 @@ Page({
       },
       {
         question: "如何删除任务？",
-        answer: "在时间首页的任务列表里，长按任意任务卡片即可删除该任务。",
+        answer:
+          "在「时间」页任务列表长按任务卡片即可删除。哲思复盘会保留，可在「哲思复盘报告」查看或长按删除；若曾设日历提醒，请自行到手机「日历」删除相关条目。",
       },
       {
         question: "如何更改任务状态？",
@@ -95,6 +96,34 @@ Page({
       },
     ],
     faqOpen: [false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+    dataNotesList: [
+      {
+        question: "换手机或重装后，数据会自动回来吗？",
+        answer:
+          "任务和身体记录在登录后可能备份到云端，但当前版本换机或重装后不会自动恢复到新手机。哲思复盘作答、每日打卡等主要保存在本机。身体边界周报存档相对完整，仍建议不要依赖换机自动恢复。",
+      },
+      {
+        question: "删除任务会删掉哲思复盘吗？",
+        answer:
+          "不会。删除任务只影响待办列表，已写的哲思复盘仍保留。请在「我的 → 哲思复盘报告」查看；若要删除某条复盘，请在该列表长按该记录。",
+      },
+      {
+        question: "删任务后，日历提醒还会响吗？",
+        answer:
+          "可能会。提醒写入手机「日历」后，微信无法代您自动删除。若曾给任务设置过提醒，删除任务后请到手机「日历」App 中查找相关条目（描述含任务编号）并手动删除。",
+      },
+      {
+        question: "个人资料、问卷标签存在哪里？",
+        answer:
+          "主要保存在本机。问卷结果在云端就绪时会同步；若仅存在本机或云未落库，删除小程序、清微信存储或换机后可能丢失，需要重新填写。",
+      },
+      {
+        question: "设置里的「清除数据」会清什么？",
+        answer:
+          "「清除图片缓存」只清图片临时文件。「清除任务与哲思本地记录」只清任务与哲思复盘作答，不会清除身体记录、打卡、周报存档、资料与问卷等；部分数据可在对应页面单独修改或删除。详见设置页清除前的确认说明。",
+      },
+    ],
+    dataNotesOpen: [false, false, false, false, false],
   },
 
   onLoad() {
@@ -121,6 +150,17 @@ Page({
     next[idx] = !this.data.faqOpen[idx];
     this.setData({
       faqOpen: next,
+    });
+  },
+
+  toggleDataNote(e) {
+    const { index } = e.currentTarget.dataset;
+    const idx = Number(index);
+    const len = this.data.dataNotesList.length;
+    const next = new Array(len).fill(false);
+    next[idx] = !this.data.dataNotesOpen[idx];
+    this.setData({
+      dataNotesOpen: next,
     });
   },
 });
