@@ -190,7 +190,14 @@ function readArchiveStore() {
  */
 function writeArchiveStore(store) {
   const normalized = normalizeStore(store);
-  wx.setStorageSync(STORAGE_KEYS.BODY_WEEK_ARCHIVE_V1, normalized);
+  try {
+    wx.setStorageSync(STORAGE_KEYS.BODY_WEEK_ARCHIVE_V1, normalized);
+  } catch (e) {
+    console.error("[bodyWeekArchive] writeArchiveStore setStorageSync", e);
+    const err = new Error("storage_write_failed");
+    err.code = "STORAGE_WRITE_FAILED";
+    throw err;
+  }
   return normalized;
 }
 
@@ -220,7 +227,11 @@ function putEntry(weekKey, entry) {
   const store = readArchiveStore();
   normalized.updatedAt = new Date().toISOString();
   store.weeks[key] = normalized;
-  writeArchiveStore(store);
+  try {
+    writeArchiveStore(store);
+  } catch (e) {
+    return { ok: false, errors: ["storage_write_failed"] };
+  }
   try {
     const cloud = require("./bodyWeekArchiveCloud");
     cloud.schedulePushEntry(normalized);

@@ -31,8 +31,10 @@ function readPendingStore() {
 function writePendingStore(store) {
   try {
     wx.setStorageSync(STORAGE_KEY, store);
+    return true;
   } catch (e) {
-    /* ignore */
+    console.warn("[reflectionArkBackground] writePendingStore", e);
+    return false;
   }
 }
 
@@ -130,8 +132,10 @@ function readFailedStore() {
 function writeFailedStore(store) {
   try {
     wx.setStorageSync(FAILED_STORAGE_KEY, store);
+    return true;
   } catch (e) {
-    /* ignore */
+    console.warn("[reflectionArkBackground] writeFailedStore", e);
+    return false;
   }
 }
 

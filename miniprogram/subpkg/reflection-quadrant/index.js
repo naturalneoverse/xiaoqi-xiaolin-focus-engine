@@ -613,6 +613,7 @@ Page({
       });
   },
 
+  /** 先 upsertQuadrant 持久化，成功后再更新界面；失败时抛出供调用方捕获 */
   _saveQuadrantResponses(cardResponses) {
     const { taskId, taskTitle, quadrantId } = this.data;
     reflectionManager.upsertQuadrant(taskId, taskTitle, quadrantId, { cardResponses });

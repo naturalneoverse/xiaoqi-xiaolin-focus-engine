@@ -20,7 +20,14 @@ function readAll() {
 
 function writeAll(list) {
   const normalized = normalizeRecordList(list);
-  wx.setStorageSync(STORAGE_KEYS.REFLECTION_RECORDS, normalized);
+  try {
+    wx.setStorageSync(STORAGE_KEYS.REFLECTION_RECORDS, normalized);
+  } catch (e) {
+    console.error("[reflectionManager] writeAll setStorageSync", e);
+    const err = new Error("storage_write_failed");
+    err.code = "STORAGE_WRITE_FAILED";
+    throw err;
+  }
   return normalized;
 }
 
@@ -75,11 +82,12 @@ function upsertQuadrant(taskId, taskTitle, quadrantId, payload) {
   record.latestCompletedAt = completedAt;
   record.latestCompletedAtMs = now;
 
+  const next = list.slice();
   if (idx >= 0) {
-    list.splice(idx, 1);
+    next.splice(idx, 1);
   }
-  list.unshift(record);
-  writeAll(list);
+  next.unshift(record);
+  writeAll(next);
   return record;
 }
 

@@ -60,7 +60,13 @@ function mergeCloudWeeksIntoLocal(cloudWeeks) {
       merged += 1;
     }
   });
-  if (merged > 0) bodyWeekArchive.writeArchiveStore(store);
+  if (merged > 0) {
+    try {
+      bodyWeekArchive.writeArchiveStore(store);
+    } catch (e) {
+      console.warn("[bodyWeekArchiveCloud] writeArchiveStore", e);
+    }
+  }
   return { merged };
 }
 
