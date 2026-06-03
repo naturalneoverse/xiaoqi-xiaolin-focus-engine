@@ -1,5 +1,6 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
+const reminderRegistry = require("../../utils/reminderRegistry");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 const { getTodayKey } = require("../../utils/dateKeys");
 const { formatDateTime } = require("../../utils/dateFormat");
@@ -157,7 +158,10 @@ Page({
     this.setData({ suppressTapOnce: true });
     wx.showModal({
       title: "删除任务",
-      content: `确认删除“${task.title}”？`,
+      content:
+        `确认删除「${task.title}」？\n\n` +
+        "哲思复盘将保留，可在「我的 → 哲思复盘报告」中查看或长按删除。\n\n" +
+        "若曾设置日历提醒，请自行到手机「日历」中删除相关条目。",
       confirmColor: "#12598f",
       success: (res) => {
         if (!res.confirm) return;
@@ -168,6 +172,11 @@ Page({
           console.error("delete task setStorageSync", err);
           wx.showToast({ title: "删除失败", icon: "none" });
           return;
+        }
+        try {
+          reminderRegistry.removeRecord(taskId);
+        } catch (e) {
+          console.warn("delete task removeRecord", e);
         }
         this.loadTasks();
         wx.showToast({

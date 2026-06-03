@@ -76,10 +76,21 @@ function confirmRescheduleUpdate() {
   });
 }
 
+/** 删任务时移除本地 registry 条目（不能取消已写入系统日历的事件） */
+function removeRecord(taskId) {
+  const id = String(taskId || "").trim();
+  if (!id) return;
+  const all = loadRegistry();
+  if (!all[id]) return;
+  delete all[id];
+  writeRegistry(all);
+}
+
 module.exports = {
   getRecord,
   saveRecord,
   migrateRecord,
+  removeRecord,
   isSameSchedule,
   confirmRescheduleUpdate,
 };
