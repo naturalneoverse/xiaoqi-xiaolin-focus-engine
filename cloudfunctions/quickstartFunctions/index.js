@@ -662,15 +662,19 @@ const saveBodyRecord = async (event) => {
   if (!sleep || !sport || !signal) {
     return { success: false, errMsg: "missing sleep/sport/signal" };
   }
+  const stamps = serverTimestamps();
+  const clientUpdatedAt = updatedAt;
   const data = stripUndefinedDeep({
     openid,
     dateKey: r.dateKey,
     sleep,
     sport,
     signal,
-    updatedAt,
+    updatedAt: clientUpdatedAt,
+    clientUpdatedAt,
     id: r.id != null ? String(r.id) : "",
     createdAt: r.createdAt != null ? String(r.createdAt) : "",
+    ...stamps,
   });
   try {
     const existed = await db.collection(BODY_RECORDS_COLL).where({ openid, dateKey: data.dateKey }).limit(1).get();
@@ -679,9 +683,42 @@ const saveBodyRecord = async (event) => {
     } else {
       await db.collection(BODY_RECORDS_COLL).add({ data });
     }
-    return { success: true };
+    return { success: true, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
   } catch (e) {
     return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+function bodyDocToClient(doc) {
+  if (!doc || !doc.dateKey) return null;
+  const clientUpdatedAt = Number(
+    doc.clientUpdatedAt != null ? doc.clientUpdatedAt : doc.updatedAt
+  );
+  return stripUndefinedDeep({
+    id: doc.id != null ? String(doc.id) : "",
+    dateKey: String(doc.dateKey),
+    sleep: doc.sleep != null ? String(doc.sleep) : "",
+    sport: doc.sport != null ? String(doc.sport) : "",
+    signal: doc.signal != null ? String(doc.signal) : "",
+    createdAt: doc.createdAt != null ? String(doc.createdAt) : "",
+    updatedAt: Number.isFinite(clientUpdatedAt) ? clientUpdatedAt : 0,
+    clientUpdatedAt: Number.isFinite(clientUpdatedAt) ? clientUpdatedAt : 0,
+    serverUpdatedAtMs: Number(doc.serverUpdatedAtMs) || 0,
+  });
+}
+
+const listBodyRecords = async () => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid", records: [] };
+  }
+  try {
+    const res = await db.collection(BODY_RECORDS_COLL).where({ openid }).limit(500).get();
+    const records = (res.data || []).map(bodyDocToClient).filter(Boolean);
+    return { success: true, records, serverTimeMs: Date.now() };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e), records: [] };
   }
 };
 
@@ -1029,6 +1066,8 @@ exports.main = async (event, context) => {
       return await purgeReflectionTask(event);
     case "saveBodyRecord":
       return await saveBodyRecord(event);
+    case "listBodyRecords":
+      return await listBodyRecords();
     case "saveBodyWeekArchive":
       return await saveBodyWeekArchive(event);
     case "listBodyWeekArchives":

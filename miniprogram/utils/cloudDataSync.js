@@ -1,5 +1,5 @@
 /**
- * 本地任务 / 身体记录写成功后的云端异步同步（不阻塞、不改本地读写删语义）。
+ * 本地任务 / 身体：pull（登录/启动）+ push（写成功后）。
  * 全量 / 增量游标：CLOUD_FULL_SYNCED、LAST_SYNC_TASK_AT、LAST_SYNC_BODY_AT。
  */
 const STORAGE_KEYS = require("../config/storageKeys");
@@ -111,6 +111,214 @@ function logCloudFail(op, res, err) {
   const r = res && res.result;
   const msg = (r && r.errMsg) || (res && res.errMsg) || (err && (err.errMsg || err.message)) || "";
   console.warn(`[cloudDataSync] ${op} 失败`, msg || err || res);
+}
+
+function parseCloudResult(res) {
+  let raw = res && res.result;
+  if (typeof raw === "string") {
+    try {
+      raw = JSON.parse(raw);
+    } catch (e) {
+      /* ignore */
+    }
+  }
+  return raw && typeof raw === "object" ? raw : null;
+}
+
+function getTaskServerMs(task) {
+  if (!task) return 0;
+  const s = Number(task.serverUpdatedAtMs);
+  if (Number.isFinite(s) && s > 0) return s;
+  return getTaskEffectiveMs(task);
+}
+
+function getBodyServerMs(record) {
+  if (!record) return 0;
+  const s = Number(record.serverUpdatedAtMs);
+  if (Number.isFinite(s) && s > 0) return s;
+  return getBodyEffectiveMs(record);
+}
+
+function writeTasks(list) {
+  try {
+    wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, Array.isArray(list) ? list : []);
+    return true;
+  } catch (e) {
+    console.error("[cloudDataSync] writeTasks", e);
+    return false;
+  }
+}
+
+function writeBodies(list) {
+  try {
+    wx.setStorageSync(STORAGE_KEYS.BODY_RECORDS, Array.isArray(list) ? list : []);
+    return true;
+  } catch (e) {
+    console.error("[cloudDataSync] writeBodies", e);
+    return false;
+  }
+}
+
+/** 云任务 → 本地 sleep_tasks 条目（保留 serverUpdatedAtMs 供后续冲突） */
+function cloudTaskToLocal(cloudTask) {
+  if (!cloudTask || !cloudTask.id) return null;
+  const updatedAt = Number(cloudTask.updatedAt) || getTaskEffectiveMs(cloudTask) || Date.now();
+  const serverUpdatedAtMs = Number(cloudTask.serverUpdatedAtMs) || 0;
+  return {
+    id: String(cloudTask.id),
+    title: cloudTask.title != null ? String(cloudTask.title) : "",
+    content: cloudTask.content != null ? String(cloudTask.content) : "",
+    timeText: cloudTask.timeText != null ? String(cloudTask.timeText) : "",
+    dateValue: cloudTask.dateValue != null ? String(cloudTask.dateValue) : "",
+    statusText: cloudTask.statusText != null ? String(cloudTask.statusText) : "进行中",
+    done: !!cloudTask.done,
+    createdAt: cloudTask.createdAt != null ? String(cloudTask.createdAt) : "",
+    updatedAt,
+    completedAt: cloudTask.completedAt != null ? String(cloudTask.completedAt) : "",
+    reminderDate: cloudTask.reminderDate != null ? String(cloudTask.reminderDate) : "",
+    reminderTime: cloudTask.reminderTime != null ? String(cloudTask.reminderTime) : "",
+    reminderFrequency:
+      cloudTask.reminderFrequency != null ? String(cloudTask.reminderFrequency) : "不重复",
+    tags: Array.isArray(cloudTask.tags) ? cloudTask.tags : [],
+    serverUpdatedAtMs,
+  };
+}
+
+function cloudBodyToLocal(cloudRecord) {
+  if (!cloudRecord || !cloudRecord.dateKey) return null;
+  const updatedAt = Number(cloudRecord.updatedAt) || Date.now();
+  return {
+    id: cloudRecord.id != null ? String(cloudRecord.id) : `b_${updatedAt}`,
+    dateKey: String(cloudRecord.dateKey),
+    sleep: cloudRecord.sleep != null ? String(cloudRecord.sleep) : "",
+    sport: cloudRecord.sport != null ? String(cloudRecord.sport) : "",
+    signal: cloudRecord.signal != null ? String(cloudRecord.signal) : "",
+    createdAt: cloudRecord.createdAt != null ? String(cloudRecord.createdAt) : "",
+    updatedAt,
+    serverUpdatedAtMs: Number(cloudRecord.serverUpdatedAtMs) || 0,
+  };
+}
+
+/**
+ * 合并云端任务进本地（Step3：服务端时间新者胜；冲突 UI 在 Step5）
+ * @returns {boolean} 是否写入本地
+ */
+function mergeCloudTasksIntoLocal(cloudTasks) {
+  const list = Array.isArray(cloudTasks) ? cloudTasks : [];
+  if (!list.length) return false;
+  const local = readTasks();
+  const byId = Object.create(null);
+  local.forEach((t) => {
+    if (t && t.id) byId[String(t.id)] = t;
+  });
+  let changed = false;
+  list.forEach((ct) => {
+    const next = cloudTaskToLocal(ct);
+    if (!next) return;
+    const id = next.id;
+    const prev = byId[id];
+    if (!prev) {
+      byId[id] = next;
+      changed = true;
+      return;
+    }
+    if (getTaskServerMs(next) >= getTaskServerMs(prev)) {
+      byId[id] = next;
+      changed = true;
+    }
+  });
+  if (!changed) return false;
+  const merged = Object.keys(byId).map((k) => byId[k]);
+  merged.sort((a, b) => getTaskServerMs(b) - getTaskServerMs(a));
+  return writeTasks(merged);
+}
+
+function mergeCloudBodiesIntoLocal(cloudRecords) {
+  const list = Array.isArray(cloudRecords) ? cloudRecords : [];
+  if (!list.length) return false;
+  const local = readBodies();
+  const byKey = Object.create(null);
+  local.forEach((r) => {
+    if (r && r.dateKey) byKey[String(r.dateKey)] = r;
+  });
+  let changed = false;
+  list.forEach((cr) => {
+    const next = cloudBodyToLocal(cr);
+    if (!next) return;
+    const key = next.dateKey;
+    const prev = byKey[key];
+    if (!prev) {
+      byKey[key] = next;
+      changed = true;
+      return;
+    }
+    if (getBodyServerMs(next) >= getBodyServerMs(prev)) {
+      byKey[key] = next;
+      changed = true;
+    }
+  });
+  if (!changed) return false;
+  const merged = Object.keys(byKey)
+    .map((k) => byKey[k])
+    .sort((a, b) => String(b.dateKey).localeCompare(String(a.dateKey)));
+  return writeBodies(merged);
+}
+
+async function callQuickstart(type, data) {
+  if (!wx.cloud || typeof wx.cloud.callFunction !== "function") {
+    return null;
+  }
+  try {
+    const res = await wx.cloud.callFunction({
+      name: "quickstartFunctions",
+      data: Object.assign({ type }, data || {}),
+    });
+    return parseCloudResult(res);
+  } catch (e) {
+    logCloudFail(type, null, e);
+    return null;
+  }
+}
+
+async function pullTasksFromCloud() {
+  const raw = await callQuickstart("listTasks");
+  if (!raw || !raw.success) return false;
+  return mergeCloudTasksIntoLocal(raw.tasks);
+}
+
+async function pullBodiesFromCloud() {
+  const raw = await callQuickstart("listBodyRecords");
+  if (!raw || !raw.success) return false;
+  return mergeCloudBodiesIntoLocal(raw.records);
+}
+
+/** 登录/启动：先从云拉取，再 push */
+async function pullAndMergeFromCloud() {
+  if (!isCloudAvailable() || !isLoggedIn()) return;
+  if (!(await checkOnline())) return;
+  try {
+    await pullTasksFromCloud();
+    await pullBodiesFromCloud();
+  } catch (e) {
+    console.warn("[cloudDataSync] pullAndMergeFromCloud", e);
+  }
+}
+
+/** 本地删任务后异步软删云端（不阻塞 UI） */
+function deleteTaskFromCloud(taskId) {
+  const id = String(taskId || "").trim();
+  if (!id) return;
+  if (!wx.cloud || typeof wx.cloud.callFunction !== "function") return;
+  wx.cloud
+    .callFunction({
+      name: "quickstartFunctions",
+      data: { type: "deleteTask", taskId: id },
+    })
+    .then((res) => {
+      const raw = parseCloudResult(res);
+      if (!raw || !raw.success) logCloudFail("deleteTask", res, null);
+    })
+    .catch((e) => logCloudFail("deleteTask", null, e));
 }
 
 async function pushTaskToCloud(task) {
@@ -254,6 +462,7 @@ async function runFullSyncIfNeeded() {
   const bodies = readBodies();
 
   if (!tasks.length && !bodies.length) {
+    /* pull 已在 runStartupSync 先执行；仍空则标记已同步，避免新设备反复全量 push */
     writeFullSynced(true);
     writeLastTaskAt(0);
     writeLastBodyAt(0);
@@ -331,6 +540,7 @@ function runStartupSync() {
   setTimeout(() => {
     _startupQueued = false;
     Promise.resolve()
+      .then(() => pullAndMergeFromCloud())
       .then(() => runFullSyncIfNeeded())
       .then(() => runIncrementalSync())
       .then(() => {
@@ -351,9 +561,13 @@ function runIncrementalDebounced() {
 module.exports = {
   afterTaskSaved,
   afterBodySaved,
+  pullAndMergeFromCloud,
+  deleteTaskFromCloud,
   runStartupSync,
   runIncrementalSync,
   runIncrementalDebounced,
   getTaskEffectiveMs,
   getBodyEffectiveMs,
+  getTaskServerMs,
+  getBodyServerMs,
 };

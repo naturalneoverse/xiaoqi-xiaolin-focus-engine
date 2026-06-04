@@ -178,6 +178,11 @@ Page({
         } catch (e) {
           console.warn("delete task removeRecord", e);
         }
+        try {
+          require("../../utils/cloudDataSync").deleteTaskFromCloud(taskId);
+        } catch (e) {
+          console.warn("delete task cloud", e);
+        }
         this.loadTasks();
         wx.showToast({
           title: "已删除",

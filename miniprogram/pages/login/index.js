@@ -209,6 +209,14 @@ Page({
           agree: true,
         });
         await this.reportPendingReferralIfAny();
+        try {
+          const sync = require("../../utils/cloudDataSync");
+          if (sync && typeof sync.pullAndMergeFromCloud === "function") {
+            await sync.pullAndMergeFromCloud();
+          }
+        } catch (syncErr) {
+          console.warn("[login] pull after login", syncErr);
+        }
         if (!tagsComplete) {
           wx.redirectTo({
             url: "/pages/onboarding-tags/index",

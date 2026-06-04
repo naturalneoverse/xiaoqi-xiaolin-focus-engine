@@ -56,8 +56,8 @@ const LOCAL_DATA_DOMAINS = [
     clearable: true,
     clearPresets: [CLEAR_PRESET_IDS.TASKS_REFLECTION],
     discardable: false,
-    cloudSync: "push-only",
-    notes: "本地主存储；cloudDataSync 仅 push（saveTask），无 pull/delete。删任务不删哲思复盘（产品设定）。",
+    cloudSync: "push-pull",
+    notes: "listTasks/pull + saveTask + deleteTask；删任务不删哲思复盘（产品设定）。",
     manualDeleteHint: "可在「时间」页长按删除单条任务",
   },
   {
@@ -108,8 +108,8 @@ const LOCAL_DATA_DOMAINS = [
     clearable: false,
     clearPresets: [],
     discardable: false,
-    cloudSync: "push-only",
-    notes: "按 dateKey 一天一条；cloudDataSync push，无 pull。",
+    cloudSync: "push-pull",
+    notes: "按 dateKey 一天一条；listBodyRecords + saveBodyRecord（Step3 pull）。",
     manualDeleteHint: "可在「今日身体报告」等页面修改/覆盖当日记录",
   },
   {
