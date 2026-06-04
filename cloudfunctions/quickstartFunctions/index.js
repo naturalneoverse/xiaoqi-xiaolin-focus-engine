@@ -115,8 +115,11 @@ const saveUserTags = async (event) => {
 };
 
 const TASKS_COLL = "tasks";
+const TASK_STATUS_ACTIVE = "active";
+const TASK_STATUS_DELETED = "deleted";
 const BODY_RECORDS_COLL = "body_records";
 const BODY_WEEK_ARCHIVE_COLL = "body_week_archives";
+const _ = db.command;
 
 function stripUndefinedDeep(input) {
   if (input === undefined) return undefined;
@@ -142,6 +145,86 @@ function normalizeTagsForDb(tags) {
   }));
 }
 
+/** 云函数写入时生成，客户端不得覆盖 */
+function serverTimestamps() {
+  const serverUpdatedAtMs = Date.now();
+  return {
+    serverUpdatedAt: db.serverDate(),
+    serverUpdatedAtMs,
+  };
+}
+
+/**
+ * 将 DB 文档转为客户端任务形状（pull 用）
+ * @param {object} doc
+ */
+function taskDocToClient(doc) {
+  if (!doc || !doc.id) return null;
+  const clientUpdatedAt = Number(
+    doc.clientUpdatedAt != null ? doc.clientUpdatedAt : doc.updatedAt
+  );
+  return stripUndefinedDeep({
+    id: String(doc.id),
+    title: doc.title != null ? String(doc.title) : "",
+    content: doc.content != null ? String(doc.content) : "",
+    timeText: doc.timeText != null ? String(doc.timeText) : "",
+    dateValue: doc.dateValue != null ? String(doc.dateValue) : "",
+    statusText: doc.statusText != null ? String(doc.statusText) : "",
+    done: !!doc.done,
+    createdAt: doc.createdAt != null ? String(doc.createdAt) : "",
+    updatedAt: Number.isFinite(clientUpdatedAt) ? clientUpdatedAt : 0,
+    clientUpdatedAt: Number.isFinite(clientUpdatedAt) ? clientUpdatedAt : 0,
+    serverUpdatedAtMs: Number(doc.serverUpdatedAtMs) || 0,
+    completedAt: doc.completedAt != null ? String(doc.completedAt) : "",
+    reminderDate: doc.reminderDate != null ? String(doc.reminderDate) : "",
+    reminderTime: doc.reminderTime != null ? String(doc.reminderTime) : "",
+    reminderFrequency: doc.reminderFrequency != null ? String(doc.reminderFrequency) : "不重复",
+    tags: Array.isArray(doc.tags) ? doc.tags : [],
+  });
+}
+
+/**
+ * @param {object} task 客户端 taskDoc
+ * @param {string} openid
+ */
+function buildTaskDbPayload(task, openid) {
+  const clientUpdatedAt = Number(task.updatedAt);
+  if (!Number.isFinite(clientUpdatedAt)) {
+    return { errMsg: "invalid updatedAt" };
+  }
+  const titleRaw = task.title != null ? String(task.title) : "";
+  const title = titleRaw.trim() || "未命名任务";
+  const statusRaw = task.statusText != null ? String(task.statusText) : "";
+  const statusText = statusRaw.trim() || "进行中";
+  let createdAt = task.createdAt != null ? String(task.createdAt) : "";
+  if (!createdAt.trim()) {
+    createdAt = new Date(clientUpdatedAt).toISOString().slice(0, 16).replace("T", " ");
+  }
+  const tags = normalizeTagsForDb(Array.isArray(task.tags) ? task.tags : []);
+  const stamps = serverTimestamps();
+  const data = stripUndefinedDeep({
+    openid,
+    id: task.id.trim(),
+    title,
+    content: task.content != null ? String(task.content) : "",
+    timeText: task.timeText != null ? String(task.timeText) : "",
+    dateValue: task.dateValue != null ? String(task.dateValue) : "",
+    statusText,
+    done: !!task.done,
+    createdAt,
+    updatedAt: clientUpdatedAt,
+    clientUpdatedAt,
+    completedAt: task.completedAt != null ? String(task.completedAt) : "",
+    reminderDate: task.reminderDate != null ? String(task.reminderDate) : "",
+    reminderTime: task.reminderTime != null ? String(task.reminderTime) : "",
+    reminderFrequency: task.reminderFrequency != null ? String(task.reminderFrequency) : "不重复",
+    tags,
+    status: TASK_STATUS_ACTIVE,
+    ...stamps,
+  });
+  return { data, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
+}
+
 const saveTask = async (event) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
@@ -153,44 +236,80 @@ const saveTask = async (event) => {
   if (!task || typeof task.id !== "string" || !task.id.trim()) {
     return { success: false, errMsg: "missing task.id" };
   }
-  const updatedAt = Number(task.updatedAt);
-  if (!Number.isFinite(updatedAt)) {
-    return { success: false, errMsg: "invalid updatedAt" };
+  const built = buildTaskDbPayload(task, openid);
+  if (built.errMsg) {
+    return { success: false, errMsg: built.errMsg };
   }
-  const titleRaw = task.title != null ? String(task.title) : "";
-  const title = titleRaw.trim() || "未命名任务";
-  const statusRaw = task.statusText != null ? String(task.statusText) : "";
-  const statusText = statusRaw.trim() || "进行中";
-  let createdAt = task.createdAt != null ? String(task.createdAt) : "";
-  if (!createdAt.trim()) {
-    createdAt = new Date(updatedAt).toISOString().slice(0, 16).replace("T", " ");
-  }
-  const tags = normalizeTagsForDb(Array.isArray(task.tags) ? task.tags : []);
-  const data = stripUndefinedDeep({
-    openid,
-    id: task.id.trim(),
-    title,
-    content: task.content != null ? String(task.content) : "",
-    timeText: task.timeText != null ? String(task.timeText) : "",
-    dateValue: task.dateValue != null ? String(task.dateValue) : "",
-    statusText,
-    done: !!task.done,
-    createdAt,
-    updatedAt,
-    completedAt: task.completedAt != null ? String(task.completedAt) : "",
-    reminderDate: task.reminderDate != null ? String(task.reminderDate) : "",
-    reminderTime: task.reminderTime != null ? String(task.reminderTime) : "",
-    reminderFrequency: task.reminderFrequency != null ? String(task.reminderFrequency) : "不重复",
-    tags,
-  });
+  const { data, serverUpdatedAtMs } = built;
   try {
     const existed = await db.collection(TASKS_COLL).where({ openid, id: data.id }).limit(1).get();
     if (existed.data && existed.data[0]) {
-      await db.collection(TASKS_COLL).doc(existed.data[0]._id).update({ data });
+      await db.collection(TASKS_COLL).doc(existed.data[0]._id).update({
+        data: {
+          ...data,
+          deletedAt: _.remove(),
+          deletedAtMs: _.remove(),
+        },
+      });
     } else {
       await db.collection(TASKS_COLL).add({ data });
     }
-    return { success: true };
+    return { success: true, serverUpdatedAtMs };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+const listTasks = async () => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid", tasks: [] };
+  }
+  try {
+    const res = await db
+      .collection(TASKS_COLL)
+      .where({
+        openid,
+        status: _.neq(TASK_STATUS_DELETED),
+      })
+      .limit(500)
+      .get();
+    const rows = (res.data || [])
+      .map(taskDocToClient)
+      .filter(Boolean);
+    return { success: true, tasks: rows, serverTimeMs: Date.now() };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e), tasks: [] };
+  }
+};
+
+const deleteTask = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  const taskId = String((event && (event.taskId || event.id)) || "").trim();
+  if (!taskId) {
+    return { success: false, errMsg: "missing taskId" };
+  }
+  const stamps = serverTimestamps();
+  try {
+    const existed = await db.collection(TASKS_COLL).where({ openid, id: taskId }).limit(1).get();
+    if (!existed.data || !existed.data[0]) {
+      return { success: true, skipped: true, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
+    }
+    await db.collection(TASKS_COLL).doc(existed.data[0]._id).update({
+      data: {
+        status: TASK_STATUS_DELETED,
+        deletedAt: stamps.serverUpdatedAt,
+        deletedAtMs: stamps.serverUpdatedAtMs,
+        serverUpdatedAt: stamps.serverUpdatedAt,
+        serverUpdatedAtMs: stamps.serverUpdatedAtMs,
+      },
+    });
+    return { success: true, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
   } catch (e) {
     return { success: false, errMsg: e && e.message ? e.message : String(e) };
   }
@@ -641,6 +760,10 @@ exports.main = async (event, context) => {
       return await getPosterBgUrl(event);
     case "saveTask":
       return await saveTask(event);
+    case "listTasks":
+      return await listTasks();
+    case "deleteTask":
+      return await deleteTask(event);
     case "saveBodyRecord":
       return await saveBodyRecord(event);
     case "saveBodyWeekArchive":
