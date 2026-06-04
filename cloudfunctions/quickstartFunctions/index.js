@@ -117,6 +117,11 @@ const saveUserTags = async (event) => {
 const TASKS_COLL = "tasks";
 const TASK_STATUS_ACTIVE = "active";
 const TASK_STATUS_DELETED = "deleted";
+/** 哲思作答：每个 openid + taskId + quadrantId(1-4) 一条 */
+const REFLECTION_QUADRANTS_COLL = "reflection_quadrants";
+const REFLECTION_STATUS_ACTIVE = "active";
+const REFLECTION_STATUS_DELETED = "deleted";
+const VALID_REFLECTION_QUADRANT_IDS = [1, 2, 3, 4];
 const BODY_RECORDS_COLL = "body_records";
 const BODY_WEEK_ARCHIVE_COLL = "body_week_archives";
 const _ = db.command;
@@ -312,6 +317,256 @@ const deleteTask = async (event) => {
     return { success: true, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
   } catch (e) {
     return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+function isValidReflectionQuadrantId(id) {
+  const n = Number(id);
+  return VALID_REFLECTION_QUADRANT_IDS.includes(n);
+}
+
+function normalizeCardResponses(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item) => {
+    if (!item || typeof item !== "object") return null;
+    const type = item.type != null ? String(item.type) : "";
+    const out = { type };
+    if (item.text != null) out.text = String(item.text);
+    if (item.selected != null) {
+      out.selected = Array.isArray(item.selected) ? item.selected.map(String) : String(item.selected);
+    }
+    if (item.label != null) out.label = String(item.label);
+    if (item.experience != null) out.experience = String(item.experience);
+    if (item.feeling != null) out.feeling = String(item.feeling);
+    if (item.decision != null) out.decision = String(item.decision);
+    return out;
+  }).filter(Boolean);
+}
+
+/**
+ * 将象限文档聚合成客户端 ReflectionRecord[]
+ * @param {object[]} docs
+ */
+function aggregateQuadrantDocsToRecords(docs) {
+  const byTask = Object.create(null);
+  (docs || []).forEach((doc) => {
+    if (!doc || doc.status === REFLECTION_STATUS_DELETED) return;
+    const taskId = String(doc.taskId || "").trim();
+    const qid = Number(doc.quadrantId);
+    if (!taskId || !isValidReflectionQuadrantId(qid)) return;
+
+    let rec = byTask[taskId];
+    if (!rec) {
+      rec = {
+        taskId,
+        taskTitle: String(doc.taskTitle || "未命名任务"),
+        quadrants: {},
+        createdAt: Number(doc.recordCreatedAt) || Number(doc.completedAtMs) || 0,
+        updatedAt: 0,
+        latestCompletedAt: "",
+        latestCompletedAtMs: 0,
+        _maxServerMs: 0,
+      };
+      byTask[taskId] = rec;
+    }
+
+    const serverMs = Number(doc.serverUpdatedAtMs) || 0;
+    if (serverMs >= rec._maxServerMs) {
+      rec._maxServerMs = serverMs;
+      if (doc.taskTitle) rec.taskTitle = String(doc.taskTitle);
+    }
+
+    const recordUpdatedAt = Number(doc.recordUpdatedAt) || Number(doc.completedAtMs) || 0;
+    if (recordUpdatedAt > rec.updatedAt) rec.updatedAt = recordUpdatedAt;
+    const recordCreatedAt = Number(doc.recordCreatedAt) || Number(doc.completedAtMs) || 0;
+    if (!rec.createdAt || recordCreatedAt < rec.createdAt) rec.createdAt = recordCreatedAt;
+
+    const completedAtMs = Number(doc.completedAtMs) || 0;
+    if (completedAtMs >= rec.latestCompletedAtMs) {
+      rec.latestCompletedAtMs = completedAtMs;
+      rec.latestCompletedAt =
+        doc.latestCompletedAt != null ? String(doc.latestCompletedAt) : String(doc.completedAt || "");
+    }
+
+    rec.quadrants[String(qid)] = {
+      cardResponses: normalizeCardResponses(doc.cardResponses),
+      completedAt: doc.completedAt != null ? String(doc.completedAt) : "",
+      completedAtMs,
+    };
+  });
+
+  return Object.keys(byTask)
+    .map((taskId) => {
+      const rec = byTask[taskId];
+      delete rec._maxServerMs;
+      return stripUndefinedDeep(rec);
+    })
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+}
+
+const saveReflectionQuadrant = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  const e = event || {};
+  const taskId = String(e.taskId || "").trim();
+  const quadrantId = Number(e.quadrantId);
+  if (!taskId) {
+    return { success: false, errMsg: "missing taskId" };
+  }
+  if (!isValidReflectionQuadrantId(quadrantId)) {
+    return { success: false, errMsg: "invalid quadrantId" };
+  }
+  const completedAtMs = Number(e.completedAtMs);
+  if (!Number.isFinite(completedAtMs) || completedAtMs <= 0) {
+    return { success: false, errMsg: "invalid completedAtMs" };
+  }
+  const cardResponses = normalizeCardResponses(e.cardResponses);
+  const stamps = serverTimestamps();
+  const recordUpdatedAt = Number(e.recordUpdatedAt);
+  const recordCreatedAt = Number(e.recordCreatedAt);
+  const data = stripUndefinedDeep({
+    openid,
+    taskId,
+    quadrantId,
+    taskTitle: String(e.taskTitle || "未命名任务"),
+    cardResponses,
+    completedAt: e.completedAt != null ? String(e.completedAt) : "",
+    completedAtMs,
+    clientCompletedAtMs: completedAtMs,
+    recordCreatedAt: Number.isFinite(recordCreatedAt) ? recordCreatedAt : completedAtMs,
+    recordUpdatedAt: Number.isFinite(recordUpdatedAt) ? recordUpdatedAt : completedAtMs,
+    latestCompletedAt: e.latestCompletedAt != null ? String(e.latestCompletedAt) : "",
+    latestCompletedAtMs: Number(e.latestCompletedAtMs) || completedAtMs,
+    status: REFLECTION_STATUS_ACTIVE,
+    ...stamps,
+  });
+  try {
+    const existed = await db
+      .collection(REFLECTION_QUADRANTS_COLL)
+      .where({ openid, taskId, quadrantId })
+      .limit(1)
+      .get();
+    if (existed.data && existed.data[0]) {
+      await db.collection(REFLECTION_QUADRANTS_COLL).doc(existed.data[0]._id).update({
+        data: {
+          ...data,
+          deletedAt: _.remove(),
+          deletedAtMs: _.remove(),
+        },
+      });
+    } else {
+      await db.collection(REFLECTION_QUADRANTS_COLL).add({ data });
+    }
+    return { success: true, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
+  } catch (err) {
+    return { success: false, errMsg: err && err.message ? err.message : String(err) };
+  }
+};
+
+const listReflectionRecords = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid", records: [] };
+  }
+  const taskIdFilter = String((event && event.taskId) || "").trim();
+  try {
+    const where = {
+      openid,
+      status: _.neq(REFLECTION_STATUS_DELETED),
+    };
+    if (taskIdFilter) where.taskId = taskIdFilter;
+    const res = await db.collection(REFLECTION_QUADRANTS_COLL).where(where).limit(500).get();
+    const records = aggregateQuadrantDocsToRecords(res.data || []);
+    return { success: true, records, serverTimeMs: Date.now() };
+  } catch (err) {
+    return {
+      success: false,
+      errMsg: err && err.message ? err.message : String(err),
+      records: [],
+    };
+  }
+};
+
+const deleteReflectionQuadrant = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  const taskId = String((event && event.taskId) || "").trim();
+  const quadrantId = Number(event && event.quadrantId);
+  if (!taskId) {
+    return { success: false, errMsg: "missing taskId" };
+  }
+  if (!isValidReflectionQuadrantId(quadrantId)) {
+    return { success: false, errMsg: "invalid quadrantId" };
+  }
+  const stamps = serverTimestamps();
+  try {
+    const existed = await db
+      .collection(REFLECTION_QUADRANTS_COLL)
+      .where({ openid, taskId, quadrantId })
+      .limit(1)
+      .get();
+    if (!existed.data || !existed.data[0]) {
+      return { success: true, skipped: true, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
+    }
+    await db.collection(REFLECTION_QUADRANTS_COLL).doc(existed.data[0]._id).update({
+      data: {
+        status: REFLECTION_STATUS_DELETED,
+        deletedAt: stamps.serverUpdatedAt,
+        deletedAtMs: stamps.serverUpdatedAtMs,
+        serverUpdatedAt: stamps.serverUpdatedAt,
+        serverUpdatedAtMs: stamps.serverUpdatedAtMs,
+      },
+    });
+    return { success: true, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
+  } catch (err) {
+    return { success: false, errMsg: err && err.message ? err.message : String(err) };
+  }
+};
+
+const purgeReflectionTask = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  const taskId = String((event && event.taskId) || "").trim();
+  if (!taskId) {
+    return { success: false, errMsg: "missing taskId" };
+  }
+  const stamps = serverTimestamps();
+  try {
+    const res = await db
+      .collection(REFLECTION_QUADRANTS_COLL)
+      .where({ openid, taskId, status: _.neq(REFLECTION_STATUS_DELETED) })
+      .limit(20)
+      .get();
+    const rows = res.data || [];
+    if (!rows.length) {
+      return { success: true, purged: 0, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
+    }
+    await Promise.all(
+      rows.map((row) =>
+        db.collection(REFLECTION_QUADRANTS_COLL).doc(row._id).update({
+          data: {
+            status: REFLECTION_STATUS_DELETED,
+            deletedAt: stamps.serverUpdatedAt,
+            deletedAtMs: stamps.serverUpdatedAtMs,
+            serverUpdatedAt: stamps.serverUpdatedAt,
+            serverUpdatedAtMs: stamps.serverUpdatedAtMs,
+          },
+        })
+      )
+    );
+    return { success: true, purged: rows.length, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
+  } catch (err) {
+    return { success: false, errMsg: err && err.message ? err.message : String(err) };
   }
 };
 
@@ -764,6 +1019,14 @@ exports.main = async (event, context) => {
       return await listTasks();
     case "deleteTask":
       return await deleteTask(event);
+    case "saveReflectionQuadrant":
+      return await saveReflectionQuadrant(event);
+    case "listReflectionRecords":
+      return await listReflectionRecords(event);
+    case "deleteReflectionQuadrant":
+      return await deleteReflectionQuadrant(event);
+    case "purgeReflectionTask":
+      return await purgeReflectionTask(event);
     case "saveBodyRecord":
       return await saveBodyRecord(event);
     case "saveBodyWeekArchive":

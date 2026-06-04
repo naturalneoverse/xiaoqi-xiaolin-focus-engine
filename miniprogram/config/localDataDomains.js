@@ -67,8 +67,8 @@ const LOCAL_DATA_DOMAINS = [
     clearable: true,
     clearPresets: [CLEAR_PRESET_IDS.TASKS_REFLECTION],
     discardable: false,
-    cloudSync: "none",
-    notes: "按 taskId 聚合四象限；与任务生命周期解耦。用户可在哲思列表长按手动删除。",
+    cloudSync: "push-pull",
+    notes: "按 taskId 聚合四象限；云集合 reflection_quadrants（Step2 API）。与任务生命周期解耦。用户可在哲思列表长按手动删除。",
     manualDeleteHint: "可在「哲思」列表长按删除单条复盘",
   },
   {
