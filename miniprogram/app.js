@@ -507,6 +507,7 @@ App({
     const opt = options || {};
     const markCustomized = opt.markCustomized !== false;
     const syncUserInfo = opt.syncUserInfo !== false;
+    const skipCloudPush = opt.skipCloudPush === true;
     if (Object.prototype.hasOwnProperty.call(patch, "nickname")) {
       patch.nickname = clampNickname(patch.nickname != null ? String(patch.nickname) : "");
     }
@@ -516,6 +517,7 @@ App({
     const nextProfile = {
       ...previous,
       ...patch,
+      updatedAtMs: Date.now(),
     };
     try {
       wx.setStorageSync(STORAGE_KEYS.USER_PROFILE, nextProfile);
@@ -533,6 +535,16 @@ App({
           page.onGlobalUserProfileChange(nextProfile);
         }
       });
+      if (!skipCloudPush && this.globalData && this.globalData.hasLoggedIn) {
+        try {
+          const profileCloudSync = require("./utils/profileCloudSync");
+          if (profileCloudSync && typeof profileCloudSync.schedulePushUserProfile === "function") {
+            profileCloudSync.schedulePushUserProfile();
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      }
       return true;
     } catch (e) {
       return false;

@@ -8,6 +8,10 @@ Page({
     sections: [],
     empty: true,
     suppressTapOnce: false,
+    /** idle | syncing | ready | error */
+    syncState: "idle",
+    syncBanner: false,
+    syncHint: "",
   },
 
   onLoad() {
@@ -16,12 +20,75 @@ Page({
 
   onShow() {
     applyReflectionNavBar();
-    this._loadList();
+    this._applyListFromLocal();
+    this._startCloudSync();
   },
 
-  _loadList() {
+  _applyListFromLocal() {
     const { sections, empty } = buildGroupedReflectionList(new Date());
-    this.setData({ sections, empty });
+    const hasLocal = !empty;
+    this.setData({
+      sections,
+      empty: hasLocal ? false : this.data.empty,
+      syncState: hasLocal ? "ready" : "syncing",
+      syncBanner: hasLocal,
+      syncHint: hasLocal ? "正在同步云端…" : "正在加载复盘记录…",
+    });
+  },
+
+  _startCloudSync() {
+    if (this._syncRunning) return;
+    this._syncRunning = true;
+    let sync = Promise.resolve({ ok: false });
+    try {
+      const reflectionCloudSync = require("../../utils/reflectionCloudSync");
+      if (reflectionCloudSync && typeof reflectionCloudSync.syncReflectionReportPage === "function") {
+        sync = reflectionCloudSync.syncReflectionReportPage();
+      }
+    } catch (e) {
+      console.warn("[reflection-list] sync", e);
+    }
+    sync
+      .then((r) => {
+        const { sections, empty } = buildGroupedReflectionList(new Date());
+        const ok = !!(r && (r.ok || !empty));
+        let syncHint = "";
+        if (r && r.listSource === "reflection_ark_cache") {
+          syncHint =
+            "列表来自回响缓存；完整作答同步中。请在手机打开本页以补全云端作答。";
+        } else if (r && r.failed > 0) {
+          syncHint = `部分记录未上传云端（${r.failed} 条），请检查网络后重试。`;
+        }
+        this.setData({
+          sections,
+          empty,
+          syncState: ok || !empty ? "ready" : "error",
+          syncBanner: false,
+          syncHint,
+        });
+      })
+      .catch(() => {
+        const { sections, empty } = buildGroupedReflectionList(new Date());
+        this.setData({
+          sections,
+          empty,
+          syncState: empty ? "error" : "ready",
+          syncBanner: false,
+          syncHint: "同步失败，请检查网络后重试",
+        });
+      })
+      .finally(() => {
+        this._syncRunning = false;
+      });
+  },
+
+  onRetrySync() {
+    this.setData({
+      syncState: "syncing",
+      syncHint: "正在重新同步…",
+      syncBanner: false,
+    });
+    this._startCloudSync();
   },
 
   onTapRecord(e) {
@@ -54,7 +121,7 @@ Page({
           wx.showToast({ title: "未找到该记录", icon: "none" });
           return;
         }
-        this._loadList();
+        this._applyListFromLocal();
         wx.showToast({ title: "已删除", icon: "success", duration: 1200 });
       },
     });

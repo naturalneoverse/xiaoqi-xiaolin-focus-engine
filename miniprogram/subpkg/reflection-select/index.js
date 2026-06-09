@@ -85,6 +85,14 @@ Page({
   },
 
   onShow() {
+    try {
+      const syncConflict = require("../../utils/syncConflict");
+      if (syncConflict.hasConflicts()) {
+        syncConflict.tryShowPendingConflicts();
+      }
+    } catch (e) {
+      /* ignore */
+    }
     applyReflectionNavBar();
     this._refreshSelectState();
   },

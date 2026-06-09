@@ -12,6 +12,50 @@
   padding: 24rpx 32rpx 0;
 }
 
+.list-sync-banner {
+  margin-bottom: 20rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 16rpx;
+  background: rgba(18, 89, 143, 0.08);
+}
+
+.list-sync-banner-text {
+  font-size: 24rpx;
+  color: #2a6a9a;
+  line-height: 1.5;
+}
+
+.list-syncing {
+  margin-top: 160rpx;
+  padding: 0 32rpx;
+  text-align: center;
+}
+
+.list-syncing-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #184061;
+}
+
+.list-syncing-desc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: #8a9cb0;
+  line-height: 1.55;
+}
+
+.list-retry-btn {
+  display: inline-block;
+  margin-top: 28rpx;
+  padding: 16rpx 40rpx;
+  border-radius: 999rpx;
+  background: #12598f;
+  color: #fff;
+  font-size: 28rpx;
+}
+
 .list-empty {
   margin-top: 160rpx;
   padding: 0 32rpx;

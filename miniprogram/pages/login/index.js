@@ -214,6 +214,10 @@ Page({
           if (sync && typeof sync.pullAndMergeFromCloud === "function") {
             await sync.pullAndMergeFromCloud();
           }
+          const reflectionCloudSync = require("../../utils/reflectionCloudSync");
+          if (reflectionCloudSync && typeof reflectionCloudSync.pushAllLocalQuadrantsToCloud === "function") {
+            await reflectionCloudSync.pushAllLocalQuadrantsToCloud();
+          }
         } catch (syncErr) {
           console.warn("[login] pull after login", syncErr);
         }

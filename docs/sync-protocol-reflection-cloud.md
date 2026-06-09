@@ -1,6 +1,8 @@
 # 哲思象限作答云 API（Step 2）
 
-集合：`reflection_quadrants`（需在云控制台创建；建议索引 `openid` + `taskId` + `quadrantId`）
+集合：`reflection_quadrants`（**多端同步作答必建**；建议索引 `openid` + `taskId` + `quadrantId`）
+
+> `reflection_ark_cache` 仅为小麒小麟「回响」缓存，**不能**代替 `reflection_quadrants`。控制台若只有 ark_cache，电脑端列表会为空；1.3.2+ 云函数在 quadrants 为空时会用 ark_cache 拼**列表占位**，完整作答仍需手机 push 到 `reflection_quadrants`。
 
 每条文档 = 一个用户 + 一个任务 + 一个象限（1–4）。
 

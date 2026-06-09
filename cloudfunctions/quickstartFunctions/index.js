@@ -13,6 +13,8 @@ cloud.init({
 const db = cloud.database();
 
 const USER_TAGS_COLL = "user_tags";
+/** 昵称 / 签名 / 头像 fileID，按 openid 一条 */
+const USER_PROFILES_COLL = "user_profiles";
 const VALID_GENDER = new Set(["she", "he", "na"]);
 const VALID_STAGE = new Set(["starting", "pushing", "halfway", "enjoying"]);
 const VALID_ROLES = new Set([
@@ -63,6 +65,74 @@ const getUserTags = async () => {
     return { success: true, tagsComplete, profile };
   } catch (e) {
     return { success: false, errMsg: e && e.message ? e.message : String(e), tagsComplete: false };
+  }
+};
+
+const getUserProfileCloud = async () => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid", profile: null };
+  }
+  try {
+    const res = await db.collection(USER_PROFILES_COLL).where({ openid }).limit(1).get();
+    const doc = res.data && res.data[0];
+    if (!doc) {
+      return { success: true, profile: null, serverTimeMs: Date.now() };
+    }
+    return {
+      success: true,
+      profile: {
+        nickname: doc.nickname != null ? String(doc.nickname) : "",
+        signature: doc.signature != null ? String(doc.signature) : "",
+        avatarUrl: doc.avatarUrl != null ? String(doc.avatarUrl) : "",
+        customized: !!doc.customized,
+        updatedAtMs: Number(doc.updatedAtMs) || 0,
+      },
+      serverTimeMs: Date.now(),
+    };
+  } catch (e) {
+    return {
+      success: false,
+      errMsg: e && e.message ? e.message : String(e),
+      profile: null,
+    };
+  }
+};
+
+const saveUserProfileCloud = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  const p = (event && event.profile) || event || {};
+  const nickname = p.nickname != null ? String(p.nickname).trim() : "";
+  const signature = p.signature != null ? String(p.signature) : "";
+  const avatarUrl = p.avatarUrl != null ? String(p.avatarUrl) : "";
+  const customized = !!p.customized;
+  const updatedAtMs = Number(p.updatedAtMs) || Date.now();
+  const stamps = serverTimestamps();
+  const data = {
+    openid,
+    nickname,
+    signature,
+    avatarUrl,
+    customized,
+    updatedAtMs,
+    serverUpdatedAtMs: stamps.serverUpdatedAtMs,
+    serverUpdatedAt: stamps.serverUpdatedAt,
+  };
+  try {
+    const existed = await db.collection(USER_PROFILES_COLL).where({ openid }).limit(1).get();
+    if (existed.data && existed.data[0]) {
+      await db.collection(USER_PROFILES_COLL).doc(existed.data[0]._id).update({ data });
+    } else {
+      await db.collection(USER_PROFILES_COLL).add({ data });
+    }
+    return { success: true, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e) };
   }
 };
 
@@ -119,6 +189,7 @@ const TASK_STATUS_ACTIVE = "active";
 const TASK_STATUS_DELETED = "deleted";
 /** 哲思作答：每个 openid + taskId + quadrantId(1-4) 一条 */
 const REFLECTION_QUADRANTS_COLL = "reflection_quadrants";
+const REFLECTION_ARK_CACHE_COLL = "reflection_ark_cache";
 const REFLECTION_STATUS_ACTIVE = "active";
 const REFLECTION_STATUS_DELETED = "deleted";
 const VALID_REFLECTION_QUADRANT_IDS = [1, 2, 3, 4];
@@ -249,7 +320,16 @@ const saveTask = async (event) => {
   try {
     const existed = await db.collection(TASKS_COLL).where({ openid, id: data.id }).limit(1).get();
     if (existed.data && existed.data[0]) {
-      await db.collection(TASKS_COLL).doc(existed.data[0]._id).update({
+      const prev = existed.data[0];
+      if (prev.status === TASK_STATUS_DELETED) {
+        return {
+          success: false,
+          errMsg: "task_deleted",
+          rejected: true,
+          serverUpdatedAtMs: Number(prev.serverUpdatedAtMs) || serverUpdatedAtMs,
+        };
+      }
+      await db.collection(TASKS_COLL).doc(prev._id).update({
         data: {
           ...data,
           deletedAt: _.remove(),
@@ -392,6 +472,7 @@ function aggregateQuadrantDocsToRecords(docs) {
       cardResponses: normalizeCardResponses(doc.cardResponses),
       completedAt: doc.completedAt != null ? String(doc.completedAt) : "",
       completedAtMs,
+      serverUpdatedAtMs: serverMs,
     };
   });
 
@@ -466,6 +547,79 @@ const saveReflectionQuadrant = async (event) => {
   }
 };
 
+/**
+ * reflection_quadrants 为空时，用 reflection_ark_cache + 用户 tasks 拼出列表（仅 completedAtMs，无完整作答）
+ */
+async function buildReflectionRecordsFromArkCache(openid) {
+  const tasksRes = await db
+    .collection(TASKS_COLL)
+    .where({
+      openid,
+      status: _.neq(TASK_STATUS_DELETED),
+    })
+    .limit(500)
+    .get();
+  const taskTitles = Object.create(null);
+  (tasksRes.data || []).forEach((t) => {
+    if (t && t.id) taskTitles[String(t.id)] = String(t.title || "未命名任务");
+  });
+  const allowedIds = Object.keys(taskTitles);
+  if (!allowedIds.length) return [];
+
+  let cacheRows = [];
+  try {
+    const cacheRes = await db.collection(REFLECTION_ARK_CACHE_COLL).limit(500).get();
+    cacheRows = cacheRes.data || [];
+  } catch (e) {
+    return [];
+  }
+
+  const byTask = Object.create(null);
+  cacheRows.forEach((doc) => {
+    const taskId = String(doc.taskId || "").trim();
+    if (!taskId || !taskTitles[taskId]) return;
+    const qid = Number(doc.quadrantId);
+    if (!isValidReflectionQuadrantId(qid)) return;
+    const createdMs = doc.createdAt ? new Date(doc.createdAt).getTime() : 0;
+    const completedAtMs =
+      Number.isFinite(createdMs) && createdMs > 0 ? createdMs : Date.now();
+
+    let rec = byTask[taskId];
+    if (!rec) {
+      rec = {
+        taskId,
+        taskTitle: taskTitles[taskId],
+        quadrants: {},
+        createdAt: completedAtMs,
+        updatedAt: completedAtMs,
+        latestCompletedAt: "",
+        latestCompletedAtMs: 0,
+      };
+      byTask[taskId] = rec;
+    }
+
+    const key = String(qid);
+    const prev = rec.quadrants[key];
+    if (!prev || completedAtMs >= (prev.completedAtMs || 0)) {
+      rec.quadrants[key] = {
+        cardResponses: [],
+        completedAt: "",
+        completedAtMs,
+        serverUpdatedAtMs: completedAtMs,
+      };
+    }
+    if (completedAtMs > rec.latestCompletedAtMs) {
+      rec.latestCompletedAtMs = completedAtMs;
+      rec.updatedAt = Math.max(rec.updatedAt || 0, completedAtMs);
+    }
+    if (completedAtMs < rec.createdAt) rec.createdAt = completedAtMs;
+  });
+
+  return Object.keys(byTask)
+    .map((k) => stripUndefinedDeep(byTask[k]))
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+}
+
 const listReflectionRecords = async (event) => {
   const wxContext = cloud.getWXContext();
   const openid = wxContext.OPENID;
@@ -480,8 +634,13 @@ const listReflectionRecords = async (event) => {
     };
     if (taskIdFilter) where.taskId = taskIdFilter;
     const res = await db.collection(REFLECTION_QUADRANTS_COLL).where(where).limit(500).get();
-    const records = aggregateQuadrantDocsToRecords(res.data || []);
-    return { success: true, records, serverTimeMs: Date.now() };
+    let records = aggregateQuadrantDocsToRecords(res.data || []);
+    let listSource = "reflection_quadrants";
+    if (!records.length) {
+      records = await buildReflectionRecordsFromArkCache(openid);
+      if (records.length) listSource = "reflection_ark_cache";
+    }
+    return { success: true, records, serverTimeMs: Date.now(), listSource };
   } catch (err) {
     return {
       success: false,
@@ -1030,6 +1189,10 @@ exports.main = async (event, context) => {
       return await getUserTags();
     case "saveUserTags":
       return await saveUserTags(event);
+    case "getUserProfile":
+      return await getUserProfileCloud();
+    case "saveUserProfile":
+      return await saveUserProfileCloud(event);
     case "getOpenId":
       return await getOpenId();
     case "getMiniProgramCode":

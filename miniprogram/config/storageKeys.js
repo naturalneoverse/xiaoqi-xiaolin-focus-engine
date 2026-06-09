@@ -30,6 +30,12 @@ const STORAGE_KEYS = {
   REFLECTION_RECORDS: "reflection_records",
   /** 身体边界周报周存档 { version, weeks: { [weekMondayKey]: ArchiveEntry } } */
   BODY_WEEK_ARCHIVE_V1: "body_week_archive_v1",
+  /** 同步基准：任务/哲思象限 hash + serverUpdatedAtMs */
+  SYNC_BASE_V1: "sync_base_v1",
+  /** 待用户选择的同步冲突队列 */
+  SYNC_CONFLICTS_V1: "sync_conflicts_v1",
+  /** 本机已删且应阻止再 push 的任务 id → deletedAtMs */
+  SYNC_TASK_TOMBSTONES_V1: "sync_task_tombstones_v1",
 };
 
 module.exports = STORAGE_KEYS;

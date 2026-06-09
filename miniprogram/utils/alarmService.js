@@ -6,6 +6,7 @@
 const alarmPermission = require("./alarmPermission");
 const reminderSchedule = require("./reminderSchedule");
 const { showCalendarNotifyGuideModal } = require("./calendarNotifyGuide");
+const deviceEnv = require("./deviceEnv");
 
 const CAL_DESCRIPTION = "由小麒小麟专注引擎创建";
 const MAX_RANGE_DAYS = 90;
@@ -54,6 +55,10 @@ function ensurePrivacyAuthorizeIfNeeded() {
 }
 
 async function ensureCalendarReady() {
+  if (deviceEnv.isDesktopWechat()) {
+    await deviceEnv.showMobileOnlyModal({ feature: "日历提醒" });
+    return false;
+  }
   const privOk = await ensurePrivacyAuthorizeIfNeeded();
   if (!privOk) return false;
   return alarmPermission.ensureAddPhoneCalendarPermission();
@@ -219,6 +224,11 @@ function scheduleAlarm(hour, minute, day, title) {
       const safeTitle = String(title || "提醒").trim() || "提醒";
       const startSec = Math.floor(fire.getTime() / 1000);
 
+      if (deviceEnv.isDesktopWechat()) {
+        deviceEnv.showMobileOnlyModal({ feature: "日历提醒" }).then(() => resolve(false));
+        return;
+      }
+
       if (typeof wx.setAlarmClock === "function") {
         alarmPermission.ensureAlarmPermission().then((alarmOk) => {
           if (!alarmOk) {
@@ -262,6 +272,10 @@ function scheduleAlarm(hour, minute, day, title) {
  * @returns {Promise<{ ok: boolean, mode?: string, days?: string[], fingerprint?: object, created?: number, failed?: number }>}
  */
 async function scheduleDailyRange(opts) {
+  if (deviceEnv.isDesktopWechat()) {
+    await deviceEnv.showMobileOnlyModal({ feature: "日历提醒" });
+    return { ok: false };
+  }
   const o = opts || {};
   const h = Number(o.hour);
   const m = Number(o.minute);

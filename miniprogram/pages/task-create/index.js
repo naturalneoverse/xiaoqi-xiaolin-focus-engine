@@ -8,6 +8,7 @@ const { goSleepHome } = require("../../utils/goTabHome");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { scheduleReminder } = require("../../utils/reminderManager");
 const reminderSchedule = require("../../utils/reminderSchedule");
+const deviceEnv = require("../../utils/deviceEnv");
 const speechRecognition = require("../../utils/speechRecognition");
 
 function formatDateRangeText(startDate, endDate) {
@@ -454,8 +455,17 @@ Page({
         showReminderModal: false,
         reminderText,
         reminderDate,
+        reminderTime,
+        reminderFrequency: freq,
+        reminderFrequencyIndex: freq === "每天" ? 1 : 0,
       });
     };
+
+    if (deviceEnv.isDesktopWechat()) {
+      finish();
+      deviceEnv.showMobileOnlyModal({ feature: "日历提醒" });
+      return;
+    }
 
     const titleBase = `${stripTaskNameNewlines(taskName).trim() || "任务"} 提醒`;
     if (this._reminderScheduling) return;

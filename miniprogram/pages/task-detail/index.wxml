@@ -60,6 +60,7 @@
         <view class="reminder-picker tap-target">{{reminderFrequency}}</view>
       </picker>
     </view>
+    <text class="reminder-hint">提醒写入本设备系统日历；换手机或电脑后需重新确认，删除任务不会自动取消日历条目。</text>
   </view>
 
   <view wx:if="{{showReflectionBtn}}" class="reflection-entry-wrap">

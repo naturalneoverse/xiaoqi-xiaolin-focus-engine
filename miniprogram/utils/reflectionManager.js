@@ -88,6 +88,11 @@ function upsertQuadrant(taskId, taskTitle, quadrantId, payload) {
   }
   next.unshift(record);
   writeAll(next);
+  try {
+    require("./reflectionCloudSync").schedulePushQuadrant(id, record, quadrantId);
+  } catch (e) {
+    console.warn("[reflectionManager] reflectionCloudSync push", e);
+  }
   return record;
 }
 
@@ -152,6 +157,11 @@ function purgeRecordByTaskId(taskId) {
     require("./reflectionArkCache").clearMemoryCacheForTask(id);
   } catch (e) {
     console.warn("[reflectionManager] purge clearMemoryCacheForTask", e);
+  }
+  try {
+    require("./reflectionCloudSync").purgeTaskOnCloud(id);
+  } catch (e) {
+    console.warn("[reflectionManager] purge cloud", e);
   }
   return removed;
 }

@@ -54,6 +54,25 @@ function getTaskTypeClass(tags) {
   return "task-type-default";
 }
 
+function getTaskSortMs(task) {
+  try {
+    const cloudDataSync = require("../../utils/cloudDataSync");
+    if (cloudDataSync && typeof cloudDataSync.getTaskEffectiveMs === "function") {
+      return cloudDataSync.getTaskEffectiveMs(task);
+    }
+  } catch (e) {
+    /* ignore */
+  }
+  const u = Number(task && task.updatedAt);
+  if (Number.isFinite(u) && u > 0) return u;
+  const c = Date.parse(String((task && (task.createdAt || task.timeText)) || "").replace(/\//g, "-"));
+  return Number.isFinite(c) ? c : 0;
+}
+
+function sortTasksNewestFirst(list) {
+  return list.slice().sort((a, b) => getTaskSortMs(b) - getTaskSortMs(a));
+}
+
 Page({
   data: {
     allTasks: [],
@@ -87,10 +106,25 @@ Page({
   onShow() {
     ensureUserTagsOrLeave().then((ok) => {
       if (!ok) return;
-      this.loadTasks();
-      if (typeof this.getTabBar === "function" && this.getTabBar()) {
-        this.getTabBar().setData({ selected: 0 });
+      const refreshUi = () => {
+        this.loadTasks();
+        if (typeof this.getTabBar === "function" && this.getTabBar()) {
+          this.getTabBar().setData({ selected: 0 });
+        }
+      };
+      let pull = Promise.resolve();
+      try {
+        const cloudDataSync = require("../../utils/cloudDataSync");
+        if (cloudDataSync && typeof cloudDataSync.ensureCloudCallable === "function") {
+          pull = cloudDataSync.ensureCloudCallable().then((ok) => {
+            if (!ok || typeof cloudDataSync.pullAndMergeFromCloud !== "function") return;
+            return cloudDataSync.pullAndMergeFromCloud();
+          });
+        }
+      } catch (e) {
+        /* ignore */
       }
+      pull.catch(() => {}).finally(refreshUi);
     });
   },
 
@@ -103,7 +137,9 @@ Page({
       console.error("loadTasks getStorageSync", e);
       storedTasks = [];
     }
-    const normalized = storedTasks.length ? storedTasks.map(normalizeTask) : [];
+    const normalized = sortTasksNewestFirst(
+      storedTasks.length ? storedTasks.map(normalizeTask) : []
+    );
     const today = getTodayKey();
     const visibleTasks = normalized.filter((task) => {
       if (task.statusText === "已取消") return false;
@@ -179,7 +215,11 @@ Page({
           console.warn("delete task removeRecord", e);
         }
         try {
-          require("../../utils/cloudDataSync").deleteTaskFromCloud(taskId);
+          const cloudDataSync = require("../../utils/cloudDataSync");
+          if (typeof cloudDataSync.markTaskDeleted === "function") {
+            cloudDataSync.markTaskDeleted(taskId);
+          }
+          cloudDataSync.deleteTaskFromCloud(taskId);
         } catch (e) {
           console.warn("delete task cloud", e);
         }

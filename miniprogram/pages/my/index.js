@@ -36,6 +36,17 @@ Page({
     ensureUserTagsOrLeave().then((ok) => {
       if (!ok) return;
       this.syncUserProfile();
+      try {
+        const profileCloudSync = require("../../utils/profileCloudSync");
+        if (profileCloudSync && typeof profileCloudSync.pullAndMergeUserProfile === "function") {
+          profileCloudSync
+            .pullAndMergeUserProfile()
+            .then(() => this.syncUserProfile())
+            .catch(() => {});
+        }
+      } catch (e) {
+        /* ignore */
+      }
       this.loadTaskStats();
       this.syncNotifyFromApp();
       if (typeof this.getTabBar === "function" && this.getTabBar()) {

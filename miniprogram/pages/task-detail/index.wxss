@@ -138,6 +138,14 @@ page {
   margin-top: 18rpx;
 }
 
+.reminder-hint {
+  display: block;
+  margin-top: 16rpx;
+  color: #6b8296;
+  font-size: 22rpx;
+  line-height: 1.55;
+}
+
 .reminder-row {
   margin-top: 16rpx;
   display: flex;

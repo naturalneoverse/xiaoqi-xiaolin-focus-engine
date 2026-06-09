@@ -17,6 +17,7 @@ page {
 }
 
 .my-nav-inner {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -24,7 +25,9 @@ page {
 }
 
 .my-nav-title {
-  flex: 1;
+  position: absolute;
+  left: 0;
+  right: 0;
   text-align: center;
   color: #000000;
   font-size: 34rpx;
@@ -32,14 +35,19 @@ page {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 .my-nav-spacer {
+  position: relative;
+  z-index: 1;
   width: 174rpx;
   flex-shrink: 0;
 }
 
 .setting-btn {
+  position: relative;
+  z-index: 1;
   width: 72rpx;
   height: 64rpx;
   border-radius: 999rpx;

@@ -1,6 +1,18 @@
 <view class="page reflection-page list-page" style="{{_globalSafeAreaStyle}}">
   <scroll-view class="list-scroll" scroll-y enhanced show-scrollbar="{{false}}">
-    <block wx:if="{{empty}}">
+    <view wx:if="{{syncBanner && syncHint}}" class="list-sync-banner">
+      <text class="list-sync-banner-text">{{syncHint}}</text>
+    </view>
+    <view wx:if="{{syncState === 'syncing' && empty}}" class="list-syncing">
+      <text class="list-syncing-title">{{syncHint || '正在加载复盘记录…'}}</text>
+      <text class="list-syncing-desc">请稍候，正在与云端同步</text>
+    </view>
+    <view wx:elif="{{syncState === 'error' && empty}}" class="list-empty">
+      <text class="list-empty-title">暂时无法加载记录</text>
+      <text class="list-empty-desc">{{syncHint || '请检查网络后重试'}}</text>
+      <view class="list-retry-btn tap-target" bindtap="onRetrySync">重新同步</view>
+    </view>
+    <block wx:elif="{{empty}}">
       <view class="list-empty">
         <text class="list-empty-title">还没有复盘记录</text>
         <text class="list-empty-desc">在任务详情中开始哲思复盘，记录会出现在这里</text>

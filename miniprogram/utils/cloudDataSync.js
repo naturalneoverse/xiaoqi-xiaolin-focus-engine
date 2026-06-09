@@ -10,15 +10,33 @@ let _lastIncrementalRun = 0;
 const INCREMENTAL_DEBOUNCE_MS = 4500;
 const STARTUP_DEBOUNCE_MS = 2800;
 
+function canCallCloudFunction() {
+  return !!(wx.cloud && typeof wx.cloud.callFunction === "function");
+}
+
+function isCloudInitOk() {
+  try {
+    const app = getApp();
+    return !!(app && app.globalData && app.globalData.cloudInitOk === true);
+  } catch (e) {
+    return false;
+  }
+}
+
 function isCloudAvailable() {
-  const app = getApp();
-  return !!(
-    wx.cloud &&
-    typeof wx.cloud.callFunction === "function" &&
-    app &&
-    app.globalData &&
-    app.globalData.cloudInitOk === true
-  );
+  return canCallCloudFunction() && isCloudInitOk();
+}
+
+/** 等待 wx.cloud.init 完成（PC 端进子页时常早于 init） */
+async function ensureCloudCallable(maxWaitMs) {
+  if (!canCallCloudFunction()) return false;
+  if (isCloudInitOk()) return true;
+  const deadline = Date.now() + (Number(maxWaitMs) > 0 ? Number(maxWaitMs) : 8000);
+  while (Date.now() < deadline) {
+    if (isCloudInitOk()) return true;
+    await new Promise((r) => setTimeout(r, 120));
+  }
+  return isCloudInitOk();
 }
 
 /** 内存 hasLoggedIn 可能与存储不一致（如仅写了 storage），以「任一为真」为准 */
@@ -199,40 +217,6 @@ function cloudBodyToLocal(cloudRecord) {
   };
 }
 
-/**
- * 合并云端任务进本地（Step3：服务端时间新者胜；冲突 UI 在 Step5）
- * @returns {boolean} 是否写入本地
- */
-function mergeCloudTasksIntoLocal(cloudTasks) {
-  const list = Array.isArray(cloudTasks) ? cloudTasks : [];
-  if (!list.length) return false;
-  const local = readTasks();
-  const byId = Object.create(null);
-  local.forEach((t) => {
-    if (t && t.id) byId[String(t.id)] = t;
-  });
-  let changed = false;
-  list.forEach((ct) => {
-    const next = cloudTaskToLocal(ct);
-    if (!next) return;
-    const id = next.id;
-    const prev = byId[id];
-    if (!prev) {
-      byId[id] = next;
-      changed = true;
-      return;
-    }
-    if (getTaskServerMs(next) >= getTaskServerMs(prev)) {
-      byId[id] = next;
-      changed = true;
-    }
-  });
-  if (!changed) return false;
-  const merged = Object.keys(byId).map((k) => byId[k]);
-  merged.sort((a, b) => getTaskServerMs(b) - getTaskServerMs(a));
-  return writeTasks(merged);
-}
-
 function mergeCloudBodiesIntoLocal(cloudRecords) {
   const list = Array.isArray(cloudRecords) ? cloudRecords : [];
   if (!list.length) return false;
@@ -283,7 +267,15 @@ async function callQuickstart(type, data) {
 async function pullTasksFromCloud() {
   const raw = await callQuickstart("listTasks");
   if (!raw || !raw.success) return false;
-  return mergeCloudTasksIntoLocal(raw.tasks);
+  const syncConflict = require("./syncConflict");
+  const r = syncConflict.mergeTasksFromCloud(
+    raw.tasks,
+    readTasks,
+    writeTasks,
+    cloudTaskToLocal,
+    getTaskServerMs
+  );
+  return r.merged;
 }
 
 async function pullBodiesFromCloud() {
@@ -294,11 +286,25 @@ async function pullBodiesFromCloud() {
 
 /** 登录/启动：先从云拉取，再 push */
 async function pullAndMergeFromCloud() {
-  if (!isCloudAvailable() || !isLoggedIn()) return;
+  if (!isLoggedIn()) return;
+  if (!(await ensureCloudCallable())) return;
   if (!(await checkOnline())) return;
   try {
     await pullTasksFromCloud();
     await pullBodiesFromCloud();
+    await require("./reflectionCloudSync").pullAndMergeFromCloud();
+    try {
+      await require("./profileCloudSync").pullAndMergeUserProfile();
+    } catch (e) {
+      console.warn("[cloudDataSync] profile pull", e);
+    }
+    const syncConflict = require("./syncConflict");
+    syncConflict.seedBaseFromLocalIfEmpty();
+    if (syncConflict.hasConflicts()) {
+      syncConflict.tryShowPendingConflicts().catch((e) => {
+        console.warn("[cloudDataSync] conflict prompt", e);
+      });
+    }
   } catch (e) {
     console.warn("[cloudDataSync] pullAndMergeFromCloud", e);
   }
@@ -322,6 +328,13 @@ function deleteTaskFromCloud(taskId) {
 }
 
 async function pushTaskToCloud(task) {
+  if (task && task.id) {
+    try {
+      if (require("./syncConflict").isTaskTombstoned(task.id)) return false;
+    } catch (e) {
+      /* ignore */
+    }
+  }
   /* 不因 cloudInitOk / 登录态拦截；仅保留 API 存在性 */
   if (!wx.cloud || typeof wx.cloud.callFunction !== "function") {
     console.warn("[cloudDataSync] saveTask 跳过：wx.cloud 不可用");
@@ -394,7 +407,12 @@ async function pushBodyToCloud(record) {
 }
 
 async function afterTaskSaved(task) {
-  if (!task) return;
+  if (!task || !task.id) return;
+  try {
+    if (require("./syncConflict").isTaskTombstoned(task.id)) return;
+  } catch (e) {
+    /* ignore */
+  }
   await pushTaskToCloud(task);
 }
 
@@ -470,9 +488,11 @@ async function runFullSyncIfNeeded() {
   }
 
   let maxTask = 0;
+  const syncConflict = require("./syncConflict");
   for (let i = 0; i < tasks.length; i++) {
     const t = tasks[i];
     if (!t || !t.id) continue;
+    if (syncConflict.isTaskTombstoned(t.id)) continue;
     const ok = await pushTaskToCloud(t);
     if (!ok) return;
     maxTask = Math.max(maxTask, ensureTaskForCloud(t).updatedAt);
@@ -505,9 +525,11 @@ async function runIncrementalSync() {
   let maxTask = lastT;
   let maxBody = lastB;
 
+  const syncConflict = require("./syncConflict");
   for (let i = 0; i < tasks.length; i++) {
     const t = tasks[i];
     if (!t || !t.id) continue;
+    if (syncConflict.isTaskTombstoned(t.id)) continue;
     const eff = getTaskEffectiveMs(t);
     if (eff > lastT) {
       const ok = await pushTaskToCloud(t);
@@ -531,6 +553,17 @@ async function runIncrementalSync() {
   writeLastBodyAt(maxBody);
 }
 
+let _lastPullWall = 0;
+const PULL_DEBOUNCE_MS = 3200;
+
+function runPullDebounced() {
+  const wall = Date.now();
+  if (wall - _lastPullWall < PULL_DEBOUNCE_MS) return;
+  _lastPullWall = wall;
+  if (!isCloudAvailable() || !isLoggedIn()) return;
+  pullAndMergeFromCloud().catch((e) => console.warn("[cloudDataSync] runPullDebounced", e));
+}
+
 function runStartupSync() {
   const wall = Date.now();
   if (wall - _lastStartupWall < STARTUP_DEBOUNCE_MS) return;
@@ -542,6 +575,10 @@ function runStartupSync() {
     Promise.resolve()
       .then(() => pullAndMergeFromCloud())
       .then(() => runFullSyncIfNeeded())
+      .then(() => {
+        const reflectionCloudSync = require("./reflectionCloudSync");
+        return reflectionCloudSync.pushAllLocalQuadrantsToCloud();
+      })
       .then(() => runIncrementalSync())
       .then(() => {
         const archiveCloud = require("./bodyWeekArchiveCloud");
@@ -555,6 +592,7 @@ function runIncrementalDebounced() {
   const now = Date.now();
   if (now - _lastIncrementalRun < INCREMENTAL_DEBOUNCE_MS) return;
   _lastIncrementalRun = now;
+  runPullDebounced();
   runIncrementalSync().catch((e) => console.warn("[cloudDataSync] runIncrementalSync", e));
 }
 
@@ -563,9 +601,17 @@ module.exports = {
   afterBodySaved,
   pullAndMergeFromCloud,
   deleteTaskFromCloud,
+  pushTaskToCloud,
+  readTasks,
+  writeTasks,
+  cloudTaskToLocal,
   runStartupSync,
+  runPullDebounced,
+  ensureCloudCallable,
+  canCallCloudFunction,
   runIncrementalSync,
   runIncrementalDebounced,
+  markTaskDeleted: (taskId) => require("./syncConflict").markTaskDeleted(taskId),
   getTaskEffectiveMs,
   getBodyEffectiveMs,
   getTaskServerMs,
