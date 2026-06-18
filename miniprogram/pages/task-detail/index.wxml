@@ -1,4 +1,5 @@
 <view class="page {{showReflectionBtn ? 'page-with-reflection-btn' : ''}}" style="{{_globalSafeAreaStyle}}">
+  <view class="page-scroll-body">
   <view class="top-bar">
     <view class="back-wrap tap-target" catchtap="goHome" hover-class="top-bar-hover">
       <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
@@ -8,8 +9,76 @@
   </view>
   <text class="task-name">{{taskName}}</text>
 
-  <view class="card">
-    <text class="desc">{{taskContent}}</text>
+  <view class="card content-card">
+    <view class="content-card-head">
+      <text class="k">详细内容</text>
+      <view class="content-card-actions" wx:if="{{!contentEditing}}">
+        <text class="content-action-link" catchtap="enterContentEdit">编辑</text>
+      </view>
+      <view class="content-card-actions" wx:else>
+        <text class="content-action-link content-action-primary" catchtap="saveContentEdit">保存</text>
+        <text class="content-action-link" catchtap="cancelContentEdit">取消</text>
+      </view>
+    </view>
+    <view wx:if="{{!contentEditing}}" class="content-readonly">
+      <text class="desc {{contentExpanded ? 'desc-expanded' : 'desc-clamped'}}">{{contentDisplayText}}</text>
+      <view wx:if="{{contentShowExpandToggle}}" class="content-expand-row">
+        <text class="content-expand-link tap-target" catchtap="toggleContentExpand">{{contentExpanded ? '收起' : '展开全文'}}</text>
+      </view>
+    </view>
+    <block wx:else>
+      <view class="content-edit-wrap">
+        <textarea
+          class="content-textarea"
+          value="{{contentDraft}}"
+          bindinput="onContentDraftInput"
+          maxlength="{{taskContentMax}}"
+          auto-height
+          focus="{{contentEditingFocus}}"
+          placeholder="详细描述你的任务..."
+          show-confirm-bar="{{false}}"
+          disabled="{{speechRecordingTarget === 'content'}}"
+        />
+        <view
+          class="speech-hold-bar speech-hold-bar--wide-counter {{speechRecordingTarget === 'content' ? '' : 'speech-layer-hidden'}}"
+          style="--speech-mic-color: #6c92b1;"
+        >
+          <view class="speech-hold-wave">
+            <view class="speech-hold-wave-bar" style="animation-delay: 0ms"></view>
+            <view class="speech-hold-wave-bar" style="animation-delay: 100ms"></view>
+            <view class="speech-hold-wave-bar" style="animation-delay: 200ms"></view>
+            <view class="speech-hold-wave-bar" style="animation-delay: 300ms"></view>
+            <view class="speech-hold-wave-bar" style="animation-delay: 400ms"></view>
+            <view class="speech-hold-wave-bar" style="animation-delay: 500ms"></view>
+          </view>
+          <text class="speech-hold-tip">松手填入</text>
+        </view>
+        <view class="content-limit-row">
+          <text class="content-limit {{contentDraftLength > taskContentMax ? 'content-limit-exceeded' : ''}}">{{contentDraftLength}}/{{taskContentMax}}</text>
+          <view class="speech-mic-corner speech-mic-corner--inline" style="--speech-mic-color: #6c92b1;">
+            <button
+              class="speech-mic-btn {{speechRecordingTarget === 'content' ? 'speech-mic-btn-recording' : ''}} {{speechContentMicDisabled ? 'speech-mic-btn-disabled' : ''}}"
+              plain
+              hover-class="none"
+              disabled="{{speechContentMicDisabled}}"
+              data-field="content"
+              catchlongpress="onSpeechLongPress"
+              catchtouchend="onSpeechTouchEnd"
+              catchtouchcancel="onSpeechTouchEnd"
+            >
+              <view wx:if="{{speechRecordingTarget === 'content'}}" class="speech-wave">
+                <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+                <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+                <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+                <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+                <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+              </view>
+              <view wx:else class="speech-mic-icon"></view>
+            </button>
+          </view>
+        </view>
+      </view>
+    </block>
   </view>
 
   <view class="card row">
@@ -42,9 +111,34 @@
   </view>
 
   <view class="card reminder-card" wx:if="{{taskId}}">
-    <text class="k">提醒</text>
+    <view class="reminder-card-head">
+      <view class="reminder-card-head-main tap-target" catchtap="toggleReminderExpand">
+        <text class="k">提醒</text>
+        <text class="reminder-chevron {{reminderExpanded ? 'reminder-chevron-open' : ''}}">⌄</text>
+      </view>
+      <text
+        wx:if="{{reminderExpanded && statusText !== '已完成' && statusText !== '已取消'}}"
+        class="reminder-sync-link {{!reminderTime || reminderCalendarSubmitting ? 'reminder-sync-link-disabled' : ''}}"
+        catchtap="confirmDetailReminderCalendar"
+      >{{reminderCalendarSubmitting ? '写入中…' : '写入日历'}}</text>
+    </view>
+    <text class="reminder-summary-line">{{reminderSummaryLine}}</text>
+    <block wx:if="{{reminderExpanded}}">
     <view class="reminder-row">
-      <text class="rk">每日时间</text>
+      <text class="rk">起始日期</text>
+      <picker mode="date" value="{{reminderStartDate}}" bindchange="onDetailReminderStartChange">
+        <view class="reminder-picker tap-target">{{reminderStartDate || "选择日期"}}</view>
+      </picker>
+    </view>
+    <view class="reminder-row">
+      <text class="rk">结束日期</text>
+      <picker mode="date" value="{{reminderEndDate}}" start="{{reminderStartDate}}" bindchange="onDetailReminderEndChange">
+        <view class="reminder-picker tap-target">{{reminderEndDate || "不填写"}}</view>
+      </picker>
+    </view>
+    <text wx:if="{{reminderEndDate}}" class="reminder-clear-end tap-target" catchtap="clearReminderEndDate">清空结束日期</text>
+    <view class="reminder-row">
+      <text class="rk">提醒时间</text>
       <picker mode="time" value="{{reminderTime}}" bindchange="onDetailReminderTimeChange">
         <view class="reminder-picker tap-target">{{reminderTime || "选择时间"}}</view>
       </picker>
@@ -60,15 +154,17 @@
         <view class="reminder-picker tap-target">{{reminderFrequency}}</view>
       </picker>
     </view>
-    <text class="reminder-hint">提醒写入本设备系统日历；换手机或电脑后需重新确认，删除任务不会自动取消日历条目。</text>
+    <text wx:if="{{nextReminderLabel}}" class="next-reminder-label">{{nextReminderLabel}}</text>
+    <text wx:elif="{{reminderTime && reminderStartDate && !nextReminderLabel}}" class="reminder-hint-warn">请先完善起始日期与提醒时间</text>
+    <text class="reminder-hint">选好后点「写入日历」同步本机；换机需重新确认，删任务不会自动取消日历条目。</text>
+    </block>
   </view>
 
-  <view wx:if="{{showReflectionBtn}}" class="reflection-entry-wrap">
-    <view class="mascot-float-3d reflection-entry-float {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
-      <button class="reflection-entry-btn" plain hover-class="reflection-entry-btn-hover" bindtap="goReflection">
-        <text class="reflection-entry-text">哲思复盘</text>
-      </button>
-    </view>
+  <view class="page-scroll-tail"></view>
+  </view>
+
+  <view wx:if="{{showReflectionBtn}}" class="page-action-bar">
+    <button class="page-action-btn" plain hover-class="page-action-btn-hover" bindtap="goReflection">哲思复盘</button>
   </view>
 
   <view wx:if="{{showMascotModal}}" class="mascot-mask" bindtap="closeMascotModal">

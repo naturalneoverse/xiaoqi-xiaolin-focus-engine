@@ -178,7 +178,7 @@
   width: 4rpx;
   height: 14rpx;
   border-radius: 4rpx;
-  background: rgba(255, 255, 255, 0.88);
+  background: #ffffff;
   animation: reflection-speech-hold-wave 0.85s ease-in-out infinite;
 }
 

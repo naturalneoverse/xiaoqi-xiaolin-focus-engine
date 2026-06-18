@@ -1,15 +1,18 @@
 page {
-  background: linear-gradient(180deg, #eff7fd 0%, #d6ebf7 100%);
+  background-color: #eff7fd;
 }
 
 .page {
   min-height: 100vh;
   padding: 24rpx;
   box-sizing: border-box;
+  background: linear-gradient(180deg, #eff7fd 0%, #d6ebf7 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.92);
+  background: #ffffff;
   border-radius: 28rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;

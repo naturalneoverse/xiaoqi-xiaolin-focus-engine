@@ -1,4 +1,5 @@
-const REMIND_FREQUENCY_OPTIONS = ["不重复", "每天"];
+const reminderSchedule = require("../../utils/reminderSchedule");
+const REMIND_FREQUENCY_OPTIONS = reminderSchedule.REMINDER_FREQ_OPTIONS;
 const {
   TASK_NAME_MAX,
   TASK_NAME_FIRST_LINE_MAX,
@@ -7,7 +8,6 @@ const {
 const { goSleepHome } = require("../../utils/goTabHome");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { scheduleReminder } = require("../../utils/reminderManager");
-const reminderSchedule = require("../../utils/reminderSchedule");
 const deviceEnv = require("../../utils/deviceEnv");
 const speechRecognition = require("../../utils/speechRecognition");
 
@@ -76,7 +76,7 @@ Page({
     showReminderModal: false,
     reminderDate: "",
     reminderTime: "",
-    reminderFrequency: "不重复",
+    reminderFrequency: reminderSchedule.FREQ_SINGLE,
     reminderFrequencyOptions: REMIND_FREQUENCY_OPTIONS,
     reminderFrequencyIndex: 0,
     reminderText: "未设置",
@@ -363,7 +363,7 @@ Page({
 
   openReminderModal() {
     const f = reminderSchedule.normalizeReminderFrequency(this.data.reminderFrequency);
-    const idx = f === "每天" ? 1 : 0;
+    const idx = reminderSchedule.reminderFrequencyIndex(f);
     this._openOverlayAfterKeyboardClear({
       showReminderModal: true,
       reminderFrequency: f,
@@ -385,7 +385,7 @@ Page({
 
   onReminderFrequencyChange(e) {
     const index = Number(e.detail.value);
-    const frequency = REMIND_FREQUENCY_OPTIONS[index] || "不重复";
+    const frequency = REMIND_FREQUENCY_OPTIONS[index] || reminderSchedule.FREQ_SINGLE;
     this.setData({
       reminderFrequency: frequency,
       reminderFrequencyIndex: index,
@@ -403,6 +403,10 @@ Page({
       });
       return;
     }
+    if (!startDate) {
+      wx.showToast({ title: "请先选择开始日期", icon: "none" });
+      return;
+    }
     const parts = String(reminderTime).split(":");
     const hour = Number(parts[0]);
     const minute = Number(parts[1]);
@@ -412,43 +416,33 @@ Page({
     }
 
     const freq = reminderSchedule.normalizeReminderFrequency(reminderFrequency);
-    const rangeEnd = endDate || startDate;
-
-    if (freq === "每天") {
+    if (
+      freq === reminderSchedule.FREQ_DAILY ||
+      freq === reminderSchedule.FREQ_START_END
+    ) {
       if (!endDate) {
-        wx.showToast({
-          title: "每日提醒需设置结束日期",
-          icon: "none",
-        });
+        wx.showToast({ title: "请先选择结束日期", icon: "none" });
         return;
       }
-      if (!startDate) {
-        wx.showToast({ title: "请先选择开始日期", icon: "none" });
-        return;
-      }
-      const futureDays = reminderSchedule.filterFutureReminderDays(
-        reminderSchedule.enumerateDateRangeYMD(startDate, endDate),
-        hour,
-        minute,
-      );
-      if (!futureDays.length) {
-        wx.showToast({
-          title: "区间内没有可设置的提醒时间",
-          icon: "none",
-        });
+      if (endDate < startDate) {
+        wx.showToast({ title: "结束日期不能早于开始日期", icon: "none" });
         return;
       }
     }
 
-    const reminderDate = reminderSchedule.computeNextReminderDateYMD(reminderTime);
-    if (rangeEnd && reminderDate && reminderDate > rangeEnd) {
-      wx.showToast({
-        title: "提醒时间不能晚于结束日期",
-        icon: "none",
-      });
+    const preview = reminderSchedule.computeReminderPreview(
+      startDate,
+      endDate,
+      reminderTime,
+      freq,
+      "进行中",
+    );
+    if (!preview.days.length) {
+      wx.showToast({ title: "区间内没有可设置的提醒时间", icon: "none" });
       return;
     }
 
+    const reminderDate = preview.days[0] || "";
     const reminderText = formatReminderText(reminderTime, reminderFrequency);
     const finish = () => {
       this.setData({
@@ -457,7 +451,7 @@ Page({
         reminderDate,
         reminderTime,
         reminderFrequency: freq,
-        reminderFrequencyIndex: freq === "每天" ? 1 : 0,
+        reminderFrequencyIndex: reminderSchedule.reminderFrequencyIndex(freq),
       });
     };
 

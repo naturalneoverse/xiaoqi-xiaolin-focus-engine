@@ -65,7 +65,7 @@ const QUOTES = [
   "宽恕过去，才能开始未来。",
 ];
 
-const MILESTONE_21 = "21天，你活成了自己选择的样子。";
+const MILESTONE_21 = "已累计打卡21天，你活成了自己选择的样子。";
 const ZERO_COPY = "这一周，为生存和责任奔波，辛苦了。";
 const CTA_TEXT = "扫我，看看你有多少真我时刻 →";
 
@@ -85,8 +85,8 @@ function rollBlindBox() {
   };
 }
 
-function getQuoteInnerText(streakDays, quoteIndex) {
-  if (streakDays >= 21) return MILESTONE_21;
+function getQuoteInnerText(totalCheckInDays, quoteIndex) {
+  if (totalCheckInDays >= 21) return MILESTONE_21;
   const i = Math.max(0, Math.min(QUOTES.length - 1, quoteIndex | 0));
   return QUOTES[i];
 }
@@ -382,7 +382,7 @@ async function drawPosterFrame(ctx, opt) {
     if (streakDays > 0) {
       ctx.font = `400 ${mid(28)}px PingFang SC, sans-serif`;
       ctx.fillStyle = COLOR_SECONDARY;
-      const streakText = `● 已连续记录 ${streakDays} 天`;
+      const streakText = `● 已累计打卡 ${streakDays} 天`;
       drawTextCenterInWidth(ctx, streakText, MARGIN_X, TEXT_W, cur + mid(22), COLOR_SECONDARY);
       cur += mid(36);
     }

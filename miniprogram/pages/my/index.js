@@ -65,7 +65,7 @@ Page({
       tasks = [];
     }
     const cur = momentScore.getCurrentWeekSummary(tasks, new Date());
-    const streak = dailyCheckIn.getCheckInStreakDays(new Date());
+    const streak = dailyCheckIn.getCheckInTotalDays();
     this.setData({
       momentWeekScore: cur.momentScore,
       streakDays: streak,

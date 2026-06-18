@@ -78,30 +78,61 @@
       <text class="past-subtitle">已完成的任务</text>
     </view>
     <view class="line"></view>
-    <view wx:for="{{pastTaskGroups}}" wx:key="range" class="past-group">
+    <view wx:for="{{pastTaskGroups}}" wx:key="dateKey" class="past-group">
       <view
-        class="group-title-row"
-        data-index="{{index}}"
+        wx:if="{{!item.isEmpty}}"
+        class="group-title-row tap-target"
+        data-date-key="{{item.dateKey}}"
         bindtap="toggleTaskGroup"
         hover-class="row-hover"
       >
-        <text class="group-arrow">{{item.expanded ? "▾" : "▸"}}</text>
         <text class="group-range">{{item.range}}</text>
+        <text class="group-chevron">{{item.expanded ? "▾" : "›"}}</text>
       </view>
-      <view wx:if="{{item.expanded}}" class="task-items">
+      <text wx:else class="past-empty-text">{{item.range}}</text>
+      <view wx:if="{{item.expanded && !item.isEmpty}}" class="past-task-cards">
         <view
           wx:for="{{item.tasks}}"
           wx:for-item="task"
           wx:key="taskId"
-          class="task-item-row tap-target"
+          class="past-task-card tap-target"
           data-task-id="{{task.taskId}}"
           bindtap="goPastTaskDetail"
-          hover-class="row-hover"
+          hover-class="past-task-card-hover"
         >
-          <text class="task-item-name">{{task.name}}</text>
-          <text class="task-item-tag">{{task.tag}}</text>
+          <text class="past-task-card-title">{{task.name}}</text>
+          <view class="past-task-card-foot">
+            <view class="past-task-card-tags">
+              <text
+                wx:for="{{task.tags}}"
+                wx:for-item="tag"
+                wx:key="text"
+                class="past-task-tag {{tag.className}}"
+              >{{tag.text}}</text>
+              <text wx:if="{{!task.tags.length}}" class="past-task-tag past-task-tag-muted">—</text>
+            </view>
+            <text class="past-task-card-arrow">›</text>
+          </view>
         </view>
       </view>
+    </view>
+    <view
+      wx:if="{{showPastDatesExpand}}"
+      class="past-dates-toggle tap-target"
+      bindtap="togglePastDatesExpand"
+      hover-class="row-hover"
+    >
+      <text class="past-dates-toggle-text">展开更多日期</text>
+      <text class="past-dates-toggle-arrow">▾</text>
+    </view>
+    <view
+      wx:if="{{showPastDatesCollapse}}"
+      class="past-dates-toggle tap-target"
+      bindtap="togglePastDatesExpand"
+      hover-class="row-hover"
+    >
+      <text class="past-dates-toggle-text">收起更早</text>
+      <text class="past-dates-toggle-arrow">▴</text>
     </view>
   </view>
   </view>

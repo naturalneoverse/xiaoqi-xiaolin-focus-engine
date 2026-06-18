@@ -30,7 +30,7 @@
   max-width: 560rpx;
   padding: 40rpx 36rpx;
   border-radius: 24rpx;
-  background: rgba(255, 255, 255, 0.92);
+  background: #ffffff;
   box-shadow: 0 12rpx 40rpx rgba(18, 89, 143, 0.08);
   box-sizing: border-box;
 }

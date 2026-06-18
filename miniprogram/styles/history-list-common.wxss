@@ -1,0 +1,84 @@
+/** 往期/报告类列表页共用：哲思复盘、时间编织报告、身体边界记录 */
+
+.list-page {
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.list-scroll {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 24rpx 32rpx 0;
+}
+
+.list-empty {
+  margin-top: 160rpx;
+  padding: 0 32rpx;
+  text-align: center;
+}
+
+.list-empty-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #184061;
+  line-height: 1.45;
+}
+
+.list-empty-desc {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  font-weight: 400;
+  color: #8a9cb0;
+  line-height: 1.55;
+}
+
+.list-card {
+  margin-bottom: 30rpx;
+  padding: 28rpx 28rpx 24rpx;
+  border-radius: 24rpx;
+  background: #ffffff;
+  border: 2rpx solid #e2eaf7;
+  box-sizing: border-box;
+}
+
+.list-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.list-task-title {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #184061;
+  line-height: 1.45;
+}
+
+.list-arrow {
+  flex-shrink: 0;
+  font-size: 36rpx;
+  color: #8a9cb0;
+  line-height: 1.2;
+}
+
+.list-time {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  font-weight: 400;
+  color: #8a9cb0;
+  line-height: 1.4;
+}
+
+.list-foot-space {
+  height: calc(48rpx + env(safe-area-inset-bottom));
+}
+
+.row-hover {
+  opacity: 0.92;
+}

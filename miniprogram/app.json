@@ -79,6 +79,9 @@
   "permission": {
     "scope.record": {
       "desc": "你的语音将转写为文字，填入任务或哲思复盘输入框"
+    },
+    "scope.addPhoneCalendar": {
+      "desc": "用于将任务提醒写入您的系统日历"
     }
   },
   "plugins": {

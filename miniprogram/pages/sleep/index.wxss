@@ -33,6 +33,24 @@ page {
   display: block;
 }
 
+.add-btn--highlight {
+  animation: add-btn-highlight-pulse 1.1s ease-in-out 3;
+}
+
+.add-btn--highlight .add-btn-icon {
+  filter: drop-shadow(0 0 16rpx rgba(29, 109, 168, 0.55));
+}
+
+@keyframes add-btn-highlight-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
 .title-row {
   margin-top: 12rpx;
 }
@@ -81,8 +99,136 @@ page {
   font-size: 30rpx;
 }
 
-.task-list {
+.task-section {
   margin-top: 34rpx;
+}
+
+.task-section-done {
+  margin-top: 8rpx;
+}
+
+.section-label {
+  display: block;
+  color: #56789b;
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 18rpx;
+}
+
+.section-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14rpx;
+}
+
+.section-head-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 0 8rpx 16rpx;
+}
+
+.section-head-toggle-text {
+  color: #6f86a0;
+  font-size: 26rpx;
+}
+
+.section-toggle {
+  margin-top: -8rpx;
+  margin-bottom: 24rpx;
+  min-height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+.section-toggle-hover {
+  opacity: 0.82;
+}
+
+.section-toggle-text {
+  color: #2e628b;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.section-toggle-arrow {
+  color: #6f86a0;
+  font-size: 24rpx;
+}
+
+.task-list {
+  margin-top: 0;
+}
+
+.done-list {
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 24rpx;
+  border: 2rpx solid rgba(226, 234, 247, 0.95);
+  overflow: hidden;
+}
+
+.task-done-row {
+  min-height: 88rpx;
+  padding: 16rpx 20rpx 16rpx 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  border-bottom: 1rpx solid rgba(226, 234, 247, 0.9);
+  box-sizing: border-box;
+}
+
+.task-done-row:last-child {
+  border-bottom: none;
+}
+
+.task-done-row-hover {
+  background: rgba(237, 244, 252, 0.85);
+}
+
+.task-done-check {
+  color: #2f719c;
+  font-size: 28rpx;
+  font-weight: 700;
+  flex-shrink: 0;
+  width: 28rpx;
+  text-align: center;
+}
+
+.task-done-title {
+  color: #5a7390;
+  font-size: 28rpx;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-done-tags {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  flex-shrink: 0;
+  max-width: 52%;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.tag-done {
+  padding: 5rpx 10rpx;
+  font-size: 18rpx;
+  flex-shrink: 0;
+}
+
+.task-done-arrow {
+  color: #9ab4cc;
+  font-size: 32rpx;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .task-empty-wrap {

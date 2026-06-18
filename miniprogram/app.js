@@ -352,6 +352,15 @@ App({
     }
   },
 
+  tryRecordDailyCheckIn() {
+    if (!this.globalData || !this.globalData.hasLoggedIn) return;
+    try {
+      require("./utils/dailyCheckIn").recordDailyCheckIn();
+    } catch (e) {
+      console.warn("[App] recordDailyCheckIn", e);
+    }
+  },
+
   onShow() {
     this.globalData.mascotAnimPaused = false;
     try {
@@ -359,6 +368,7 @@ App({
     } catch (e) {
       /* ignore */
     }
+    this.tryRecordDailyCheckIn();
     try {
       const m = require("./utils/cloudDataSync");
       if (m && typeof m.runIncrementalDebounced === "function") {
@@ -449,6 +459,9 @@ App({
     try {
       wx.setStorageSync(STORAGE_KEYS.HAS_LOGGED_IN, value);
       this.globalData.hasLoggedIn = value;
+      if (value) {
+        this.tryRecordDailyCheckIn();
+      }
       if (value && this.globalData && this.globalData.cloudInitOk === true) {
         try {
           const m = require("./utils/cloudDataSync");

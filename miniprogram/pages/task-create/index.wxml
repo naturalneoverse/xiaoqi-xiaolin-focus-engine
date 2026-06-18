@@ -172,7 +172,7 @@
     <view class="modal-panel" catchtap="noop">
       <text class="modal-title">设置提醒</text>
       <view class="modal-row">
-        <text class="modal-label">每日提醒时间</text>
+        <text class="modal-label">提醒时间</text>
         <picker mode="time" value="{{reminderTime}}" bindchange="onReminderTimeChange">
           <text class="modal-value">{{reminderTime || "选择时间"}}</text>
         </picker>

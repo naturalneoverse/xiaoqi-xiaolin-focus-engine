@@ -1,13 +1,16 @@
 @import "../../styles/reflection-speech-mic.wxss";
 
 page {
-  background: linear-gradient(180deg, #f8fbff 0%, #e8f3ff 100%);
+  background-color: #f8fbff;
 }
 
 .page {
   min-height: 100vh;
   padding: 18rpx 28rpx 34rpx;
   box-sizing: border-box;
+  background: linear-gradient(180deg, #f8fbff 0%, #e8f3ff 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .nav {

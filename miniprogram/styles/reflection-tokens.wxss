@@ -6,8 +6,8 @@
 page,
 .reflection-page {
   /* 象限卡片渐变叠加强度（与 reflectionTheme.js QUADRANT_CARD_BG_ALPHA 一致） */
-  --reflection-card-alpha: 0.7;
-  --reflection-card-border-alpha: 0.7;
+  --reflection-card-alpha: 1;
+  --reflection-card-border-alpha: 1;
 
   /* 空态（对齐 reflectionReport.EMPTY_LABEL） */
   --reflection-empty-label-color: #8a9cb0;

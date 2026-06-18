@@ -1,5 +1,5 @@
 page {
-  background: linear-gradient(135deg, #f7f9fb 0%, #eef6ff 100%);
+  background-color: #f7f9fb;
 }
 
 .page {
@@ -9,6 +9,9 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, #f7f9fb 0%, #eef6ff 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .card {

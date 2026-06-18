@@ -1,5 +1,5 @@
 page {
-  background: linear-gradient(180deg, #deebf8 0%, #d8e7f5 56%, #d3e3f1 100%);
+  background-color: #deebf8;
 }
 
 .page {
@@ -11,6 +11,9 @@ page {
   align-items: center;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(180deg, #deebf8 0%, #d8e7f5 56%, #d3e3f1 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .bg-clouds {

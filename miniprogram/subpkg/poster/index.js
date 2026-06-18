@@ -1,6 +1,7 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const momentScore = require("../../utils/momentScore");
+const dailyCheckIn = require("../../utils/dailyCheckIn");
 const posterRenderer = require("../../utils/posterRenderer");
 
 /**
@@ -190,7 +191,7 @@ Page({
       momentScore.mondayDateFromKey(this.__weekMondayKey) || momentScore.getIsoWeekMonday(now);
     const agg = momentScore.aggregateMomentScoreForWeek(tasks, monday, now);
     const ms = agg.momentScore;
-    const streak = momentScore.getCompletionStreakDays(tasks, now);
+    const streak = dailyCheckIn.getCheckInTotalDays();
     const blind = this.__blind || posterRenderer.rollBlindBox();
     this.__blind = blind;
     const paletteBase = posterRenderer.PALETTES[blind.paletteIndex % posterRenderer.PALETTES.length];

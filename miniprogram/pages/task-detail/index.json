@@ -1,6 +1,7 @@
 {
   "navigationStyle": "custom",
   "navigationBarTitleText": "任务详情",
+  "disableScroll": false,
   "usingComponents": {
     "chat-bubble": "/components/chat-bubble/index"
   }

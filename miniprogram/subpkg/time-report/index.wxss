@@ -1,5 +1,5 @@
 page {
-  background: linear-gradient(180deg, #eff7fd 0%, #d6ebf7 100%);
+  background-color: #eff7fd;
 }
 
 .page {
@@ -8,6 +8,9 @@ page {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(180deg, #eff7fd 0%, #d6ebf7 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .time-report-main {
@@ -56,7 +59,7 @@ page {
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.93);
+  background: #ffffff;
   border-radius: 30rpx;
   padding: 26rpx 24rpx;
   margin-bottom: 24rpx;
@@ -252,46 +255,200 @@ page {
   margin-top: 12rpx;
 }
 
-.group-title-row {
-  height: 62rpx;
-  display: flex;
-  align-items: center;
+.past-empty-text {
+  display: block;
+  padding: 18rpx 0 8rpx;
+  color: #8a9cb0;
+  font-size: 28rpx;
 }
 
-.group-arrow {
-  color: #184061;
-  font-size: 30rpx;
-  width: 30rpx;
+.group-title-row {
+  min-height: 68rpx;
+  padding: 8rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
 }
 
 .group-range {
   color: #184061;
-  font-size: 31rpx;
-  font-weight: 700;
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 1.35;
+  flex: 1;
+  min-width: 0;
 }
 
-.task-items {
-  margin-top: 6rpx;
-  padding-left: 30rpx;
+.group-chevron {
+  color: #8a9cb0;
+  font-size: 34rpx;
+  flex-shrink: 0;
+  width: 34rpx;
+  text-align: right;
+  line-height: 1;
 }
 
-.task-item-row {
-  height: 60rpx;
+.past-task-cards {
+  margin: 0 0 14rpx;
+  padding: 16rpx 14rpx;
+  border-radius: 20rpx;
+  background: #edf4fc;
+  border: 1rpx solid rgba(186, 204, 224, 0.45);
+  box-shadow:
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.88),
+    0 4rpx 16rpx rgba(24, 64, 97, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+  box-sizing: border-box;
+}
+
+.past-task-card {
+  background: #ffffff;
+  border-radius: 22rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.95);
+  padding: 18rpx 20rpx 16rpx;
+  box-shadow:
+    0 2rpx 6rpx rgba(24, 64, 97, 0.05),
+    0 8rpx 22rpx rgba(24, 64, 97, 0.07);
+  box-sizing: border-box;
+}
+
+.past-task-card-hover {
+  background: #f8fbfe;
+  transform: translateY(-1rpx);
+  box-shadow:
+    0 4rpx 10rpx rgba(24, 64, 97, 0.07),
+    0 12rpx 28rpx rgba(24, 64, 97, 0.08);
+}
+
+.past-task-card-title {
+  display: block;
+  color: #184061;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.past-task-card-foot {
+  margin-top: 12rpx;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10rpx;
+}
+
+.past-task-card-tags {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 6rpx;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
-.task-item-name {
-  color: #577388;
-  font-size: 30rpx;
-}
-
-.task-item-tag {
-  padding: 8rpx 20rpx;
+.past-task-tag {
   border-radius: 999rpx;
-  background: #e7f6f1;
-  color: #008a5e;
+  padding: 6rpx 12rpx;
+  font-size: 20rpx;
+  line-height: 1;
+  color: #72869f;
+  background: #e7eef6;
+}
+
+.past-task-tag-muted {
+  background: transparent;
+  color: #b0bec9;
+}
+
+.past-task-tag.tag-red {
+  color: #8e4f57;
+  background: #f1dfe3;
+}
+
+.past-task-tag.tag-orange {
+  color: #a5673f;
+  background: #f7e4d6;
+}
+
+.past-task-tag.tag-gray {
+  color: #66758b;
+  background: #e3e8f0;
+}
+
+.past-task-tag.tag-blue {
+  color: #4a78a2;
+  background: #ddeaf7;
+}
+
+.past-task-tag.tag-berry {
+  color: #8c566a;
+  background: #f1e2e8;
+}
+
+.past-task-tag.tag-lavender {
+  color: #6f689b;
+  background: #ebe8f8;
+}
+
+.past-task-tag.tag-sky {
+  color: #567fa3;
+  background: #e2eef8;
+}
+
+.past-task-tag.tag-violet {
+  color: #665a94;
+  background: #e8e3f6;
+}
+
+.past-task-tag.tag-amber {
+  color: #90674e;
+  background: #f5eadf;
+}
+
+.past-task-tag.tag-teal {
+  color: #4f7b72;
+  background: #e0efe9;
+}
+
+.past-task-tag.tag-gold {
+  color: #8a7a4a;
+  background: #f3edd8;
+}
+
+.past-task-tag.tag-deep {
+  color: #4f6a8b;
+  background: #dfe8f5;
+}
+
+.past-task-card-arrow {
+  color: #8a9cb0;
+  font-size: 34rpx;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.past-dates-toggle {
+  margin-top: 4rpx;
+  min-height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+}
+
+.past-dates-toggle-text {
+  color: #2a6a9a;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+
+.past-dates-toggle-arrow {
+  color: #6f86a0;
   font-size: 24rpx;
 }
 

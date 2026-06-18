@@ -1,7 +1,7 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-bar">
     <text class="main-title">今日任务</text>
-    <view class="add-btn tap-target" bindtap="goTaskCreate">
+    <view class="add-btn tap-target {{highlightAddBtn ? 'add-btn--highlight' : ''}}" bindtap="goTaskCreate">
       <image class="add-btn-icon" src="/images/transparent background/creat.png" mode="aspectFit" binderror="onImageError" />
     </view>
   </view>
@@ -18,29 +18,90 @@
     </view>
   </view>
 
-  <view class="task-list" wx:if="{{tasks.length}}">
-    <view
-      wx:for="{{tasks}}"
-      wx:key="id"
-      class="task-card {{item.typeClass}}"
-      data-id="{{item.id}}"
-      bindtap="openTaskDetail"
-      bindlongpress="onTaskLongPress"
-      hover-class="task-card-hover"
-      hover-stay-time="70"
-    >
-      <view class="task-head">
-        <text class="task-title">{{item.displayTitle}}</text>
-        <text class="task-time">{{item.timeText}}</text>
-      </view>
-      <view class="task-foot">
-        <view class="task-tags">
-          <text wx:for="{{item.tags}}" wx:key="text" class="tag {{item.className}} {{item.isPriority ? 'tag-priority' : ''}}">{{item.text}}</text>
+  <block wx:if="{{hasVisibleTasks}}">
+    <view wx:if="{{pendingTasks.length}}" class="task-section">
+      <text class="section-label">进行中</text>
+      <view class="task-list">
+        <view
+          wx:for="{{pendingTasks}}"
+          wx:key="id"
+          class="task-card {{item.typeClass}}"
+          data-id="{{item.id}}"
+          bindtap="openTaskDetail"
+          bindlongpress="onTaskLongPress"
+          hover-class="task-card-hover"
+          hover-stay-time="70"
+        >
+          <view class="task-head">
+            <text class="task-title">{{item.displayTitle}}</text>
+            <text class="task-time">{{item.timeText}}</text>
+          </view>
+          <view class="task-foot">
+            <view class="task-tags">
+              <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="text" class="tag {{tag.className}} {{tag.isPriority ? 'tag-priority' : ''}}">{{tag.text}}</text>
+            </view>
+            <view class="status {{item.done ? 'status-done' : ''}}">{{item.done ? '✓' : '○'}}</view>
+          </view>
         </view>
-        <view class="status {{item.done ? 'status-done' : ''}}">{{item.done ? '✓' : '○'}}</view>
+      </view>
+      <view
+        wx:if="{{showPendingExpand}}"
+        class="section-toggle tap-target"
+        bindtap="togglePendingExpand"
+        hover-class="section-toggle-hover"
+        hover-stay-time="70"
+      >
+        <text class="section-toggle-text">展开其余 {{pendingHiddenCount}} 条</text>
+        <text class="section-toggle-arrow">▾</text>
+      </view>
+      <view
+        wx:if="{{showPendingCollapse}}"
+        class="section-toggle tap-target"
+        bindtap="togglePendingExpand"
+        hover-class="section-toggle-hover"
+        hover-stay-time="70"
+      >
+        <text class="section-toggle-text">收起</text>
+        <text class="section-toggle-arrow">▴</text>
       </view>
     </view>
-  </view>
+
+    <view wx:if="{{doneTodayCount}}" class="task-section task-section-done">
+      <view class="section-head-row">
+        <text class="section-label">今日已完成 ({{doneTodayCount}})</text>
+        <view
+          wx:if="{{showDoneTodayExpand || showDoneTodayCollapse}}"
+          class="section-head-toggle tap-target"
+          bindtap="toggleDoneTodayExpand"
+          hover-class="section-toggle-hover"
+          hover-stay-time="70"
+        >
+          <text class="section-head-toggle-text">{{showDoneTodayCollapse ? '收起' : '展开'}}</text>
+          <text class="section-toggle-arrow">{{showDoneTodayCollapse ? '▴' : '▾'}}</text>
+        </view>
+      </view>
+      <view class="done-list">
+        <view
+          wx:for="{{doneTodayTasks}}"
+          wx:key="id"
+          class="task-done-row tap-target"
+          data-id="{{item.id}}"
+          bindtap="openTaskDetail"
+          bindlongpress="onTaskLongPress"
+          hover-class="task-done-row-hover"
+          hover-stay-time="70"
+        >
+          <text class="task-done-check">✓</text>
+          <text class="task-done-title">{{item.displayTitle}}</text>
+          <view class="task-done-tags">
+            <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="text" class="tag tag-done {{tag.className}}">{{tag.text}}</text>
+          </view>
+          <text class="task-done-arrow">›</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
   <view wx:else class="task-empty-wrap" bindtap="goTaskCreate" hover-class="task-empty-wrap-hover" hover-stay-time="70">
     <image class="task-empty-icon" src="/images/transparent background/clocking.png" mode="aspectFit" binderror="onImageError" />
     <text class="task-empty-text">记下来，别让时间悄悄溜走</text>

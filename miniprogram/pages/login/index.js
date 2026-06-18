@@ -152,6 +152,9 @@ Page({
           if (app && app.globalData) {
             app.globalData.hasLoggedIn = true;
           }
+          if (app && typeof app.tryRecordDailyCheckIn === "function") {
+            app.tryRecordDailyCheckIn();
+          }
         }
         const oid = result.openid && typeof result.openid === "string" ? result.openid.trim() : "";
         if (oid) {

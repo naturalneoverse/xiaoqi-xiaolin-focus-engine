@@ -3,6 +3,10 @@ const momentScore = require("../../utils/momentScore");
 const { buildPastWeeklyReportRows } = require("../../utils/reportHistoryLists");
 const { goSleepHome } = require("../../utils/goTabHome");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
+const {
+  getPastTaskAllTags,
+  buildPastDateDisplay,
+} = require("../../utils/taskListDisplay");
 
 function toDateLabel(dateKey) {
   if (!dateKey) return "未分组";
@@ -36,19 +40,25 @@ function buildGroups(doneTasks) {
     const dateKey = normalizeCompletedDateKey(task.completedAt);
     if (!dateKey) return;
     if (!map[dateKey]) map[dateKey] = [];
-    map[dateKey].push({
-      taskId: task.id || "",
-      name: task.title,
-      tag: (task.tags && task.tags[0] && task.tags[0].text) || "任务",
-    });
+    map[dateKey].push(task);
   });
   return Object.keys(map)
     .sort((a, b) => (a < b ? 1 : -1))
-    .map((dateKey, index) => ({
-      range: `${toDateLabel(dateKey)} 完成`,
-      expanded: index === 0,
-      tasks: map[dateKey],
+    .map((dateKey) => ({
+      dateKey,
+      range: toDateLabel(dateKey),
+      expanded: false,
+      isEmpty: false,
+      tasks: map[dateKey].map((task) => ({
+        taskId: task.id || "",
+        name: task.title || "未命名任务",
+        tags: getPastTaskAllTags(task),
+      })),
     }));
+}
+
+function buildEmptyPastGroup() {
+  return [{ isEmpty: true, dateKey: "", range: "暂无完成任务", expanded: false, tasks: [] }];
 }
 
 /** 当下质地：本周完成率 = 已完成数 / 本周创建任务数（与 momentScore 周口径一致） */
@@ -95,13 +105,32 @@ function summaryToHistoryRow(summary, tasks) {
   };
 }
 
+function applyPastGroupsToPage(page, allGroups) {
+  const datesExpanded = !!page.data.pastDatesExpanded;
+  const dateDisplay = buildPastDateDisplay(allGroups, datesExpanded);
+  page.setData({
+    allPastTaskGroups: allGroups,
+    pastTaskGroups: dateDisplay.visible,
+    pastDatesHiddenCount: dateDisplay.hiddenCount,
+    showPastDatesExpand: dateDisplay.showExpand,
+    showPastDatesCollapse: dateDisplay.showCollapse,
+    pastTasksEmpty: allGroups.length === 0 || !!allGroups[0].isEmpty,
+  });
+}
+
 Page({
   data: {
     latest: buildEmptyLatest(),
     lastWeekReport: null,
     showAllPastLink: false,
     lastWeekEmptyHint: "上周暂无完成任务记录",
-    pastTaskGroups: [{ range: "暂无完成任务", expanded: true, tasks: [] }],
+    allPastTaskGroups: [],
+    pastTaskGroups: buildEmptyPastGroup(),
+    pastTasksEmpty: true,
+    pastDatesExpanded: false,
+    pastDatesHiddenCount: 0,
+    showPastDatesExpand: false,
+    showPastDatesCollapse: false,
   },
 
   onLoad() {
@@ -122,7 +151,18 @@ Page({
       tasks = [];
     }
     const doneTasks = getDoneTasks(tasks);
-    const groups = buildGroups(doneTasks);
+    const built = buildGroups(doneTasks);
+    const expandedKeys = new Set(
+      (this.data.allPastTaskGroups || [])
+        .filter((group) => group.expanded && group.dateKey)
+        .map((group) => group.dateKey)
+    );
+    const allGroups = built.length
+      ? built.map((group) => ({
+          ...group,
+          expanded: expandedKeys.has(group.dateKey),
+        }))
+      : buildEmptyPastGroup();
     const cur = momentScore.getCurrentWeekSummary(tasks, new Date());
     const presenceName = presenceTierName(cur.doneCount, cur.createdCount);
     const presenceHint = presenceHintFor(cur.doneCount, cur.createdCount);
@@ -145,8 +185,8 @@ Page({
       lastWeekEmptyHint: pastRows.length > 0
         ? "上周暂无完成任务记录，更早的周报在下方查看"
         : "上周暂无完成任务记录",
-      pastTaskGroups: groups.length ? groups : [{ range: "暂无完成任务", expanded: true, tasks: [] }],
     });
+    applyPastGroupsToPage(this, allGroups);
   },
 
   goBack() {
@@ -180,14 +220,23 @@ Page({
     });
   },
 
-  toggleTaskGroup(e) {
-    const index = Number(e.currentTarget.dataset.index);
-    const groups = this.data.pastTaskGroups.slice();
-    if (!groups[index]) return;
-    groups[index].expanded = !groups[index].expanded;
-    this.setData({
-      pastTaskGroups: groups,
+  togglePastDatesExpand() {
+    this.setData({ pastDatesExpanded: !this.data.pastDatesExpanded }, () => {
+      applyPastGroupsToPage(this, this.data.allPastTaskGroups);
     });
+  },
+
+  toggleTaskGroup(e) {
+    const dateKey = e.currentTarget.dataset.dateKey;
+    if (!dateKey) return;
+    const allGroups = (this.data.allPastTaskGroups || []).map((group) => {
+      if (group.isEmpty) return group;
+      if (group.dateKey === dateKey) {
+        return { ...group, expanded: !group.expanded };
+      }
+      return { ...group, expanded: false };
+    });
+    applyPastGroupsToPage(this, allGroups);
   },
 
   goPastTaskDetail(e) {

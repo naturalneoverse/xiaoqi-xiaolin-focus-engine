@@ -7,7 +7,7 @@ const STORAGE_KEYS = {
   TASKS_DATA: "sleep_tasks",
   BODY_RECORDS: "body_records",
   CACHE_IMAGES: "cache_images",
-  /** 已登录用户打卡日期 YYYY-MM-DD 列表，每日最多记一次 */
+  /** 已登录用户打卡日期 YYYY-MM-DD 列表（打开小程序或录入等触发），每日最多记一次 */
   DAILY_CHECK_INS: "daily_check_ins",
   /** 首次标签已提交（与云端同步，仅作本地缓存；换机以云为准） */
   USER_TAGS_COMPLETE: "user_tags_complete",

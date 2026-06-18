@@ -6,6 +6,7 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const authSession = require("../../utils/authSession");
 const shareReferrer = require("../../utils/shareReferrer");
+const { goSleepHome } = require("../../utils/goTabHome");
 
 Page({
   data: {},
@@ -70,6 +71,9 @@ Page({
       } else {
         wx.setStorageSync(STORAGE_KEYS.HAS_LOGGED_IN, true);
         if (app && app.globalData) app.globalData.hasLoggedIn = true;
+        if (app && typeof app.tryRecordDailyCheckIn === "function") {
+          app.tryRecordDailyCheckIn();
+        }
       }
     } catch (e) {
       console.warn("[launch] setHasLoggedIn", e);
@@ -114,7 +118,7 @@ Page({
           wx.redirectTo({ url: "/pages/onboarding-tags/index" });
           return;
         }
-        wx.switchTab({ url: "/pages/index/index" });
+        goSleepHome();
       });
     };
 

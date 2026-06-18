@@ -1,11 +1,14 @@
 page {
-  background: linear-gradient(180deg, #eaf4fb 0%, #d8eaf7 100%);
+  background-color: #eaf4fb;
 }
 
 .page {
   min-height: 100vh;
   padding: 20rpx 22rpx 52rpx;
   box-sizing: border-box;
+  background: linear-gradient(180deg, #eaf4fb 0%, #d8eaf7 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
 }
 
 .range-wrap {

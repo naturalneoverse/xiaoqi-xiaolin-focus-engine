@@ -5,6 +5,12 @@ const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 const { getTodayKey } = require("../../utils/dateKeys");
 const { formatDateTime } = require("../../utils/dateFormat");
 const { mapTagClassByText } = require("../../utils/taskTagStyles");
+const {
+  sortIncompleteTasks,
+  sortCompletedTasksNewestFirst,
+  buildPendingDisplay,
+  buildDoneTodayDisplay,
+} = require("../../utils/taskListDisplay");
 
 function formatMetaDateChinese(date) {
   const y = date.getFullYear();
@@ -28,6 +34,10 @@ function formatListTitle(title) {
 function normalizeTask(task) {
   const statusText = normalizeStatus(task);
   const createdAt = task.createdAt || task.timeText || formatDateTime(new Date());
+  const updatedAt =
+    Number(task.updatedAt) > 0
+      ? Number(task.updatedAt)
+      : getTaskSortMs({ ...task, createdAt, timeText: createdAt }) || Date.now();
   const tags = Array.isArray(task.tags) ? task.tags : [];
   const typeClass = getTaskTypeClass(tags);
   return {
@@ -36,6 +46,7 @@ function normalizeTask(task) {
     displayTitle: formatListTitle(task.title),
     createdAt,
     timeText: createdAt,
+    updatedAt,
     statusText,
     done: statusText === "已完成",
     typeClass,
@@ -73,12 +84,35 @@ function sortTasksNewestFirst(list) {
   return list.slice().sort((a, b) => getTaskSortMs(b) - getTaskSortMs(a));
 }
 
+function isVisibleOnSleepTab(task, today) {
+  if (task.statusText === "已取消") return false;
+  if (task.statusText === "进行中" || task.statusText === "已延期") return true;
+  if (task.statusText !== "已完成") return false;
+  const completedDay = (task.completedAt || "").slice(0, 10).replace(/\//g, "-");
+  return completedDay === today;
+}
+
+function isIncompleteTask(task) {
+  return task.statusText === "进行中" || task.statusText === "已延期";
+}
+
 Page({
   data: {
     allTasks: [],
-    tasks: [],
+    hasVisibleTasks: false,
+    pendingTasks: [],
+    pendingHiddenCount: 0,
+    showPendingExpand: false,
+    showPendingCollapse: false,
+    doneTodayTasks: [],
+    doneTodayCount: 0,
+    doneTodayHiddenCount: 0,
+    showDoneTodayExpand: false,
+    showDoneTodayCollapse: false,
+    pendingExpanded: false,
+    doneTodayExpanded: false,
     metaDate: formatMetaDateChinese(new Date()),
-    suppressTapOnce: false,
+    highlightAddBtn: false,
     doneCount: 0,
     totalCount: 0,
   },
@@ -141,22 +175,45 @@ Page({
       storedTasks.length ? storedTasks.map(normalizeTask) : []
     );
     const today = getTodayKey();
-    const visibleTasks = normalized.filter((task) => {
-      if (task.statusText === "已取消") return false;
-      if (task.statusText === "进行中" || task.statusText === "已延期") return true;
-      if (task.statusText !== "已完成") return false;
-      const completedDay = (task.completedAt || "").slice(0, 10).replace(/\//g, "-");
-      return completedDay === today;
-    });
+    const visibleTasks = normalized.filter((task) => isVisibleOnSleepTab(task, today));
+    const pendingAll = sortIncompleteTasks(
+      visibleTasks.filter(isIncompleteTask),
+      getTaskSortMs
+    );
+    const doneTodayAll = sortCompletedTasksNewestFirst(
+      visibleTasks.filter((task) => task.statusText === "已完成"),
+      getTaskSortMs
+    );
+    const pendingExpanded = !!this.data.pendingExpanded;
+    const doneTodayExpanded = !!this.data.doneTodayExpanded;
+    const pendingDisplay = buildPendingDisplay(pendingAll, pendingExpanded);
+    const doneTodayDisplay = buildDoneTodayDisplay(doneTodayAll, doneTodayExpanded);
     const totalCount = visibleTasks.length;
-    const doneCount = visibleTasks.filter((task) => task.done).length;
+    const doneCount = doneTodayAll.length;
     this.setData({
       allTasks: normalized,
-      tasks: visibleTasks,
+      hasVisibleTasks: visibleTasks.length > 0,
+      pendingTasks: pendingDisplay.visible,
+      pendingHiddenCount: pendingDisplay.hiddenCount,
+      showPendingExpand: pendingDisplay.showExpand,
+      showPendingCollapse: pendingDisplay.showCollapse,
+      doneTodayTasks: doneTodayDisplay.visible,
+      doneTodayCount: doneTodayAll.length,
+      doneTodayHiddenCount: doneTodayDisplay.hiddenCount,
+      showDoneTodayExpand: doneTodayDisplay.showExpand,
+      showDoneTodayCollapse: doneTodayDisplay.showCollapse,
       doneCount,
       totalCount,
       metaDate: formatMetaDateChinese(new Date()),
     });
+  },
+
+  togglePendingExpand() {
+    this.setData({ pendingExpanded: !this.data.pendingExpanded }, () => this.loadTasks());
+  },
+
+  toggleDoneTodayExpand() {
+    this.setData({ doneTodayExpanded: !this.data.doneTodayExpanded }, () => this.loadTasks());
   },
 
   goTaskCreate() {

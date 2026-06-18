@@ -33,6 +33,25 @@ function buildTaskTitle(p) {
   return freq ? `${titleBase}（${freq}）` : titleBase;
 }
 
+function timeHHmmFromParams(hour, minute) {
+  const h = Number(hour);
+  const m = Number(minute);
+  if (!Number.isFinite(h) || !Number.isFinite(m)) return "";
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+function notifyManualCalendarCleanup() {
+  try {
+    wx.showToast({
+      title: "请到系统日历手动删除旧提醒",
+      icon: "none",
+      duration: 3000,
+    });
+  } catch (e) {
+    /* ignore */
+  }
+}
+
 /**
  * @param {ReminderScene|string} scene
  * @param {{
@@ -54,10 +73,11 @@ async function scheduleReminder(scene, params) {
       const freq = reminderSchedule.normalizeReminderFrequency(p.frequencyLabel);
       const title = buildTaskTitle(p);
       const taskId = String(p.taskId || "").trim();
+      const startYMD = String(p.startDate || "").trim();
+      const endYMD = String(p.endDate || p.startDate || "").trim();
+      const timeHHmm = timeHHmmFromParams(p.hour, p.minute);
 
-      if (freq === "每天" && p.startDate) {
-        const startYMD = String(p.startDate).trim();
-        const endYMD = String(p.endDate || p.startDate).trim();
+      if (freq === reminderSchedule.FREQ_DAILY && startYMD) {
         const scheduleParams = {
           startYMD,
           endYMD,
@@ -70,18 +90,15 @@ async function scheduleReminder(scene, params) {
           return true;
         }
 
-        if (prev) {
-          const go = await reminderRegistry.confirmRescheduleUpdate();
-          if (!go) return false;
-        }
-
+        const hadPrevSchedule = !!prev;
         const version = (prev && prev.version ? prev.version : 0) + 1;
+        const titleBase = (p.title && String(p.title).trim()) || "任务提醒";
         const result = await alarmService.scheduleDailyRange({
           startYMD,
           endYMD,
           hour: p.hour,
           minute: p.minute,
-          title,
+          title: titleBase,
           taskId,
           version,
         });
@@ -97,11 +114,28 @@ async function scheduleReminder(scene, params) {
             fingerprint: result.fingerprint,
             days: result.days,
           });
+          if (hadPrevSchedule) notifyManualCalendarCleanup();
         }
         return !!result.ok;
       }
 
-      return alarmService.scheduleAlarm(p.hour, p.minute, p.day, title);
+      if (freq === reminderSchedule.FREQ_START_END) {
+        const days = reminderSchedule.computeStartEndPairReminderDays(startYMD, endYMD, timeHHmm);
+        if (!days.length) {
+          wx.showToast({ title: "区间内没有可设置的提醒时间", icon: "none" });
+          return false;
+        }
+        return alarmService.scheduleAlarmDays(p.hour, p.minute, days, title);
+      }
+
+      const singleDay =
+        reminderSchedule.computeSingleReminderDayYMD(startYMD, endYMD, timeHHmm) ||
+        String(p.day || "").trim();
+      if (!singleDay) {
+        wx.showToast({ title: "区间内没有可设置的提醒时间", icon: "none" });
+        return false;
+      }
+      return alarmService.scheduleAlarm(p.hour, p.minute, singleDay, title);
     }
 
     if (RESERVED_SCENES.has(String(scene || ""))) {

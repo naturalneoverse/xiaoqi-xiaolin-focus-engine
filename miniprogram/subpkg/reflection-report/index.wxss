@@ -48,7 +48,7 @@
   margin: 16rpx 32rpx 0;
   padding: 20rpx 28rpx;
   border-radius: 16rpx;
-  background: rgba(255, 255, 255, 0.72);
+  background: #ffffff;
   border: 1rpx solid rgba(24, 64, 97, 0.12);
   box-sizing: border-box;
 }
@@ -221,7 +221,7 @@
 .report-loading-panel {
   padding: 36rpx 40rpx;
   border-radius: 20rpx;
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
   min-width: 320rpx;
   box-sizing: border-box;
 }

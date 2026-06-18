@@ -38,7 +38,13 @@ function writeTaskToStorage(task, draftTaskId) {
     console.error("[taskCreatePersist] getStorageSync", e);
     return { ok: false };
   }
-  const nextTasks = [task, ...prevTasks.filter((t) => t && t.id !== taskId)];
+  const nextTasks = [
+    {
+      ...task,
+      updatedAt: Number(task.updatedAt) > 0 ? Number(task.updatedAt) : Date.now(),
+    },
+    ...prevTasks.filter((t) => t && t.id !== taskId),
+  ];
   try {
     wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
     dailyCheckIn.recordDailyCheckIn();

@@ -81,6 +81,9 @@ function ensureAlarmPermission() {
 /** 系统日历（带提醒），与 wx.addPhoneCalendar 对应 */
 const SCOPE_ADD_PHONE_CALENDAR = "scope.addPhoneCalendar";
 
+/** 已授权后跳过异步 getSetting，避免 picker 回调链过长导致日历 API 失去用户手势上下文 */
+let calendarPermissionCached = null;
+
 function openSettingThen(resolve, scopeKey, deniedToast) {
   if (typeof wx.openSetting !== "function") {
     toast("无法打开设置");
@@ -92,6 +95,7 @@ function openSettingThen(resolve, scopeKey, deniedToast) {
       try {
         const auth2 = readAuth(res2);
         if (auth2[scopeKey] === true) {
+          if (scopeKey === SCOPE_ADD_PHONE_CALENDAR) calendarPermissionCached = true;
           resolve(true);
           return;
         }
@@ -113,6 +117,9 @@ function openSettingThen(resolve, scopeKey, deniedToast) {
  * @returns {Promise<boolean>}
  */
 function ensureAddPhoneCalendarPermission() {
+  if (calendarPermissionCached === true) {
+    return Promise.resolve(true);
+  }
   return new Promise((resolve) => {
     try {
       if (typeof wx.getSetting !== "function") {
@@ -124,6 +131,7 @@ function ensureAddPhoneCalendarPermission() {
           try {
             const auth = readAuth(res);
             if (auth[SCOPE_ADD_PHONE_CALENDAR] === true) {
+              calendarPermissionCached = true;
               resolve(true);
               return;
             }
@@ -134,7 +142,10 @@ function ensureAddPhoneCalendarPermission() {
             if (typeof wx.authorize === "function") {
               wx.authorize({
                 scope: SCOPE_ADD_PHONE_CALENDAR,
-                success: () => resolve(true),
+                success: () => {
+                  calendarPermissionCached = true;
+                  resolve(true);
+                },
                 fail: () => {
                   openSettingThen(resolve, SCOPE_ADD_PHONE_CALENDAR, "需要开启日历权限才能添加提醒");
                 },
@@ -154,9 +165,19 @@ function ensureAddPhoneCalendarPermission() {
   });
 }
 
+function markCalendarPermissionGranted() {
+  calendarPermissionCached = true;
+}
+
+function isCalendarPermissionCached() {
+  return calendarPermissionCached === true;
+}
+
 module.exports = {
   ensureAlarmPermission,
   ensureAddPhoneCalendarPermission,
+  markCalendarPermissionGranted,
+  isCalendarPermissionCached,
   SCOPE_ALARM,
   SCOPE_ADD_PHONE_CALENDAR,
 };

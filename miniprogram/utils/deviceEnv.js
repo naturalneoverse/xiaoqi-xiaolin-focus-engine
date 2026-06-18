@@ -17,6 +17,23 @@ function isDesktopWechat() {
   return p === "windows" || p === "mac" || p === "devtools";
 }
 
+/** 华为/鸿蒙等机型 addPhoneRepeatCalendar 易报 wrong format:repeat，改走逐日写入 */
+function shouldSkipRepeatCalendar() {
+  try {
+    const sys =
+      typeof wx.getDeviceInfo === "function" ? wx.getDeviceInfo() : wx.getSystemInfoSync();
+    const brand = String((sys && sys.brand) || "").toLowerCase();
+    const model = String((sys && sys.model) || "").toLowerCase();
+    const system = String((sys && sys.system) || "").toLowerCase();
+    if (system.includes("harmony") || system.includes("hongmeng")) return true;
+    if (brand.includes("huawei") || brand.includes("honor")) return true;
+    if (model.includes("huawei") || model.includes("honor")) return true;
+    return false;
+  } catch (e) {
+    return false;
+  }
+}
+
 /**
  * 电脑端同步提示：立即弹窗，避免先走 addPhoneCalendar 再等系统「在手机上打开」延迟出现。
  * @param {{ feature?: string }} [opts]
@@ -41,5 +58,6 @@ function showMobileOnlyModal(opts) {
 module.exports = {
   readPlatform,
   isDesktopWechat,
+  shouldSkipRepeatCalendar,
   showMobileOnlyModal,
 };
