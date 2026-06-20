@@ -1,6 +1,11 @@
 // app.js
 const TAB_PAGE_ROUTES = new Set(["pages/sleep/index", "pages/index/index", "pages/my/index"]);
-const NO_TOP_SAFE_AREA_ROUTES = new Set(["pages/login/index", "pages/onboarding-tags/index", "pages/launch/launch"]);
+const NO_TOP_SAFE_AREA_ROUTES = new Set([
+  "pages/login/index",
+  "pages/login-splash/index",
+  "pages/onboarding-tags/index",
+  "pages/launch/launch",
+]);
 /** 仅这些页为自定义导航，需顶部安全区 padding；其余使用系统导航，由微信留出标题栏，不再叠加 top padding */
 const CUSTOM_NAV_ROUTES = new Set([
   "pages/agreement/index",

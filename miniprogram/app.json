@@ -4,6 +4,7 @@
   "pages": [
     "pages/launch/launch",
     "pages/login/index",
+    "pages/login-splash/index",
     "pages/agreement/index",
     "pages/privacy/index",
     "pages/onboarding-tags/index",

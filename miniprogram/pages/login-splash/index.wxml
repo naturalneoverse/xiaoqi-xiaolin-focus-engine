@@ -1,0 +1,45 @@
+<view class="splash-page">
+  <view wx:if="{{videoSrc}}" class="splash-video-wrap">
+    <video
+      id="splashVideo"
+      class="splash-video"
+      src="{{videoSrc}}"
+      autoplay
+      muted="{{muted}}"
+      show-center-play-btn="{{false}}"
+      show-play-btn="{{false}}"
+      show-fullscreen-btn="{{false}}"
+      controls="{{false}}"
+      enable-progress-gesture="{{false}}"
+      object-fit="cover"
+      bindended="onVideoEnded"
+      binderror="onVideoError"
+      bindplay="onVideoPlay"
+    />
+  </view>
+  <view wx:else class="splash-fallback">
+    <text class="splash-fallback-text">{{loadingHint}}</text>
+  </view>
+
+  <view wx:if="{{showEnterBtn}}" class="splash-end-scrim" />
+
+  <view wx:if="{{videoSrc}}" class="splash-sound-btn" bindtap="onTapSoundToggle">
+    <text>{{muted ? "开启声音" : "关闭声音"}}</text>
+  </view>
+
+  <view
+    wx:if="{{showEnterBtn}}"
+    class="splash-enter-wrap"
+    bindtap="onTapEnter"
+  >
+    <view class="splash-enter-btn splash-enter-btn--breathe">
+      <view class="splash-enter-btn-glass">
+        <view class="splash-enter-btn-shine" />
+        <view class="splash-enter-btn-core">
+          <view class="splash-enter-btn-inner" />
+        </view>
+      </view>
+    </view>
+    <text class="splash-enter-label">继续</text>
+  </view>
+</view>

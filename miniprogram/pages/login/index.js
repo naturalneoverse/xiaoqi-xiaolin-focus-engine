@@ -1,6 +1,6 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const authSession = require("../../utils/authSession");
-const { goSleepHome } = require("../../utils/goTabHome");
+const { goAfterLoginSplash } = require("../../utils/loginSplashNavigate");
 
 Page({
   data: {
@@ -224,13 +224,7 @@ Page({
         } catch (syncErr) {
           console.warn("[login] pull after login", syncErr);
         }
-        if (!tagsComplete) {
-          wx.redirectTo({
-            url: "/pages/onboarding-tags/index",
-          });
-        } else {
-          goSleepHome();
-        }
+        goAfterLoginSplash(tagsComplete);
       } catch (e) {
         const errMsg = (e && (e.errMsg || e.message)) || "";
         let toastTitle = "登录失败，请重试";
