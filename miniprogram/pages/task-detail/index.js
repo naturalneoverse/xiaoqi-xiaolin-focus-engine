@@ -9,9 +9,9 @@ const { goSleepHome } = require("../../utils/goTabHome");
 const reminderSchedule = require("../../utils/reminderSchedule");
 const { scheduleReminder } = require("../../utils/reminderManager");
 const deviceEnv = require("../../utils/deviceEnv");
-const alarmService = require("../../utils/alarmService");
 const speechRecognition = require("../../utils/speechRecognition");
 const { formatCompanionBubbleLines } = require("../../utils/formatCompanionBubble");
+const subtaskUtil = require("../../utils/subtask");
 const STATUS_OPTIONS = ["进行中", "已完成", "已延期", "已取消"];
 const { REMINDER_FREQ_OPTIONS, FREQ_SINGLE } = reminderSchedule;
 
@@ -164,6 +164,15 @@ Page({
     detailReminderFreqIndex: 0,
     tags: [],
     showReflectionBtn: false,
+    subtasks: [],
+    subtaskDone: 0,
+    subtaskTotal: 0,
+    subtaskProgressPercent: 0,
+    subtaskCanAdd: true,
+    subtaskAtLimit: false,
+    subtaskAllDoneHint: false,
+    showConvertPicker: false,
+    convertCandidates: [],
     mascotAnimPaused: false,
     showMascotModal: false,
     companionBubbleLines: null,
@@ -191,6 +200,15 @@ Page({
       setTimeout(() => goSleepHome(), 400);
       return;
     }
+
+    if (subtaskUtil.isSubtask(task)) {
+      wx.redirectTo({
+        url: `/pages/subtask-detail/index?taskId=${encodeURIComponent(task.id)}`,
+      });
+      return;
+    }
+
+    speechRecognition.warmUp().catch(() => {});
 
     const range = resolveReminderDateRange(task);
     const statusText = task.statusText || "进行中";
@@ -243,13 +261,111 @@ Page({
     if (showSuccess) {
       this.applyCreateSuccessBubble(task, tagTexts);
     }
+    this.loadSubtaskSection(task);
+  },
+
+  loadSubtaskSection(taskOpt) {
+    const taskId = this.data.taskId;
+    if (!taskId) return;
+    const tasks = subtaskUtil.readTasks();
+    const parent = taskOpt || subtaskUtil.findTaskById(tasks, taskId);
+    if (!parent) return;
+    const gate = subtaskUtil.canAddSubtaskToParent(parent, tasks);
+    const subs = subtaskUtil.getSubtasksForParent(tasks, taskId);
+    const progress = subtaskUtil.computeProgress(subs);
+    const percent = progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
+    const list = subtaskUtil.buildSubtaskListView(taskId, tasks);
+    this.setData({
+      subtasks: list,
+      subtaskDone: progress.done,
+      subtaskTotal: progress.total,
+      subtaskProgressPercent: percent,
+      subtaskCanAdd: gate.ok,
+      subtaskAtLimit: gate.reason === "limit",
+      subtaskAllDoneHint: subtaskUtil.shouldShowSubtaskAllDoneHint(parent, tasks),
+    });
+  },
+
+  onToggleSubtask(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    const res = subtaskUtil.toggleSubtaskDone(id);
+    if (!res.ok) {
+      wx.showToast({ title: res.message || "操作失败", icon: "none" });
+      return;
+    }
+    this.loadSubtaskSection(res.parent);
+  },
+
+  onTapSubtaskRow(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    wx.navigateTo({
+      url: `/pages/subtask-detail/index?taskId=${encodeURIComponent(id)}`,
+    });
+  },
+
+  onTapAddSubtask() {
+    const { taskId } = this.data;
+    if (!taskId) return;
+    const tasks = subtaskUtil.readTasks();
+    const parent = subtaskUtil.findTaskById(tasks, taskId);
+    const gate = subtaskUtil.canAddSubtaskToParent(parent, tasks);
+    if (gate.reason === "limit") {
+      const subs = subtaskUtil.getSubtasksForParent(tasks, taskId);
+      this.setData({
+        showConvertPicker: true,
+        convertCandidates: subs.map((t) => ({
+          id: t.id,
+          title: t.title || "未命名",
+        })),
+      });
+      return;
+    }
+    if (!gate.ok) {
+      wx.showToast({ title: gate.message || "无法添加", icon: "none" });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/subtask-create/index?parentTaskId=${encodeURIComponent(taskId)}`,
+    });
+  },
+
+  onCancelConvertPicker() {
+    this.setData({ showConvertPicker: false, convertCandidates: [] });
+  },
+
+  onSelectConvertSubtask(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    const candidate = (this.data.convertCandidates || []).find((c) => c.id === id);
+    wx.showModal({
+      title: "转为独立任务",
+      content: `将「${(candidate && candidate.title) || "子任务"}」移出当前任务，变为独立任务？`,
+      confirmColor: "#12598f",
+      success: (res) => {
+        if (!res.confirm) return;
+        const r = subtaskUtil.detachSubtaskAsIndependent(id);
+        if (!r.ok) {
+          wx.showToast({ title: r.message || "操作失败", icon: "none" });
+          return;
+        }
+        this.setData({ showConvertPicker: false, convertCandidates: [] });
+        this.loadSubtaskSection(r.parent);
+        wx.showToast({ title: "已转为独立任务", icon: "success" });
+        setTimeout(() => {
+          wx.navigateTo({
+            url: `/pages/subtask-create/index?parentTaskId=${encodeURIComponent(this.data.taskId)}`,
+          });
+        }, 400);
+      },
+    });
   },
 
   onShow() {
     speechRecognition.prepare();
-    speechRecognition.warmUp().catch(() => {});
-    if (!deviceEnv.isDesktopWechat()) {
-      alarmService.warmCalendarSession().catch(() => {});
+    if (this.data.taskId) {
+      this.loadSubtaskSection();
     }
   },
 
@@ -298,11 +414,7 @@ Page({
   },
 
   toggleReminderExpand() {
-    const next = !this.data.reminderExpanded;
-    this.setData({ reminderExpanded: next });
-    if (next && !deviceEnv.isDesktopWechat()) {
-      alarmService.warmCalendarSession().catch(() => {});
-    }
+    this.setData({ reminderExpanded: !this.data.reminderExpanded });
   },
 
   cancelContentEdit() {
@@ -606,6 +718,9 @@ Page({
       if (saved) {
         const cloudDataSync = require("../../utils/cloudDataSync");
         cloudDataSync.afterTaskSaved(saved);
+        if (patch.tags && subtaskUtil.isTopLevelTask(saved)) {
+          subtaskUtil.syncParentTagsToSubtasks(taskId);
+        }
         if (opts.scheduleReminder !== false) {
           this.maybeScheduleTaskReminder(saved);
         }

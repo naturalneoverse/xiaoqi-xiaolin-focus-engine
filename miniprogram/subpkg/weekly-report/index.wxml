@@ -5,7 +5,7 @@
 
   <view class="card">
     <text class="section-title">时间流向看得清</text>
-    <text class="section-desc">这一周，您记下了 {{recordedCount}} 件事，做完了 {{finishedCount}} 件。</text>
+    <text class="section-desc">这一周，清单里 {{flowingCount}} 件 在流动（其中本周新建 {{createdInWeekCount}} 件），做完了 {{finishedCount}} 件。</text>
 
     <view class="progress-list">
       <view class="progress-item" wx:for="{{distPriority}}" wx:key="key">
@@ -36,7 +36,8 @@
     </view>
 
     <view class="moment-wrap">
-      <text class="moment-text">真我时刻：{{momentScore}} 次</text>
+      <text class="moment-text">真我时刻：{{momentDisplayText}} {{momentUnitText}}</text>
+      <text wx:if="{{momentFootnote}}" class="moment-footnote">{{momentFootnote}}</text>
     </view>
   </view>
 

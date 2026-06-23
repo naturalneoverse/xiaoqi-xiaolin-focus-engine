@@ -1,0 +1,148 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="nav">
+    <view class="back tap-target" bindtap="goBack">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
+    </view>
+    <text class="nav-title">添加子任务</text>
+    <view class="nav-space"></view>
+  </view>
+
+  <text class="parent-hint">属于：{{parentTitle}}</text>
+
+  <view class="input-card">
+    <text class="label">子任务名称</text>
+    <view class="input-field-wrap input-field-wrap-name">
+      <view class="input-row input-row-textarea">
+        <textarea
+          class="textarea input-field input-field-name"
+          placeholder="输入子任务名称"
+          placeholder-class="placeholder-text"
+          value="{{taskName}}"
+          maxlength="200"
+          adjust-position
+          hold-keyboard="{{false}}"
+          show-confirm-bar="{{false}}"
+          confirm-type="done"
+          focus="{{nameFocus}}"
+          disabled="{{speechRecordingTarget === 'content'}}"
+          bindinput="onTaskNameInput"
+        />
+      </view>
+      <text class="limit-tip limit-tip-corner {{speechRecordingTarget === 'name' ? 'speech-layer-hidden' : ''}} {{taskNameLength > taskNameMax ? 'limit-tip-exceeded' : ''}}">{{taskNameLength}}/{{taskNameMax}}</text>
+      <view
+        class="speech-hold-bar {{speechRecordingTarget === 'name' ? '' : 'speech-layer-hidden'}}"
+        style="--speech-mic-color: #6c92b1;"
+      >
+        <view class="speech-hold-wave">
+          <view class="speech-hold-wave-bar" style="animation-delay: 0ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 100ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 200ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 300ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 400ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 500ms"></view>
+        </view>
+        <text class="speech-hold-tip">松手填入</text>
+      </view>
+      <view class="speech-mic-corner speech-mic-corner--card" style="--speech-mic-color: #6c92b1;">
+        <button
+          class="speech-mic-btn {{speechRecordingTarget === 'name' ? 'speech-mic-btn-recording' : ''}} {{speechNameMicDisabled ? 'speech-mic-btn-disabled' : ''}}"
+          plain
+          hover-class="none"
+          disabled="{{speechNameMicDisabled}}"
+          data-field="name"
+          catchlongpress="onSpeechLongPress"
+          catchtouchend="onSpeechTouchEnd"
+          catchtouchcancel="onSpeechTouchEnd"
+        >
+          <view wx:if="{{speechRecordingTarget === 'name'}}" class="speech-wave">
+            <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+          </view>
+          <view wx:else class="speech-mic-icon"></view>
+        </button>
+      </view>
+    </view>
+    <text wx:if="{{taskNameError}}" class="limit-error">{{taskNameError}}</text>
+  </view>
+
+  <view class="input-card">
+    <text class="label">子任务内容</text>
+    <view class="input-field-wrap input-field-wrap-content">
+      <view class="input-row input-row-textarea">
+        <textarea
+          class="textarea input-field"
+          placeholder="选填"
+          placeholder-class="placeholder-text"
+          value="{{taskContent}}"
+          maxlength="2000"
+          auto-height
+          adjust-position
+          hold-keyboard="{{false}}"
+          show-confirm-bar="{{false}}"
+          confirm-type="done"
+          disabled="{{speechRecordingTarget === 'name'}}"
+          bindinput="onTaskContentInput"
+        />
+      </view>
+      <text class="limit-tip limit-tip-corner {{speechRecordingTarget === 'content' ? 'speech-layer-hidden' : ''}} {{taskContentLength > taskContentMax ? 'limit-tip-exceeded' : ''}}">{{taskContentLength}}/{{taskContentMax}}</text>
+      <view
+        class="speech-hold-bar speech-hold-bar--wide-counter {{speechRecordingTarget === 'content' ? '' : 'speech-layer-hidden'}}"
+        style="--speech-mic-color: #6c92b1;"
+      >
+        <view class="speech-hold-wave">
+          <view class="speech-hold-wave-bar" style="animation-delay: 0ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 100ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 200ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 300ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 400ms"></view>
+          <view class="speech-hold-wave-bar" style="animation-delay: 500ms"></view>
+        </view>
+        <text class="speech-hold-tip">松手填入</text>
+      </view>
+      <view class="speech-mic-corner speech-mic-corner--card" style="--speech-mic-color: #6c92b1;">
+        <button
+          class="speech-mic-btn {{speechRecordingTarget === 'content' ? 'speech-mic-btn-recording' : ''}} {{speechContentMicDisabled ? 'speech-mic-btn-disabled' : ''}}"
+          plain
+          hover-class="none"
+          disabled="{{speechContentMicDisabled}}"
+          data-field="content"
+          catchlongpress="onSpeechLongPress"
+          catchtouchend="onSpeechTouchEnd"
+          catchtouchcancel="onSpeechTouchEnd"
+        >
+          <view wx:if="{{speechRecordingTarget === 'content'}}" class="speech-wave">
+            <view class="speech-wave-bar" style="animation-delay: 0ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 120ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 240ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 360ms"></view>
+            <view class="speech-wave-bar" style="animation-delay: 480ms"></view>
+          </view>
+          <view wx:else class="speech-mic-icon"></view>
+        </button>
+      </view>
+    </view>
+    <text wx:if="{{taskContentError}}" class="limit-error">{{taskContentError}}</text>
+  </view>
+
+  <view class="input-card">
+    <text class="label">日期</text>
+    <view class="picker-row">
+      <text class="picker-k">开始</text>
+      <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+        <view class="picker-v tap-target">{{startDate || "选择日期"}}</view>
+      </picker>
+    </view>
+    <view class="picker-row">
+      <text class="picker-k">结束</text>
+      <picker mode="date" value="{{endDate}}" start="{{startDate}}" bindchange="onEndDateChange">
+        <view class="picker-v tap-target">{{endDate || "不填写"}}</view>
+      </picker>
+    </view>
+    <text wx:if="{{endDate}}" class="clear-end tap-target" bindtap="clearEndDate">清空结束日期</text>
+  </view>
+
+  <button class="btn-create" bindtap="onCreate" loading="{{saving}}" disabled="{{saving}}">创建</button>
+</view>

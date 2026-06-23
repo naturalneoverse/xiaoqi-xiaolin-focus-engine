@@ -212,19 +212,33 @@ Page({
           agree: true,
         });
         await this.reportPendingReferralIfAny();
-        try {
-          const sync = require("../../utils/cloudDataSync");
-          if (sync && typeof sync.pullAndMergeFromCloud === "function") {
-            await sync.pullAndMergeFromCloud();
-          }
-          const reflectionCloudSync = require("../../utils/reflectionCloudSync");
-          if (reflectionCloudSync && typeof reflectionCloudSync.pushAllLocalQuadrantsToCloud === "function") {
-            await reflectionCloudSync.pushAllLocalQuadrantsToCloud();
-          }
-        } catch (syncErr) {
-          console.warn("[login] pull after login", syncErr);
-        }
         goAfterLoginSplash(tagsComplete);
+        // 云同步放后台：PC/弱网下 callFunction 可能长时间挂起，阻塞跳转会导致「登录中」卡死
+        Promise.resolve()
+          .then(async () => {
+            try {
+              const checkInCloudSync = require("../../utils/checkInCloudSync");
+              if (checkInCloudSync && typeof checkInCloudSync.pullAndMergeCheckIns === "function") {
+                await checkInCloudSync.pullAndMergeCheckIns();
+              }
+            } catch (e0) {
+              console.warn("[login] checkIn pull", e0);
+            }
+            const sync = require("../../utils/cloudDataSync");
+            if (sync && typeof sync.pullAndMergeFromCloud === "function") {
+              await sync.pullAndMergeFromCloud();
+            }
+            const reflectionCloudSync = require("../../utils/reflectionCloudSync");
+            if (
+              reflectionCloudSync &&
+              typeof reflectionCloudSync.pushAllLocalQuadrantsToCloud === "function"
+            ) {
+              await reflectionCloudSync.pushAllLocalQuadrantsToCloud();
+            }
+          })
+          .catch((syncErr) => {
+            console.warn("[login] pull after login", syncErr);
+          });
       } catch (e) {
         const errMsg = (e && (e.errMsg || e.message)) || "";
         let toastTitle = "登录失败，请重试";

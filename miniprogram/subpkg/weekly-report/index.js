@@ -52,9 +52,13 @@ const SHARE_CARD_H = 600;
 Page({
   data: {
     rangeLabel: "",
-    recordedCount: 0,
+    flowingCount: 0,
+    createdInWeekCount: 0,
     finishedCount: 0,
     momentScore: 0,
+    momentDisplayText: "0",
+    momentUnitText: "次",
+    momentFootnote: "",
     mascotText: "",
     mascotInfraError: false,
     distPriority: [],
@@ -114,6 +118,7 @@ Page({
     const refNow = new Date();
     const agg = momentScore.aggregateMomentScoreForWeek(tasks, monday, refNow);
     const { doneCount, momentScore: ms } = agg;
+    const momentView = momentScore.buildMomentScoreView(ms);
     const weave = timeWeaveWeekStats.buildTimeWeaveWeekStats(tasks, monday, refNow);
 
     const baselineBody = localLine(weave.copyKey, weave.lineIndex) || FALLBACK_NEUTRAL;
@@ -121,9 +126,13 @@ Page({
 
     this.setData({
       rangeLabel: momentScore.formatWeekRangeChinese(monday),
-      recordedCount: weave.recordedCount,
+      flowingCount: weave.flowingCount,
+      createdInWeekCount: weave.createdInWeekCount,
       finishedCount: doneCount,
       momentScore: ms,
+      momentDisplayText: momentView.displayText,
+      momentUnitText: momentView.unitText,
+      momentFootnote: momentView.footnote,
       distPriority: weave.distPriority,
       distWhom: weave.distWhom,
       distWhy: weave.distWhy,

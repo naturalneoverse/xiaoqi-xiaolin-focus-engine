@@ -162,6 +162,16 @@ page {
   font-weight: 700;
 }
 
+.moment-footnote {
+  display: block;
+  margin-top: 14rpx;
+  padding: 0 16rpx;
+  color: #6a8499;
+  font-size: 24rpx;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
 .summary-card {
   border-radius: 24rpx;
   background: #edf6fd;

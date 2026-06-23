@@ -1,3 +1,6 @@
 {
-  "navigationBarTitleText": "为何而做"
+  "navigationBarTitleText": "为何而做",
+  "usingComponents": {
+    "moment-guardian-modal": "/components/moment-guardian-modal/index"
+  }
 }

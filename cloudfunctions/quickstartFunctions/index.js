@@ -15,6 +15,10 @@ const db = cloud.database();
 const USER_TAGS_COLL = "user_tags";
 /** 昵称 / 签名 / 头像 fileID，按 openid 一条 */
 const USER_PROFILES_COLL = "user_profiles";
+/** 每日打卡日期列表 YYYY-MM-DD[]，按 openid 一条 */
+const USER_CHECK_INS_COLL = "user_check_ins";
+const CHECK_IN_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const MAX_CHECK_IN_DAYS = 400;
 const VALID_GENDER = new Set(["she", "he", "na"]);
 const VALID_STAGE = new Set(["starting", "pushing", "halfway", "enjoying"]);
 const VALID_ROLES = new Set([
@@ -133,6 +137,76 @@ const saveUserProfileCloud = async (event) => {
     return { success: true, serverUpdatedAtMs: stamps.serverUpdatedAtMs };
   } catch (e) {
     return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+function normalizeCheckInDates(arr) {
+  if (!Array.isArray(arr)) return [];
+  const set = new Set();
+  arr.forEach((k) => {
+    if (typeof k === "string" && CHECK_IN_DATE_RE.test(k)) set.add(k);
+  });
+  return Array.from(set)
+    .sort((a, b) => (a < b ? 1 : -1))
+    .slice(0, MAX_CHECK_IN_DAYS);
+}
+
+/** 合并打卡日期：云端与客户端取并集 */
+const mergeCheckInDates = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid", dates: [] };
+  }
+  const incoming = normalizeCheckInDates(event && event.dates);
+  try {
+    const existed = await db.collection(USER_CHECK_INS_COLL).where({ openid }).limit(1).get();
+    const cloudDates = normalizeCheckInDates(existed.data && existed.data[0] && existed.data[0].dates);
+    const merged = normalizeCheckInDates([...cloudDates, ...incoming]);
+    const minLen = Math.max(cloudDates.length, incoming.length);
+    if (merged.length < minLen) {
+      console.error("[mergeCheckInDates] unexpected shrink", cloudDates.length, incoming.length, merged.length);
+    }
+    const stamps = serverTimestamps();
+    const data = {
+      openid,
+      dates: merged,
+      updatedAtMs: stamps.serverUpdatedAtMs,
+      serverUpdatedAtMs: stamps.serverUpdatedAtMs,
+      serverUpdatedAt: stamps.serverUpdatedAt,
+    };
+    if (existed.data && existed.data[0]) {
+      await db.collection(USER_CHECK_INS_COLL).doc(existed.data[0]._id).update({ data });
+    } else {
+      await db.collection(USER_CHECK_INS_COLL).add({ data });
+    }
+    return { success: true, dates: merged };
+  } catch (e) {
+    return {
+      success: false,
+      errMsg: e && e.message ? e.message : String(e),
+      dates: incoming,
+    };
+  }
+};
+
+/** 只读拉取云端打卡日期（不修改云端，供正式版/开发版本地缩水后恢复） */
+const getCheckInDates = async () => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid", dates: [] };
+  }
+  try {
+    const existed = await db.collection(USER_CHECK_INS_COLL).where({ openid }).limit(1).get();
+    const cloudDates = normalizeCheckInDates(existed.data && existed.data[0] && existed.data[0].dates);
+    return { success: true, dates: cloudDates };
+  } catch (e) {
+    return {
+      success: false,
+      errMsg: e && e.message ? e.message : String(e),
+      dates: [],
+    };
   }
 };
 
@@ -256,6 +330,14 @@ function taskDocToClient(doc) {
     reminderTime: doc.reminderTime != null ? String(doc.reminderTime) : "",
     reminderFrequency: doc.reminderFrequency != null ? String(doc.reminderFrequency) : "不重复",
     tags: Array.isArray(doc.tags) ? doc.tags : [],
+    parentTaskId: doc.parentTaskId != null ? String(doc.parentTaskId) : "",
+    subtaskProgress:
+      doc.subtaskProgress && typeof doc.subtaskProgress === "object"
+        ? {
+            total: Number(doc.subtaskProgress.total) || 0,
+            done: Number(doc.subtaskProgress.done) || 0,
+          }
+        : undefined,
   });
 }
 
@@ -295,6 +377,19 @@ function buildTaskDbPayload(task, openid) {
     reminderTime: task.reminderTime != null ? String(task.reminderTime) : "",
     reminderFrequency: task.reminderFrequency != null ? String(task.reminderFrequency) : "不重复",
     tags,
+    parentTaskId:
+      task.parentTaskId != null && String(task.parentTaskId).trim()
+        ? String(task.parentTaskId).trim()
+        : "",
+    subtaskProgress:
+      task.subtaskProgress &&
+      typeof task.subtaskProgress === "object" &&
+      !task.parentTaskId
+        ? {
+            total: Number(task.subtaskProgress.total) || 0,
+            done: Number(task.subtaskProgress.done) || 0,
+          }
+        : undefined,
     status: TASK_STATUS_ACTIVE,
     ...stamps,
   });
@@ -1165,10 +1260,44 @@ const deleteRecord = async (event) => {
       success: true,
     };
   } catch (e) {
-    return {
-      success: false,
-      errMsg: e,
-    };
+    return { success: false, errMsg: e && e.message ? e.message : String(e) };
+  }
+};
+
+const MAX_AVATAR_UPLOAD_BYTES = 3 * 1024 * 1024;
+
+/** 客户端直传失败时：经云函数写入云存储（服务端 uploadFile） */
+const uploadUserAvatar = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const openid = wxContext.OPENID;
+  if (!openid) {
+    return { success: false, errMsg: "no openid" };
+  }
+  const b64 = event && event.base64 != null ? String(event.base64) : "";
+  if (!b64) {
+    return { success: false, errMsg: "no image data" };
+  }
+  try {
+    const buffer = Buffer.from(b64, "base64");
+    if (!buffer.length) {
+      return { success: false, errMsg: "empty image" };
+    }
+    if (buffer.length > MAX_AVATAR_UPLOAD_BYTES) {
+      return { success: false, errMsg: "image too large" };
+    }
+    const extRaw = event && event.ext != null ? String(event.ext).toLowerCase() : "jpg";
+    const ext = extRaw === "png" ? "png" : "jpg";
+    const cloudPath = `avatars/${openid.slice(-10)}_${Date.now()}.${ext}`;
+    const upload = await cloud.uploadFile({
+      cloudPath,
+      fileContent: buffer,
+    });
+    if (!upload || !upload.fileID) {
+      return { success: false, errMsg: "upload no fileID" };
+    }
+    return { success: true, fileID: upload.fileID };
+  } catch (e) {
+    return { success: false, errMsg: e && e.message ? e.message : String(e) };
   }
 };
 
@@ -1193,6 +1322,12 @@ exports.main = async (event, context) => {
       return await getUserProfileCloud();
     case "saveUserProfile":
       return await saveUserProfileCloud(event);
+    case "uploadUserAvatar":
+      return await uploadUserAvatar(event);
+    case "mergeCheckInDates":
+      return await mergeCheckInDates(event);
+    case "getCheckInDates":
+      return await getCheckInDates(event);
     case "getOpenId":
       return await getOpenId();
     case "getMiniProgramCode":

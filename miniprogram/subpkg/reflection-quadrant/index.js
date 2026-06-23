@@ -185,7 +185,6 @@ Page({
   onShow() {
     applyReflectionNavBar();
     speechRecognition.prepare();
-    speechRecognition.warmUp().catch(() => {});
     this._returningToSelect = false;
     if (this._submitting) {
       this._ready = true;

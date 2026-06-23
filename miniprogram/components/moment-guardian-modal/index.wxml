@@ -1,0 +1,11 @@
+<view wx:if="{{visible}}" class="mg-mask" catchtouchmove="noop">
+  <view class="mg-modal" catchtap="noop">
+    <text class="mg-message">{{message}}</text>
+    <button class="mg-btn mg-btn-primary" plain hover-class="mg-btn-hover" bindtap="onSettle">
+      好的，我先安顿手边的
+    </button>
+    <button class="mg-btn mg-btn-ghost" plain hover-class="mg-btn-ghost-hover" bindtap="onProceed">
+      仍要添加
+    </button>
+  </view>
+</view>

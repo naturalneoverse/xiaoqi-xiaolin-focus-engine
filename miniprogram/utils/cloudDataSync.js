@@ -182,24 +182,37 @@ function cloudTaskToLocal(cloudTask) {
   if (!cloudTask || !cloudTask.id) return null;
   const updatedAt = Number(cloudTask.updatedAt) || getTaskEffectiveMs(cloudTask) || Date.now();
   const serverUpdatedAtMs = Number(cloudTask.serverUpdatedAtMs) || 0;
-  return {
+  const parentTaskId =
+    cloudTask.parentTaskId != null ? String(cloudTask.parentTaskId).trim() : "";
+  const local = {
     id: String(cloudTask.id),
     title: cloudTask.title != null ? String(cloudTask.title) : "",
     content: cloudTask.content != null ? String(cloudTask.content) : "",
     timeText: cloudTask.timeText != null ? String(cloudTask.timeText) : "",
     dateValue: cloudTask.dateValue != null ? String(cloudTask.dateValue) : "",
+    startDate: cloudTask.startDate != null ? String(cloudTask.startDate) : "",
+    endDate: cloudTask.endDate != null ? String(cloudTask.endDate) : "",
     statusText: cloudTask.statusText != null ? String(cloudTask.statusText) : "进行中",
     done: !!cloudTask.done,
     createdAt: cloudTask.createdAt != null ? String(cloudTask.createdAt) : "",
     updatedAt,
+    clientUpdatedAt: Number(cloudTask.clientUpdatedAt) || updatedAt,
+    serverUpdatedAtMs,
     completedAt: cloudTask.completedAt != null ? String(cloudTask.completedAt) : "",
     reminderDate: cloudTask.reminderDate != null ? String(cloudTask.reminderDate) : "",
     reminderTime: cloudTask.reminderTime != null ? String(cloudTask.reminderTime) : "",
     reminderFrequency:
       cloudTask.reminderFrequency != null ? String(cloudTask.reminderFrequency) : "不重复",
     tags: Array.isArray(cloudTask.tags) ? cloudTask.tags : [],
-    serverUpdatedAtMs,
+    parentTaskId: parentTaskId || "",
   };
+  if (!parentTaskId && cloudTask.subtaskProgress && typeof cloudTask.subtaskProgress === "object") {
+    local.subtaskProgress = {
+      total: Number(cloudTask.subtaskProgress.total) || 0,
+      done: Number(cloudTask.subtaskProgress.done) || 0,
+    };
+  }
+  return local;
 }
 
 function cloudBodyToLocal(cloudRecord) {
@@ -275,7 +288,18 @@ async function pullTasksFromCloud() {
     cloudTaskToLocal,
     getTaskServerMs
   );
-  return r.merged;
+  let merged = r.merged;
+  try {
+    const subtask = require("./subtask");
+    const rec = subtask.reconcileSubtasksAfterMerge(readTasks());
+    if (rec.changed) {
+      writeTasks(rec.tasks);
+      merged = true;
+    }
+  } catch (e) {
+    console.warn("[cloudDataSync] subtask reconcile", e);
+  }
+  return merged;
 }
 
 async function pullBodiesFromCloud() {

@@ -22,27 +22,59 @@
     <view wx:if="{{pendingTasks.length}}" class="task-section">
       <text class="section-label">进行中</text>
       <view class="task-list">
-        <view
-          wx:for="{{pendingTasks}}"
-          wx:key="id"
-          class="task-card {{item.typeClass}}"
-          data-id="{{item.id}}"
-          bindtap="openTaskDetail"
-          bindlongpress="onTaskLongPress"
-          hover-class="task-card-hover"
-          hover-stay-time="70"
-        >
-          <view class="task-head">
-            <text class="task-title">{{item.displayTitle}}</text>
-            <text class="task-time">{{item.timeText}}</text>
-          </view>
-          <view class="task-foot">
-            <view class="task-tags">
-              <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="text" class="tag {{tag.className}} {{tag.isPriority ? 'tag-priority' : ''}}">{{tag.text}}</text>
+        <block wx:for="{{pendingTasks}}" wx:key="rowKey">
+          <view
+            wx:if="{{item.rowType === 'parent'}}"
+            class="task-card {{item.typeClass}}"
+            data-id="{{item.id}}"
+            data-row-type="parent"
+            bindtap="openTaskDetail"
+            bindlongpress="onTaskLongPress"
+            hover-class="task-card-hover"
+            hover-stay-time="70"
+          >
+            <view class="task-head">
+              <view class="task-head-main">
+                <text class="task-title">{{item.displayTitle}}</text>
+                <text wx:if="{{item.hasSubtasks}}" class="subtask-count">（{{item.subtaskDone}}/{{item.subtaskTotal}}）</text>
+              </view>
+              <view class="task-head-actions">
+                <view
+                  wx:if="{{item.hasSubtasks}}"
+                  class="tree-toggle tap-target"
+                  data-id="{{item.id}}"
+                  catchtap="toggleSubtaskTree"
+                  hover-class="tree-toggle-hover"
+                >
+                  <text class="tree-toggle-icon">{{item.expanded ? '▴' : '▾'}}</text>
+                </view>
+                <text class="task-time">{{item.timeText}}</text>
+              </view>
             </view>
-            <view class="status {{item.done ? 'status-done' : ''}}">{{item.done ? '✓' : '○'}}</view>
+            <view class="task-foot">
+              <view class="task-tags">
+                <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="text" class="tag {{tag.className}} {{tag.isPriority ? 'tag-priority' : ''}}">{{tag.text}}</text>
+              </view>
+              <view class="status {{item.done ? 'status-done' : ''}}">{{item.done ? '✓' : '○'}}</view>
+            </view>
           </view>
-        </view>
+          <view
+            wx:else
+            class="subtask-tree-row tap-target"
+            data-id="{{item.id}}"
+            data-row-type="subtask"
+            bindtap="openTaskDetail"
+            bindlongpress="onTaskLongPress"
+            hover-class="subtask-tree-row-hover"
+          >
+            <text class="tree-prefix">{{item.treePrefix}}</text>
+            <view class="subtask-tree-check-wrap" catchtap="onToggleSubtaskFromTree" data-id="{{item.id}}">
+              <text class="subtask-tree-check {{item.done ? 'subtask-tree-check-done' : ''}}">{{item.done ? '✓' : '○'}}</text>
+            </view>
+            <text class="subtask-tree-title {{item.done ? 'subtask-tree-title-done' : ''}}">{{item.displayTitle}}</text>
+            <text wx:if="{{item.dateLabel}}" class="subtask-tree-date">{{item.dateLabel}}</text>
+          </view>
+        </block>
       </view>
       <view
         wx:if="{{showPendingExpand}}"
@@ -81,23 +113,54 @@
         </view>
       </view>
       <view class="done-list">
-        <view
-          wx:for="{{doneTodayTasks}}"
-          wx:key="id"
-          class="task-done-row tap-target"
-          data-id="{{item.id}}"
-          bindtap="openTaskDetail"
-          bindlongpress="onTaskLongPress"
-          hover-class="task-done-row-hover"
-          hover-stay-time="70"
-        >
-          <text class="task-done-check">✓</text>
-          <text class="task-done-title">{{item.displayTitle}}</text>
-          <view class="task-done-tags">
-            <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="text" class="tag tag-done {{tag.className}}">{{tag.text}}</text>
+        <block wx:for="{{doneTodayTasks}}" wx:key="rowKey">
+          <view
+            wx:if="{{item.rowType === 'parent'}}"
+            class="task-done-row tap-target"
+            data-id="{{item.id}}"
+            data-row-type="parent"
+            bindtap="openTaskDetail"
+            bindlongpress="onTaskLongPress"
+            hover-class="task-done-row-hover"
+            hover-stay-time="70"
+          >
+            <text class="task-done-check">✓</text>
+            <view class="task-done-main">
+              <view class="task-done-title-row">
+                <text class="task-done-title">{{item.displayTitle}}</text>
+                <text wx:if="{{item.hasSubtasks}}" class="subtask-count-done">（{{item.subtaskDone}}/{{item.subtaskTotal}}）</text>
+                <view
+                  wx:if="{{item.hasSubtasks}}"
+                  class="tree-toggle tree-toggle-done tap-target"
+                  data-id="{{item.id}}"
+                  catchtap="toggleSubtaskTree"
+                >
+                  <text class="tree-toggle-icon">{{item.expanded ? '▴' : '▾'}}</text>
+                </view>
+              </view>
+              <view class="task-done-tags">
+                <text wx:for="{{item.tags}}" wx:for-item="tag" wx:key="text" class="tag tag-done {{tag.className}}">{{tag.text}}</text>
+              </view>
+            </view>
+            <text class="task-done-arrow">›</text>
           </view>
-          <text class="task-done-arrow">›</text>
-        </view>
+          <view
+            wx:else
+            class="subtask-tree-row subtask-tree-row-done tap-target"
+            data-id="{{item.id}}"
+            data-row-type="subtask"
+            bindtap="openTaskDetail"
+            bindlongpress="onTaskLongPress"
+            hover-class="subtask-tree-row-hover"
+          >
+            <text class="tree-prefix">{{item.treePrefix}}</text>
+            <view class="subtask-tree-check-wrap" catchtap="onToggleSubtaskFromTree" data-id="{{item.id}}">
+              <text class="subtask-tree-check {{item.done ? 'subtask-tree-check-done' : ''}}">{{item.done ? '✓' : '○'}}</text>
+            </view>
+            <text class="subtask-tree-title {{item.done ? 'subtask-tree-title-done' : ''}}">{{item.displayTitle}}</text>
+            <text wx:if="{{item.dateLabel}}" class="subtask-tree-date">{{item.dateLabel}}</text>
+          </view>
+        </block>
       </view>
     </view>
   </block>

@@ -13,8 +13,6 @@ Page({
     options: OPTIONS,
     selected: "",
     payload: {},
-    showMascotModal: false,
-    nextPayload: "",
   },
 
   onLoad(options) {
@@ -41,20 +39,8 @@ Page({
         signal: this.data.selected,
       }),
     );
-    this.setData({
-      nextPayload: payload,
-      showMascotModal: true,
-    });
-  },
-
-  confirmMascot() {
-    const { nextPayload } = this.data;
-    if (!nextPayload) return;
-    this.setData({
-      showMascotModal: false,
-    });
     wx.redirectTo({
-      url: `/subpkg/today-report/index?payload=${nextPayload}`,
+      url: `/subpkg/today-report/index?payload=${payload}`,
     });
   },
 });

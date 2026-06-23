@@ -14,6 +14,7 @@ const {
 const { TASK_NAME_MAX } = require("../../config/taskLimits");
 const { formatDateTime } = require("../../utils/dateFormat");
 const { resolveTaskId, persistTaskAndOpenDetail } = require("../../utils/taskCreatePersist");
+const momentGuardian = require("../../utils/momentGuardian");
 
 function buildTags(payload, selectedWhy) {
   return [
@@ -39,6 +40,8 @@ Page({
     selected: "",
     payload: {},
     saveSubmitting: false,
+    guardianVisible: false,
+    guardianMessage: "",
   },
 
   onLoad(options) {
@@ -76,6 +79,38 @@ Page({
     };
     const mergedPayload = { ...payload, why: selected, quizSelections };
 
+    const draftTaskId = String(mergedPayload.draftTaskId || "").trim();
+    const previewTask = {
+      id: draftTaskId,
+      tags: buildTags(mergedPayload, selected),
+    };
+    const guard = momentGuardian.evaluateForNewTask(previewTask, draftTaskId);
+    if (guard.shouldShow) {
+      this._guardianResume = () => this._runSavePipeline(mergedPayload, selected, quizSelections);
+      this.setData({
+        guardianVisible: true,
+        guardianMessage: guard.message || "",
+      });
+      return;
+    }
+    this._runSavePipeline(mergedPayload, selected, quizSelections);
+  },
+
+  onGuardianSettle() {
+    this._guardianResume = null;
+    this.setData({ guardianVisible: false, guardianMessage: "" });
+    wx.reLaunch({ url: "/pages/sleep/index" });
+  },
+
+  onGuardianProceed() {
+    momentGuardian.markPromptShown();
+    const resume = this._guardianResume;
+    this.setData({ guardianVisible: false, guardianMessage: "" });
+    this._guardianResume = null;
+    if (resume) resume();
+  },
+
+  _runSavePipeline(mergedPayload, selected, quizSelections) {
     this._saveTaskLocked = true;
     this.setData({ saveSubmitting: true });
 

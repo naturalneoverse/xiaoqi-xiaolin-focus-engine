@@ -1,0 +1,58 @@
+<view class="page trail-page" style="{{_globalSafeAreaStyle}}">
+  <view class="toolbar">
+    <view class="toolbar-spacer"></view>
+    <view class="info-btn tap-target" bindtap="onTapInfo" hover-class="info-btn-hover" aria-label="说明">ⓘ</view>
+  </view>
+
+  <scroll-view class="trail-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="hero-card">
+      <text class="hero-label">本周 · {{currentWeek.rangeLabel}}</text>
+      <view class="hero-value-line">
+        <text class="hero-value">{{currentWeek.displayText}}</text>
+        <text class="hero-unit">{{currentWeek.unitText}}</text>
+      </view>
+      <text wx:if="{{currentWeek.footnote}}" class="hero-footnote">{{currentWeek.footnote}}</text>
+    </view>
+
+    <view wx:if="{{!hasData}}" class="trail-empty">
+      <text class="trail-empty-title">还没有真我时刻记录</text>
+      <text class="trail-empty-desc">创建带「真我 / 不二 / 合一」标签的任务，会在这里留下轨迹</text>
+    </view>
+
+    <block wx:elif="{{historyRows.length}}">
+      <view class="section-divider">
+        <view class="section-line"></view>
+        <text class="section-label">历史周</text>
+        <view class="section-line"></view>
+      </view>
+
+      <view class="history-list">
+        <view wx:for="{{historyRows}}" wx:key="weekMondayKey" class="history-row">
+          <view class="history-main">
+            <text class="history-range">{{item.rangeLabel}}</text>
+            <text class="history-score">{{item.displayText}}{{item.unitText}}</text>
+          </view>
+          <text wx:if="{{item.footnote}}" class="history-footnote">{{item.footnote}}</text>
+        </view>
+      </view>
+    </block>
+
+    <view class="trail-foot-space"></view>
+  </scroll-view>
+
+  <view wx:if="{{showIntro}}" class="sheet-mask" catchtouchmove="noop">
+    <view class="sheet-card intro-card">
+      <text class="sheet-title">真我时刻是什么</text>
+      <text class="sheet-body">{{introText}}</text>
+      <button class="sheet-btn" hover-class="button-hover" bindtap="onDismissIntro">知道了</button>
+    </view>
+  </view>
+
+  <view wx:if="{{showInfoSheet}}" class="sheet-mask" catchtouchmove="noop" bindtap="onCloseInfoSheet">
+    <view class="sheet-card info-card" catchtap="noop">
+      <text class="sheet-title">真我时刻是什么</text>
+      <text class="sheet-body">{{introText}}</text>
+      <button class="sheet-btn sheet-btn-ghost" hover-class="button-hover" bindtap="onCloseInfoSheet">关闭</button>
+    </view>
+  </view>
+</view>

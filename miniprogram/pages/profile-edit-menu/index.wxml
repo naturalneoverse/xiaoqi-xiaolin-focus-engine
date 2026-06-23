@@ -8,10 +8,16 @@
   </view>
 
   <view class="group">
-    <view class="cell tap-target" bindtap="goAvatar" hover-class="cell-hover">
+    <button
+      class="cell cell-btn tap-target"
+      open-type="chooseAvatar"
+      bindchooseavatar="onChooseAvatar"
+      hover-class="cell-hover"
+      plain
+    >
       <text class="cell-title">修改头像</text>
       <text class="arrow">></text>
-    </view>
+    </button>
     <view class="line"></view>
     <view class="cell tap-target" bindtap="goNickname" hover-class="cell-hover">
       <text class="cell-title">修改昵称</text>

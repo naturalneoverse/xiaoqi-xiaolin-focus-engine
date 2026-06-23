@@ -1,0 +1,234 @@
+@import "../../styles/reflection-page.wxss";
+
+page {
+  background: #e2eaf7;
+}
+
+.trail-page {
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 8rpx 0 30rpx;
+  flex-shrink: 0;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.info-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34rpx;
+  color: #5f7893;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.info-btn-hover {
+  opacity: 0.75;
+}
+
+.trail-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 16rpx 30rpx 0;
+  box-sizing: border-box;
+}
+
+.hero-card {
+  background: linear-gradient(145deg, #f8fbff 0%, #e8f2fc 100%);
+  border-radius: 24rpx;
+  padding: 32rpx 28rpx 28rpx;
+  box-shadow: 0 8rpx 28rpx rgba(18, 89, 143, 0.08);
+}
+
+.hero-label {
+  font-size: 26rpx;
+  color: #5f7893;
+  font-weight: 600;
+}
+
+.hero-value-line {
+  margin-top: 8rpx;
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+}
+
+.hero-value {
+  font-size: 80rpx;
+  font-weight: 800;
+  color: #12598f;
+  line-height: 1;
+}
+
+.hero-unit {
+  font-size: 28rpx;
+  color: #8ea8c8;
+  font-weight: 600;
+}
+
+.hero-footnote {
+  display: block;
+  margin-top: 20rpx;
+  font-size: 28rpx;
+  color: #5f7893;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+.trail-empty {
+  margin-top: 80rpx;
+  text-align: center;
+  padding: 0 24rpx;
+}
+
+.trail-empty-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #184a72;
+}
+
+.trail-empty-desc {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: #8ea8c8;
+  line-height: 1.55;
+}
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin: 36rpx 0 24rpx;
+}
+
+.section-line {
+  flex: 1;
+  height: 1rpx;
+  background: #c5d6e8;
+}
+
+.section-label {
+  font-size: 24rpx;
+  color: #8ea8c8;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28rpx;
+}
+
+.history-row {
+  padding: 0 4rpx;
+}
+
+.history-main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.history-range {
+  flex: 1;
+  min-width: 0;
+  font-size: 30rpx;
+  color: #5f7893;
+  font-weight: 600;
+}
+
+.history-score {
+  flex-shrink: 0;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #12598f;
+}
+
+.history-footnote {
+  display: block;
+  margin-top: 10rpx;
+  padding-left: 0;
+  font-size: 24rpx;
+  color: #9eb0c4;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+.trail-foot-space {
+  height: 48rpx;
+}
+
+.sheet-mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1000;
+  background: rgba(24, 74, 114, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.sheet-card {
+  width: 100%;
+  max-width: 620rpx;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 36rpx 32rpx 28rpx;
+  box-shadow: 0 12rpx 40rpx rgba(18, 89, 143, 0.15);
+}
+
+.sheet-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #184a72;
+  margin-bottom: 20rpx;
+}
+
+.sheet-body {
+  display: block;
+  font-size: 28rpx;
+  color: #5f7893;
+  line-height: 1.6;
+}
+
+.sheet-btn {
+  margin-top: 32rpx;
+  background: #12598f;
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 600;
+  border-radius: 16rpx;
+  border: none;
+  line-height: 2.4;
+}
+
+.sheet-btn::after {
+  border: none;
+}
+
+.sheet-btn-ghost {
+  background: #eef5fc;
+  color: #12598f;
+}

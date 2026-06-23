@@ -7,3 +7,7 @@ cloudfunctions/quickstartFunctions/node_modules/
 cloudfunctions/getReply/node_modules/
 
 project.private.config.json
+
+# 本地密钥文件，禁止提交
+API密钥.txt
+**/API密钥.txt

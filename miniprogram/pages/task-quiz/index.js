@@ -14,6 +14,7 @@ const {
 } = require("../../utils/taskTagStyles");
 const { TASK_NAME_MAX } = require("../../config/taskLimits");
 const { resolveTaskId, persistTaskAndOpenDetail } = require("../../utils/taskCreatePersist");
+const momentGuardian = require("../../utils/momentGuardian");
 
 function clampTextByLength(value, maxLength) {
   const chars = Array.from(value || "");
@@ -59,6 +60,8 @@ Page({
     insightLoading: false,
     saveSubmitting: false,
     primaryBtnText: "生成陪伴语",
+    guardianVisible: false,
+    guardianMessage: "",
   },
 
   onLoad(options) {
@@ -153,12 +156,45 @@ Page({
       wx.showToast({ title: "请完成三道选择题", icon: "none" });
       return;
     }
+    const labels = labelsFromIds(selections.priority, selections.circle, selections.layer);
+    const draftTaskId = String(payload.draftTaskId || "").trim();
+    const previewTask = {
+      id: draftTaskId,
+      tags: buildTags(labels),
+    };
+    const guard = momentGuardian.evaluateForNewTask(previewTask, draftTaskId);
+    if (guard.shouldShow) {
+      this._guardianResume = () => this._runSavePipeline(labels, companionText, quizCode);
+      this.setData({
+        guardianVisible: true,
+        guardianMessage: guard.message || "",
+      });
+      return;
+    }
+    this._runSavePipeline(labels, companionText, quizCode);
+  },
+
+  onGuardianSettle() {
+    this._guardianResume = null;
+    this.setData({ guardianVisible: false, guardianMessage: "" });
+    wx.reLaunch({ url: "/pages/sleep/index" });
+  },
+
+  onGuardianProceed() {
+    momentGuardian.markPromptShown();
+    const resume = this._guardianResume;
+    this.setData({ guardianVisible: false, guardianMessage: "" });
+    this._guardianResume = null;
+    if (resume) resume();
+  },
+
+  _runSavePipeline(labels, companionText, quizCode) {
     const finishSave = () => {
-      const labels = labelsFromIds(selections.priority, selections.circle, selections.layer);
       this._persistTask(labels, companionText, quizCode);
     };
     if (!companionText) {
-      const code = buildQuizCode(selections.priority, selections.circle, selections.layer);
+      const code =
+        quizCode || buildQuizCode(this.data.selections.priority, this.data.selections.circle, this.data.selections.layer);
       this.setData({ loadingCopy: true });
       fetchTaskQuizCopy(code).then((res) => {
         if (!res || !res.fullText) {

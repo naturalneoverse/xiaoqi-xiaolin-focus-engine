@@ -48,6 +48,14 @@ function writeTaskToStorage(task, draftTaskId) {
   try {
     wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
     dailyCheckIn.recordDailyCheckIn();
+    try {
+      const subtaskUtil = require("./subtask");
+      if (subtaskUtil.isTopLevelTask(task)) {
+        subtaskUtil.syncParentTagsToSubtasks(task.id);
+      }
+    } catch (e) {
+      /* ignore */
+    }
     return { ok: true };
   } catch (e) {
     console.error("[taskCreatePersist] setStorageSync", e);

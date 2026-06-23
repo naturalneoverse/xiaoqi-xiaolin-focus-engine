@@ -1,1 +1,17 @@
 @import "../settings/index.wxss";
+
+.cell-btn {
+  width: 100%;
+  margin: 0;
+  padding: 0 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  line-height: normal;
+  font-weight: normal;
+}
+
+.cell-btn::after {
+  border: none;
+}

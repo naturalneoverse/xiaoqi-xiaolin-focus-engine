@@ -1,6 +1,6 @@
 /**
- * 时间编织报告统一统计：记下了 / Total / 条形图占比 / 小麟 copyKey
- * 真我时刻仍由 momentScore 独立计算，不在此模块。
+ * 时间编织报告统一统计：流动清单 / 条形图占比 / 小麟 copyKey
+ * 质地基数与真我时刻同源（momentScore.buildFlowingTaskListForWeek）。
  */
 
 const momentScore = require("./momentScore");
@@ -31,41 +31,8 @@ function isCancelled(task) {
   return task && task.statusText === "已取消";
 }
 
-function isRecordedInWeek(task, weekMonday) {
-  return !isCancelled(task) && momentScore.isCreatedInWeek(task, weekMonday);
-}
-
-/**
- * 延期计入 Total：
- * - 当前周：打开报告时 status===已延期
- * - 历史周：该周末前未完成 + 当前为已延期（无状态快照时的近似）
- */
-function isDelayedForWeekTotal(task, weekMonday, isCurrentWeek) {
-  if (!task || isCancelled(task)) return false;
-  if (task.statusText !== "已延期") return false;
-  if (isCurrentWeek) return true;
-  if (momentScore.isCompletedInWeek(task, weekMonday)) return false;
-  const created = momentScore.parseLooseDateTime(task.createdAt || task.timeText);
-  const weekEnd = momentScore.getIsoWeekSundayEnd(weekMonday);
-  if (created && created.getTime() > weekEnd.getTime()) return false;
-  return true;
-}
-
 function buildTotalTaskList(tasks, weekMonday, refNow) {
-  const refMonday = momentScore.getIsoWeekMonday(refNow);
-  const isCurrentWeek = momentScore.weekMondayKey(weekMonday) === momentScore.weekMondayKey(refMonday);
-  const byId = new Map();
-
-  (tasks || []).forEach((task) => {
-    if (!task) return;
-    if (isRecordedInWeek(task, weekMonday)) {
-      byId.set(task.id || JSON.stringify(task), task);
-    } else if (isDelayedForWeekTotal(task, weekMonday, isCurrentWeek)) {
-      byId.set(task.id || JSON.stringify(task), task);
-    }
-  });
-
-  return Array.from(byId.values());
+  return momentScore.buildFlowingTaskListForWeek(tasks, weekMonday, refNow || new Date());
 }
 
 function isSecularArchive(task) {
@@ -185,7 +152,10 @@ function buildTimeWeaveWeekStats(tasks, weekMonday, refNow) {
   const list = Array.isArray(tasks) ? tasks : [];
   const totalTasks = buildTotalTaskList(list, weekMonday, ref);
   const total = totalTasks.length;
-  const recordedCount = list.filter((t) => isRecordedInWeek(t, weekMonday)).length;
+  const flowingCount = total;
+  const createdInWeekCount = list.filter(
+    (t) => t && !isCancelled(t) && momentScore.isCreatedInWeek(t, weekMonday)
+  ).length;
 
   const nums = countDimensionNumerators(totalTasks);
   const copyKey = total > 0 ? resolveCopyKey(total, nums) : COPY_KEYS.CALM_EASY;
@@ -197,9 +167,10 @@ function buildTimeWeaveWeekStats(tasks, weekMonday, refNow) {
   const whyKeys = ["生计", "职责", "真我", "合一"];
 
   return {
-    dataSchemaVersion: "time-weave-1",
+    dataSchemaVersion: "time-weave-2",
     weekKey,
-    recordedCount,
+    flowingCount,
+    createdInWeekCount,
     totalCount: total,
     totalTasks,
     copyKey,

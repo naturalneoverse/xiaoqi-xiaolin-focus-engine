@@ -40,4 +40,11 @@
     <view class="dot"></view>
     <view class="dot dot-active"></view>
   </view>
+
+  <moment-guardian-modal
+    visible="{{guardianVisible}}"
+    message="{{guardianMessage}}"
+    bindsettle="onGuardianSettle"
+    bindproceed="onGuardianProceed"
+  />
 </view>

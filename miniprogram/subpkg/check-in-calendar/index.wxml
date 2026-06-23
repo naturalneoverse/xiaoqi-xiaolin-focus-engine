@@ -1,0 +1,20 @@
+<view
+  class="page"
+  style="{{_globalSafeAreaStyle}}"
+  bindtouchstart="onTouchStart"
+  bindtouchend="onTouchEnd"
+>
+  <view class="summary">
+    <text class="summary-line">累计 {{totalDays}} 天 · 本月 {{monthDays}} 天</text>
+    <text class="summary-hint">左右滑动或点击箭头切换月份；仅查看，不可补签</text>
+  </view>
+
+  <check-in-month-calendar
+    year="{{viewYear}}"
+    month="{{viewMonth}}"
+    checked-map="{{checkedMap}}"
+    today-key="{{todayKey}}"
+    bind:monthchange="onMonthChange"
+    bind:daytap="onDayTap"
+  />
+</view>

@@ -5,13 +5,8 @@
 const momentScore = require("./momentScore");
 const bodyStats = require("./bodyStats");
 
-function presenceTierName(doneCount, createdCount) {
-  if (!createdCount || createdCount <= 0) return "暂无";
-  const rate = (doneCount / createdCount) * 100;
-  if (rate >= 80) return "沉浸";
-  if (rate >= 60) return "专注";
-  if (rate >= 30) return "铺展";
-  return "酝酿";
+function presenceTierName(doneCount, createdCount, activeMomentCount) {
+  return momentScore.presenceTierName(doneCount, createdCount, activeMomentCount);
 }
 
 /**
@@ -26,13 +21,45 @@ function buildPastWeeklyReportRows(tasks) {
     .filter((s) => s && s.weekMondayKey && s.weekMondayKey !== curKey && s.doneCount > 0)
     .map((s) => {
       const createdCount = momentScore.countCreatedInWeek(list, s.weekMonday);
-      const presence = presenceTierName(s.doneCount, createdCount);
+      const presence = presenceTierName(s.doneCount, createdCount, 0);
       return {
         weekMondayKey: s.weekMondayKey,
         title: s.rangeLabel,
         subtitle: `真我时刻 ${s.momentScore}次 · 完成 ${s.doneCount}件 · 当下质地 ${presence}`,
       };
     });
+}
+
+/**
+ * @deprecated 已由 momentTrailView.buildMomentTrailView 替代（真我时刻轨迹页）
+ * 「我的」→ 真我时刻历史：本周置顶 + 有数据的往周（倒序）。
+ * @param {object[]} tasks
+ * @returns {{ weekMondayKey: string, title: string, subtitle: string }[]}
+ */
+function buildMomentWeekHistoryRows(tasks) {
+  const list = Array.isArray(tasks) ? tasks : [];
+  const refNow = new Date();
+  const curKey = momentScore.weekMondayKey(momentScore.getIsoWeekMonday(refNow));
+  const cur = momentScore.getCurrentWeekSummary(list, refNow);
+  const rows = [
+    {
+      weekMondayKey: curKey,
+      title: `${cur.rangeLabel}（本周）`,
+      subtitle: `真我时刻 ${momentScore.formatMomentScoreWithUnit(cur.momentScore)}`,
+    },
+  ];
+
+  momentScore.buildWeekSummaries(list).forEach((s) => {
+    if (!s || !s.weekMondayKey || s.weekMondayKey === curKey) return;
+    if (s.momentScore <= 0 && s.doneCount <= 0) return;
+    rows.push({
+      weekMondayKey: s.weekMondayKey,
+      title: s.rangeLabel,
+      subtitle: `真我时刻 ${momentScore.formatMomentScoreWithUnit(s.momentScore)}`,
+    });
+  });
+
+  return rows;
 }
 
 function weekMondayKeyFromBodyDateKey(dateKey) {
@@ -82,5 +109,6 @@ function buildPastBodyReportRows(allRecords) {
 
 module.exports = {
   buildPastWeeklyReportRows,
+  buildMomentWeekHistoryRows,
   buildPastBodyReportRows,
 };

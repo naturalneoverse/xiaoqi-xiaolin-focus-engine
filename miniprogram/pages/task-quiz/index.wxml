@@ -73,3 +73,10 @@
     </button>
   </view>
 </view>
+
+<moment-guardian-modal
+  visible="{{guardianVisible}}"
+  message="{{guardianMessage}}"
+  bindsettle="onGuardianSettle"
+  bindproceed="onGuardianProceed"
+/>

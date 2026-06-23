@@ -17,8 +17,8 @@
     <view class="latest-body">
       <view class="metric">
         <view class="metric-value-wrap">
-          <text class="metric-value">{{latest.moments}}</text>
-          <text class="metric-unit">次</text>
+          <text class="metric-value">{{latest.momentDisplayText}}</text>
+          <text class="metric-unit">{{latest.momentUnitText}}</text>
         </view>
         <text class="metric-label">真我时刻</text>
       </view>
@@ -32,7 +32,7 @@
       </view>
       <view class="metric-divider"></view>
       <view class="metric">
-        <text class="metric-status {{latest.presenceName === '暂无' ? 'metric-status-muted' : ''}}">{{latest.presenceName}}</text>
+        <text class="metric-status {{latest.presenceName === '暂无' ? 'metric-status-muted' : ''}} {{latest.presenceName === '进行中' ? 'metric-status-active' : ''}}">{{latest.presenceName}}</text>
         <text class="metric-label">当下质地</text>
       </view>
       <text class="chevron">›</text>

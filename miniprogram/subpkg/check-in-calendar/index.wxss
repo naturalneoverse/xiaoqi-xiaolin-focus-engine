@@ -1,0 +1,30 @@
+page {
+  background: #e2eaf7;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 24rpx 30rpx 48rpx;
+  box-sizing: border-box;
+}
+
+.summary {
+  margin-bottom: 28rpx;
+  padding: 8rpx 4rpx 0;
+}
+
+.summary-line {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #184a72;
+  line-height: 1.4;
+}
+
+.summary-hint {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #8ea8c8;
+  line-height: 1.45;
+}

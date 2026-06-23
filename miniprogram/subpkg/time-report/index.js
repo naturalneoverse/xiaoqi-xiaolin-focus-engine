@@ -61,26 +61,23 @@ function buildEmptyPastGroup() {
   return [{ isEmpty: true, dateKey: "", range: "暂无完成任务", expanded: false, tasks: [] }];
 }
 
-/** 当下质地：本周完成率 = 已完成数 / 本周创建任务数（与 momentScore 周口径一致） */
-function presenceTierName(doneCount, createdCount) {
-  if (!createdCount || createdCount <= 0) return "暂无";
-  const rate = (doneCount / createdCount) * 100;
-  if (rate >= 80) return "沉浸";
-  if (rate >= 60) return "专注";
-  if (rate >= 30) return "铺展";
-  return "酝酿";
+/** 当下质地：见 momentScore.presenceTierName */
+function presenceTierName(doneCount, createdCount, activeMomentCount) {
+  return momentScore.presenceTierName(doneCount, createdCount, activeMomentCount);
 }
 
-function presenceHintFor(doneCount, createdCount) {
-  if (!createdCount || createdCount <= 0) return "本周还没有新任务，先去创建一条吧。";
-  return "";
+function presenceHintFor(doneCount, createdCount, activeMomentCount) {
+  return momentScore.presenceHintFor(doneCount, createdCount, activeMomentCount);
 }
 
 function buildEmptyLatest(curSummary) {
   const c = curSummary || momentScore.getCurrentWeekSummary([], new Date());
+  const momentView = momentScore.buildMomentScoreView(0);
   return {
     range: c.rangeLabel,
     moments: 0,
+    momentDisplayText: momentView.displayText,
+    momentUnitText: momentView.unitText,
     doneCount: 0,
     presenceName: "暂无",
     presenceHint: presenceHintFor(0, 0),
@@ -100,7 +97,7 @@ function summaryToHistoryRow(summary, tasks) {
   return {
     range: summary.rangeLabel,
     moments: summary.momentScore,
-    presenceName: presenceTierName(summary.doneCount, createdCount),
+    presenceName: presenceTierName(summary.doneCount, createdCount, 0),
     weekMondayKey: summary.weekMondayKey,
   };
 }
@@ -164,15 +161,18 @@ Page({
         }))
       : buildEmptyPastGroup();
     const cur = momentScore.getCurrentWeekSummary(tasks, new Date());
-    const presenceName = presenceTierName(cur.doneCount, cur.createdCount);
-    const presenceHint = presenceHintFor(cur.doneCount, cur.createdCount);
+    const presenceName = cur.presenceName || presenceTierName(cur.doneCount, cur.createdCount, cur.activeMomentCount);
+    const presenceHint = presenceHintFor(cur.doneCount, cur.createdCount, cur.activeMomentCount);
     const summaries = momentScore.buildWeekSummaries(tasks);
     const prevKey = previousWeekMondayKey(new Date());
     const prevSummary = summaries.find((s) => s.weekMondayKey === prevKey) || null;
     const pastRows = buildPastWeeklyReportRows(tasks);
+    const momentView = momentScore.buildMomentScoreView(cur.momentScore);
     const latest = {
       range: cur.rangeLabel,
       moments: cur.momentScore,
+      momentDisplayText: momentView.displayText,
+      momentUnitText: momentView.unitText,
       doneCount: cur.doneCount,
       presenceName,
       presenceHint,

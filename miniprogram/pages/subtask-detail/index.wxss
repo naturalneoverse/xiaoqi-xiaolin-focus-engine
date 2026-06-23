@@ -1,0 +1,36 @@
+@import "../task-detail/index.wxss";
+
+.parent-link {
+  display: block;
+  text-align: center;
+  margin: -8rpx 0 24rpx;
+  font-size: 26rpx;
+  color: #12598f;
+}
+
+.date-readonly {
+  color: #184061;
+}
+
+.btn-delete {
+  margin: 32rpx 0 48rpx;
+  background: #12598f !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 999rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  height: 88rpx;
+  line-height: 88rpx;
+}
+
+.btn-delete::after {
+  border: none;
+}
+
+.content-textarea {
+  width: 100%;
+  min-height: 120rpx;
+  font-size: 28rpx;
+  color: #334155;
+}

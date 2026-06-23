@@ -47,7 +47,7 @@ function composeLocalCopy(scene, stats) {
   const hits = normalizeHits(stats && stats.hits);
   const ruleKey = pickRuleHit(scene, hits);
   const ruleText = ruleKey ? RULE_TEXT[ruleKey] || "" : "";
-  const continuation = buildContinuation(scene);
+  const continuation = scene === "body_daily" ? "" : buildContinuation(scene);
   let text = ruleText && continuation ? `${ruleText}${continuation}` : ruleText || continuation;
   if (!text) {
     text = scene === "task_create" ? RULE_TEXT.neutral_xiaoqi : RULE_TEXT.neutral_xiaolin;

@@ -173,11 +173,9 @@ function ensureManagerReady() {
   return prepare();
 }
 
+/** 预初始化语音识别插件（不申请麦克风权限；权限在用户长按话筒时由 start 触发） */
 function warmUp() {
-  return Promise.resolve().then(() => {
-    if (!ensureManagerReady()) return false;
-    return ensureRecordPermission();
-  });
+  return Promise.resolve(ensureManagerReady());
 }
 
 function setPermissionCache(granted, explicitlyDenied) {

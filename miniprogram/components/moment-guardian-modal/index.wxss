@@ -1,0 +1,67 @@
+.mg-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 40rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.mg-modal {
+  width: 100%;
+  max-width: 660rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  padding: 40rpx 32rpx 32rpx;
+  box-sizing: border-box;
+}
+
+.mg-message {
+  display: block;
+  color: #184061;
+  font-size: 30rpx;
+  line-height: 1.65;
+  text-align: left;
+}
+
+.mg-btn {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 999rpx !important;
+  font-size: 30rpx !important;
+  font-weight: 600 !important;
+  line-height: 88rpx !important;
+  height: 88rpx !important;
+  box-sizing: border-box;
+}
+
+.mg-btn-primary {
+  margin-top: 36rpx !important;
+  background: #12598f !important;
+  color: #ffffff !important;
+}
+
+.mg-btn-ghost {
+  margin-top: 16rpx !important;
+  background: transparent !important;
+  color: #577388 !important;
+  font-weight: 500 !important;
+  line-height: 72rpx !important;
+  height: 72rpx !important;
+}
+
+.mg-btn-hover {
+  opacity: 0.9;
+}
+
+.mg-btn-ghost-hover {
+  opacity: 0.75;
+}

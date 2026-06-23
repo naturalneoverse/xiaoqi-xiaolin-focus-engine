@@ -1,0 +1,47 @@
+@import "../task-create/index.wxss";
+
+.parent-hint {
+  display: block;
+  margin: 8rpx 0 24rpx;
+  font-size: 26rpx;
+  color: #64748b;
+}
+
+.picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16rpx;
+}
+
+.picker-k {
+  font-size: 28rpx;
+  color: #64748b;
+}
+
+.picker-v {
+  font-size: 28rpx;
+  color: #184061;
+  padding: 12rpx 0;
+}
+
+.clear-end {
+  display: inline-block;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #12598f;
+}
+
+.btn-create {
+  margin: 32rpx 0 48rpx;
+  background: #12598f !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 999rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+}
+
+.btn-create::after {
+  border: none;
+}

@@ -10,9 +10,15 @@
   </view>
 
   <view class="profile-card profile-card-gradient">
-    <view class="avatar-wrap" bindtap="onTapAvatar">
+    <view class="avatar-wrap">
       <image wx:if="{{userProfile.avatarUrl}}" class="avatar-image" src="{{userProfile.avatarUrl}}" mode="aspectFill" binderror="onImageError" data-err-field="userProfile.avatarUrl" />
       <view wx:else class="avatar">👤</view>
+      <button
+        class="avatar-hit"
+        open-type="chooseAvatar"
+        bindchooseavatar="onChooseAvatar"
+        hover-class="none"
+      />
     </view>
     <input
       wx:if="{{editingName}}"
@@ -47,19 +53,19 @@
   </view>
 
   <view class="stats">
-    <view class="stat-item">
+    <view class="stat-item tap-target" bindtap="goMomentWeekHistory" hover-class="stat-item-hover">
       <view class="stat-icon-wrap">
         <image class="stat-icon-image" src="/images/transparent background/realme.png" mode="aspectFit" binderror="onImageError" />
       </view>
       <view class="stat-content">
         <text class="stat-title">真我时刻</text>
         <view class="stat-value-line">
-          <text class="stat-value">{{momentWeekScore}}</text>
-          <text class="stat-unit">次</text>
+          <text class="stat-value">{{momentDisplayText}}</text>
+          <text class="stat-unit">{{momentUnitText}}</text>
         </view>
       </view>
     </view>
-    <view class="stat-item">
+    <view class="stat-item tap-target" bindtap="goCheckInCalendar" hover-class="stat-item-hover">
       <view class="stat-icon-wrap">
         <image class="stat-icon-image stat-icon-image-clocking" src="/images/transparent background/clocking.png" mode="aspectFit" binderror="onImageError" />
       </view>

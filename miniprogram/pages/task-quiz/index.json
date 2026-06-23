@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "任务标签",
-  "usingComponents": {}
+  "usingComponents": {
+    "moment-guardian-modal": "/components/moment-guardian-modal/index"
+  }
 }

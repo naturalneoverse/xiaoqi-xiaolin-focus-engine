@@ -593,3 +593,142 @@ page {
   align-items: center;
   justify-content: center;
 }
+
+.subtask-card {
+  margin-top: 16rpx;
+}
+
+.subtask-head {
+  margin-bottom: 16rpx;
+}
+
+.subtask-all-done-hint {
+  display: block;
+  margin: -4rpx 0 16rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+.subtask-bar {
+  margin-top: 12rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: #e2eaf7;
+  overflow: hidden;
+}
+
+.subtask-bar-fill {
+  height: 100%;
+  border-radius: 999rpx;
+  background: #12598f;
+}
+
+.subtask-empty {
+  font-size: 26rpx;
+  color: #94a3b8;
+  padding: 8rpx 0 16rpx;
+}
+
+.subtask-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 0;
+  border-top: 2rpx solid #eef4fb;
+}
+
+.subtask-check-wrap {
+  flex-shrink: 0;
+  padding: 4rpx 8rpx 4rpx 0;
+}
+
+.subtask-check {
+  flex-shrink: 0;
+  width: 32rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 32rpx;
+  text-align: center;
+  color: #c9dde7;
+}
+
+.subtask-check-done {
+  color: #2f719c;
+}
+
+.subtask-title {
+  flex: 1;
+  font-size: 28rpx;
+  color: #184061;
+}
+
+.subtask-title-done {
+  color: #5a7390;
+}
+
+.subtask-date {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+.subtask-add {
+  margin-top: 16rpx;
+  text-align: center;
+  font-size: 28rpx;
+  color: #12598f;
+  padding: 16rpx 0 8rpx;
+}
+
+.subtask-add-disabled {
+  color: #cbd5e1;
+  pointer-events: none;
+}
+
+.subtask-add-limit {
+  color: #b45309;
+}
+
+.subtask-convert-panel {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #eef4fb;
+}
+
+.subtask-convert-tip {
+  display: block;
+  font-size: 24rpx;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 12rpx;
+}
+
+.subtask-convert-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  padding: 16rpx 0;
+  border-bottom: 2rpx solid #eef4fb;
+}
+
+.subtask-convert-title {
+  flex: 1;
+  font-size: 28rpx;
+  color: #184061;
+}
+
+.subtask-convert-action {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: #12598f;
+}
+
+.subtask-convert-cancel {
+  display: block;
+  margin-top: 16rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #94a3b8;
+}

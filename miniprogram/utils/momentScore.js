@@ -14,6 +14,8 @@ const TAG_PRIORITY = 0;
 const TAG_FOR_WHOM = 1;
 const TAG_WHY = 2;
 
+const subtaskUtil = require("./subtask");
+
 function pad2(n) {
   return String(n).padStart(2, "0");
 }
@@ -149,29 +151,23 @@ function formatWeekRangePoster(monday) {
 }
 
 /**
- * 某自然周内：「做完了」= 本周内标记完成的任务数；
- * 「真我时刻」：当前自然周含进行中/已延期 + 本周完成；历史自然周仅本周完成。
+ * 本周「流动清单」：与真我时刻、时间编织报告质地统计共用。
+ * 当前自然周：进行中 + 已延期（不论创建周）+ 本周内标记完成；历史自然周：仅本周内标记完成。
  */
-function aggregateMomentScoreForWeek(tasks, weekMonday, refDate) {
+function buildFlowingTaskListForWeek(tasks, weekMonday, refDate) {
   const list = Array.isArray(tasks) ? tasks : [];
   const ref = refDate || new Date();
   const refMonday = getIsoWeekMonday(ref);
   const isCurrentWeek = weekMondayKey(weekMonday) === weekMondayKey(refMonday);
 
-  const doneCount = list.filter((t) => isCompletedInWeek(t, weekMonday)).length;
-
   if (!isCurrentWeek) {
-    const doneTasks = list.filter((t) => t && t.statusText === "已完成" && isCompletedInWeek(t, weekMonday));
-    let momentScore = 0;
-    doneTasks.forEach((t) => {
-      momentScore += computeTaskMomentScore(t);
-    });
-    return { doneCount, momentScore, distTasks: doneTasks };
+    return list.filter((t) => t && t.statusText === "已完成" && isCompletedInWeek(t, weekMonday));
   }
 
   const byKey = new Map();
   list.forEach((task) => {
     if (!task) return;
+    if (subtaskUtil.isSubtask(task)) return;
     if (task.statusText === "已取消") return;
 
     const key = taskDedupeKey(task);
@@ -188,13 +184,23 @@ function aggregateMomentScoreForWeek(tasks, weekMonday, refDate) {
     }
   });
 
-  let momentScore = 0;
-  const distTasks = [];
-  byKey.forEach((t) => {
-    momentScore += computeTaskMomentScore(t);
-    distTasks.push(t);
-  });
+  return Array.from(byKey.values());
+}
 
+/**
+ * 某自然周内：「做完了」= 本周内标记完成的任务数；
+ * 「真我时刻」：当前自然周含进行中/已延期 + 本周完成；历史自然周仅本周完成。
+ */
+function aggregateMomentScoreForWeek(tasks, weekMonday, refDate) {
+  const list = Array.isArray(tasks) ? tasks : [];
+  const doneCount = list.filter(
+    (t) => subtaskUtil.isTopLevelTask(t) && isCompletedInWeek(t, weekMonday),
+  ).length;
+  const distTasks = buildFlowingTaskListForWeek(tasks, weekMonday, refDate);
+  let momentScore = 0;
+  distTasks.forEach((t) => {
+    momentScore += computeTaskMomentScore(t);
+  });
   return { doneCount, momentScore, distTasks };
 }
 
@@ -206,6 +212,48 @@ function countCreatedInWeek(tasks, weekMonday) {
     if (isCreatedInWeek(task, weekMonday)) n += 1;
   });
   return n;
+}
+
+/** 本周计入真我时刻的进行中/已延期任务数（与 aggregateMomentScoreForWeek 口径一致） */
+function countActiveMomentTasksInWeek(tasks, weekMonday, refDate) {
+  const ref = refDate || new Date();
+  const refMonday = getIsoWeekMonday(ref);
+  const isCurrentWeek = weekMondayKey(weekMonday) === weekMondayKey(refMonday);
+  if (!isCurrentWeek) return 0;
+  const agg = aggregateMomentScoreForWeek(tasks, weekMonday, ref);
+  const dist = Array.isArray(agg.distTasks) ? agg.distTasks : [];
+  return dist.filter((t) => t && (t.statusText === "进行中" || t.statusText === "已延期")).length;
+}
+
+/**
+ * 当下质地：本周完成率分档；有进行中任务且本周尚无完成时显示「进行中」。
+ * @param {number} doneCount 本周完成数
+ * @param {number} createdCount 本周创建数
+ * @param {number} [activeMomentCount] 本周清单内进行中/已延期（仅当前自然周有效）
+ */
+function presenceTierName(doneCount, createdCount, activeMomentCount) {
+  const done = Number(doneCount) || 0;
+  const created = Number(createdCount) || 0;
+  const active = Number(activeMomentCount) || 0;
+
+  if (active > 0 && done === 0) return "进行中";
+  if (!created || created <= 0) return active > 0 ? "进行中" : "暂无";
+
+  const rate = (done / created) * 100;
+  if (rate >= 80) return "沉浸";
+  if (rate >= 60) return "专注";
+  if (rate >= 30) return "铺展";
+  return "酝酿";
+}
+
+/** 时间编织图「最新报告」质地旁注 */
+function presenceHintFor(doneCount, createdCount, activeMomentCount) {
+  const done = Number(doneCount) || 0;
+  const created = Number(createdCount) || 0;
+  const active = Number(activeMomentCount) || 0;
+  if (active > 0) return "";
+  if (!created || created <= 0) return "本周还没有新任务，先去创建一条吧。";
+  return "";
 }
 
 const PRIORITY_KEYS = ["重要且紧急", "重要不紧急", "紧急不重要", "不重要不紧急"];
@@ -313,6 +361,7 @@ function getCurrentWeekSummary(tasks, now) {
   const monday = getIsoWeekMonday(ref);
   const agg = aggregateMomentScoreForWeek(tasks, monday, ref);
   const createdCount = countCreatedInWeek(tasks, monday);
+  const activeMomentCount = countActiveMomentTasksInWeek(tasks, monday, ref);
   const list = Array.isArray(tasks) ? tasks : [];
   const doneThisWeek = list.filter((t) => isCompletedInWeek(t, monday));
   return {
@@ -323,8 +372,60 @@ function getCurrentWeekSummary(tasks, now) {
     doneCount: agg.doneCount,
     momentScore: agg.momentScore,
     createdCount,
+    activeMomentCount,
+    presenceName: presenceTierName(agg.doneCount, createdCount, activeMomentCount),
     dist: distributionRatios(agg.distTasks || []),
     doneTasks: doneThisWeek,
+  };
+}
+
+/** UI 展示封顶：≥100 显示为 100+（原始分仍保留在 momentScore 字段） */
+const MOMENT_SCORE_DISPLAY_CAP = 100;
+
+function normalizeMomentScoreNumber(score) {
+  const n = Number(score);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.floor(n);
+}
+
+/**
+ * 真我时刻分数展示：0～99 为原数字，≥100 为「100+」；单位固定「次」。
+ * @param {number} score
+ * @returns {{ displayText: string, unitText: string }}
+ */
+function formatMomentScoreDisplay(score) {
+  const n = normalizeMomentScoreNumber(score);
+  return {
+    displayText: n >= MOMENT_SCORE_DISPLAY_CAP ? "100+" : String(n),
+    unitText: "次",
+  };
+}
+
+/** 拼接为「12次」或「100+次」 */
+function formatMomentScoreWithUnit(score) {
+  const { displayText, unitText } = formatMomentScoreDisplay(score);
+  return `${displayText}${unitText}`;
+}
+
+/**
+ * 真我时刻觉察旁注（不弹窗）：<36 无文案。
+ * @param {number} score
+ * @returns {string}
+ */
+function formatMomentScoreFootnote(score) {
+  const n = normalizeMomentScoreNumber(score);
+  if (n >= MOMENT_SCORE_DISPLAY_CAP) return "时间都给了自己，这个节奏里，你还好吗？";
+  if (n >= 36) return "投入挺多的，看看节奏是不是自己想要的";
+  return "";
+}
+
+/** 展示用字段：displayText / unitText / footnote */
+function buildMomentScoreView(score) {
+  const { displayText, unitText } = formatMomentScoreDisplay(score);
+  return {
+    displayText,
+    unitText,
+    footnote: formatMomentScoreFootnote(score),
   };
 }
 
@@ -344,10 +445,19 @@ module.exports = {
   formatWeekRangeShort,
   formatWeekRangePoster,
   formatCalendarRangeChinese,
+  buildFlowingTaskListForWeek,
   aggregateMomentScoreForWeek,
   countCreatedInWeek,
+  countActiveMomentTasksInWeek,
+  presenceTierName,
+  presenceHintFor,
   distributionRatios,
   getCompletionStreakDays,
   buildWeekSummaries,
   getCurrentWeekSummary,
+  MOMENT_SCORE_DISPLAY_CAP,
+  formatMomentScoreDisplay,
+  formatMomentScoreWithUnit,
+  formatMomentScoreFootnote,
+  buildMomentScoreView,
 };

@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "打卡记录",
+  "navigationBarBackgroundColor": "#EFF7FD",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#EFF7FD",
+  "backgroundColorContent": "#D6EBF7",
+  "usingComponents": {
+    "check-in-month-calendar": "/components/check-in-month-calendar/index"
+  }
+}

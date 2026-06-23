@@ -78,6 +78,7 @@ page {
 }
 
 .avatar-wrap {
+  position: relative;
   width: 170rpx;
   height: 170rpx;
   border-radius: 999rpx;
@@ -86,6 +87,25 @@ page {
   align-items: center;
   justify-content: center;
   box-shadow: 0 8rpx 26rpx rgba(24, 64, 97, 0.08);
+  overflow: hidden;
+}
+
+.avatar-hit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 999rpx;
+  background: transparent;
+  opacity: 0;
+}
+
+.avatar-hit::after {
+  border: none;
 }
 
 .avatar {
@@ -171,6 +191,10 @@ page {
   align-items: center;
   gap: 16rpx;
   min-height: 206rpx;
+}
+
+.stat-item-hover {
+  opacity: 0.92;
 }
 
 .stat-icon-wrap {

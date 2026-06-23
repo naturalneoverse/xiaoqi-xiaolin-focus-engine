@@ -1,0 +1,63 @@
+<view class="page" style="{{_globalSafeAreaStyle}}">
+  <view class="top-bar">
+    <view class="back-wrap tap-target" catchtap="goBack" hover-class="top-bar-hover">
+      <image class="close-icon" src="/images/transparent background/close.png" mode="aspectFit" binderror="onImageError" />
+    </view>
+    <text class="page-title">子任务</text>
+    <view class="top-space"></view>
+  </view>
+
+  <text class="task-name">{{taskName}}</text>
+  <text class="parent-link tap-target" bindtap="goParent">查看{{parentTitle}} ›</text>
+
+  <view class="card content-card">
+    <view class="content-card-head">
+      <text class="k">详细内容</text>
+      <view class="content-card-actions" wx:if="{{!contentEditing}}">
+        <text class="content-action-link" catchtap="enterContentEdit">编辑</text>
+      </view>
+      <view class="content-card-actions" wx:else>
+        <text class="content-action-link content-action-primary" catchtap="saveContentEdit">保存</text>
+        <text class="content-action-link" catchtap="cancelContentEdit">取消</text>
+      </view>
+    </view>
+    <view wx:if="{{!contentEditing}}">
+      <text class="desc">{{taskContent}}</text>
+    </view>
+    <textarea
+      wx:else
+      class="content-textarea"
+      value="{{contentDraft}}"
+      bindinput="onContentDraftInput"
+      maxlength="{{taskContentMax}}"
+      auto-height
+      focus
+      placeholder="详细描述..."
+    />
+  </view>
+
+  <view class="card row">
+    <text class="k">日期</text>
+    <text class="v date-readonly">{{dateText}}</text>
+  </view>
+
+  <view class="card">
+    <text class="k">标签</text>
+    <view class="tags">
+      <text wx:for="{{tags}}" wx:key="*this" class="tag">{{item}}</text>
+      <text wx:if="{{!tags.length}}" class="tag">暂无标签</text>
+    </view>
+  </view>
+
+  <view class="card row">
+    <text class="k">状态</text>
+    <picker mode="selector" range="{{statusOptions}}" value="{{statusIndex}}" bindchange="onStatusChange">
+      <view class="status-picker-inner">
+        <text class="v">{{statusText}}</text>
+        <text class="status-arrow">⌄</text>
+      </view>
+    </picker>
+  </view>
+
+  <button class="btn-delete" bindtap="onDelete">删除子任务</button>
+</view>

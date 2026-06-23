@@ -1,8 +1,5 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
-const { buildInstantFeedback } = require("../../config/bodyFeedback");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
-const mascotCopyClient = require("../../utils/mascotCopyClient");
-const mascotCopyStats = require("../../utils/mascotCopyStats");
 const mascotEngineClient = require("../../utils/mascotEngineClient");
 const { raceResolve, MASCOT_ENGINE_TIMEOUT_MS } = require("../../utils/raceResolve");
 const { goMindHome } = require("../../utils/goTabHome");
@@ -25,6 +22,7 @@ Page({
   data: {
     todayRecords: [],
     adviceText: "",
+    adviceLoading: true,
   },
 
   onLoad(options) {
@@ -37,6 +35,22 @@ Page({
 
   onShow() {
     this.refreshTodayList();
+  },
+
+  _resolveAdviceText(record) {
+    const fallback = record
+      ? mascotEngineClient.getBodyDailyMascotLine(record)
+      : NO_RECORD_ADVICE_FALLBACK;
+    this.setData({ adviceLoading: true, adviceText: "" });
+    return raceResolve(mascotEngineClient.fetchMascotEngineBodyDaily(record), MASCOT_ENGINE_TIMEOUT_MS)
+      .then((cloudText) => {
+        const adviceText = cloudText || fallback;
+        this.setData({ adviceText, adviceLoading: false });
+      })
+      .catch((e) => {
+        console.error("today-report body_daily", e);
+        this.setData({ adviceText: fallback, adviceLoading: false });
+      });
   },
 
   refreshTodayList() {
@@ -56,65 +70,13 @@ Page({
       console.error("today-report refreshTodayList", e);
       list = [];
     }
+    this.setData({ todayRecords: list });
     if (!list.length) {
-      let allForStats = [];
-      try {
-        const saved = wx.getStorageSync(STORAGE_KEYS.BODY_RECORDS);
-        allForStats = Array.isArray(saved) ? saved : [];
-      } catch (e) {
-        allForStats = [];
-      }
-      const stats = mascotCopyStats.buildBodyDailyStats(allForStats, today);
-      const baseline =
-        mascotCopyClient.composeLocalCopy("body_daily", stats).text || NO_RECORD_ADVICE_FALLBACK;
-      this.setData({
-        todayRecords: [],
-        adviceText: baseline,
-      });
-      raceResolve(mascotEngineClient.fetchMascotEngineBodyDaily(null), MASCOT_ENGINE_TIMEOUT_MS)
-        .then((cloudText) => {
-          if (cloudText) {
-            this.setData({ adviceText: cloudText });
-          }
-        })
-        .catch((e) => {
-          console.error("today-report body_daily empty", e);
-        });
+      this._resolveAdviceText(null);
       return;
     }
     const last = list[list.length - 1];
-    const fallbackAdvice = () => {
-      const adviceText =
-        last && (last.sleep || last.sport || last.signal)
-          ? buildInstantFeedback({
-              sleep: last.sleep,
-              sport: last.sport,
-              signal: last.signal,
-              createdAt: last.createdAt,
-            })
-          : "";
-      this.setData({
-        todayRecords: list,
-        adviceText,
-      });
-    };
-    if (!mascotEngineClient.pickBodyDailySubType(last)) {
-      fallbackAdvice();
-      return;
-    }
-    fallbackAdvice();
-    raceResolve(mascotEngineClient.fetchMascotEngineBodyDaily(last), MASCOT_ENGINE_TIMEOUT_MS)
-      .then((cloudText) => {
-        if (cloudText) {
-          this.setData({
-            todayRecords: list,
-            adviceText: cloudText,
-          });
-        }
-      })
-      .catch((e) => {
-        console.error("today-report body_daily", e);
-      });
+    this._resolveAdviceText(last);
   },
 
   persistTodayBodyRecord(payload) {

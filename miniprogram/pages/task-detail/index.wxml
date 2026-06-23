@@ -81,6 +81,48 @@
     </block>
   </view>
 
+  <view class="card subtask-card">
+    <view class="subtask-head">
+      <text class="k">子任务（{{subtaskDone}}/{{subtaskTotal}}）</text>
+      <view class="subtask-bar" wx:if="{{subtaskTotal > 0}}">
+        <view class="subtask-bar-fill" style="width: {{subtaskProgressPercent}}%;"></view>
+      </view>
+    </view>
+    <text wx:if="{{subtaskAllDoneHint}}" class="subtask-all-done-hint">子步骤已全部完成，可在上方将任务标记为已完成</text>
+    <view wx:if="{{subtaskTotal === 0}}" class="subtask-empty">暂无子任务，点击下方添加</view>
+    <view
+      wx:for="{{subtasks}}"
+      wx:key="id"
+      class="subtask-row tap-target"
+      bindtap="onTapSubtaskRow"
+      data-id="{{item.id}}"
+    >
+      <view class="subtask-check-wrap" catchtap="onToggleSubtask" data-id="{{item.id}}">
+        <text class="subtask-check {{item.done ? 'subtask-check-done' : ''}}">{{item.done ? '✓' : '○'}}</text>
+      </view>
+      <text class="subtask-title {{item.done ? 'subtask-title-done' : ''}}">{{item.title}}</text>
+      <text wx:if="{{item.dateLabel}}" class="subtask-date">{{item.dateLabel}}</text>
+    </view>
+    <view
+      class="subtask-add tap-target {{subtaskAtLimit ? 'subtask-add-limit' : (subtaskCanAdd ? '' : 'subtask-add-disabled')}}"
+      catchtap="onTapAddSubtask"
+    >+ 添加子任务</view>
+    <view wx:if="{{showConvertPicker}}" class="subtask-convert-panel">
+      <text class="subtask-convert-tip">已达 20 条上限，选择一条转为独立任务后可继续添加：</text>
+      <view
+        wx:for="{{convertCandidates}}"
+        wx:key="id"
+        class="subtask-convert-row tap-target"
+        catchtap="onSelectConvertSubtask"
+        data-id="{{item.id}}"
+      >
+        <text class="subtask-convert-title">{{item.title}}</text>
+        <text class="subtask-convert-action">转为独立 ›</text>
+      </view>
+      <text class="subtask-convert-cancel tap-target" catchtap="onCancelConvertPicker">取消</text>
+    </view>
+  </view>
+
   <view class="card row">
     <text class="k">日期</text>
     <text class="v">{{dateText}}</text>

@@ -124,7 +124,6 @@ Page({
 
   onShow() {
     speechRecognition.prepare();
-    speechRecognition.warmUp().catch(() => {});
   },
 
   onUnload() {

@@ -94,6 +94,22 @@ page {
   transform: scaleX(-1);
 }
 
+.advice-loading {
+  flex: 1;
+  min-height: 80rpx;
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  border-radius: 20rpx;
+  background: rgba(183, 214, 234, 0.22);
+}
+
+.advice-loading text {
+  color: #577388;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
 .advice-row chat-bubble {
   flex: 1;
   max-width: 525rpx;

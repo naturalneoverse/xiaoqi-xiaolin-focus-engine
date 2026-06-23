@@ -15,11 +15,12 @@
     "pages/body/index",
     "pages/task-create/index",
     "pages/task-quiz/index",
-    "pages/reminder-test/index",
     "pages/task-priority/index",
     "pages/task-for-whom/index",
     "pages/task-why/index",
     "pages/task-detail/index",
+    "pages/subtask-create/index",
+    "pages/subtask-detail/index",
     "pages/my/index",
     "pages/settings/index",
     "pages/profile-edit-menu/index",
@@ -39,6 +40,8 @@
         "time-report/index",
         "weekly-report/index",
         "weekly-report-list/index",
+        "moment-week-list/index",
+        "check-in-calendar/index",
         "poster/index",
         "reflection-select/index",
         "reflection-quadrant/index",
@@ -77,12 +80,13 @@
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2",
+  "__usePrivacyCheck__": true,
   "permission": {
     "scope.record": {
       "desc": "你的语音将转写为文字，填入任务或哲思复盘输入框"
     },
     "scope.addPhoneCalendar": {
-      "desc": "用于将任务提醒写入您的系统日历"
+      "desc": "用于将任务提醒写入你的系统日历"
     }
   },
   "plugins": {

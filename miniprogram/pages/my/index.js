@@ -8,7 +8,9 @@ const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 Page({
   data: {
     momentWeekScore: 0,
-    streakDays: 0,
+    momentDisplayText: "0",
+    momentUnitText: "次",
+    streakDays: "0",
     notifyOn: true,
     userProfile: {
       avatarUrl: "",
@@ -35,6 +37,9 @@ Page({
   onShow() {
     ensureUserTagsOrLeave().then((ok) => {
       if (!ok) return;
+      dailyCheckIn.repairCheckInsFromActivity(true);
+      dailyCheckIn.recordDailyCheckIn();
+      this.loadTaskStats();
       this.syncUserProfile();
       try {
         const profileCloudSync = require("../../utils/profileCloudSync");
@@ -47,7 +52,19 @@ Page({
       } catch (e) {
         /* ignore */
       }
-      this.loadTaskStats();
+      try {
+        const checkInCloudSync = require("../../utils/checkInCloudSync");
+        if (checkInCloudSync && typeof checkInCloudSync.pullAndMergeCheckIns === "function") {
+          checkInCloudSync
+            .pullAndMergeCheckIns()
+            .then(() => this.loadTaskStats())
+            .catch(() => this.loadTaskStats());
+        } else {
+          this.loadTaskStats();
+        }
+      } catch (e2) {
+        this.loadTaskStats();
+      }
       this.syncNotifyFromApp();
       if (typeof this.getTabBar === "function" && this.getTabBar()) {
         this.getTabBar().setData({ selected: 2 });
@@ -65,10 +82,13 @@ Page({
       tasks = [];
     }
     const cur = momentScore.getCurrentWeekSummary(tasks, new Date());
+    const momentView = momentScore.buildMomentScoreView(cur.momentScore);
     const streak = dailyCheckIn.getCheckInTotalDays();
     this.setData({
       momentWeekScore: cur.momentScore,
-      streakDays: streak,
+      momentDisplayText: momentView.displayText,
+      momentUnitText: momentView.unitText,
+      streakDays: String(streak),
     });
   },
 
@@ -93,12 +113,20 @@ Page({
     });
   },
 
-  onTapAvatar() {
-    const { pickAndUploadUserAvatar } = require("../../utils/avatarUpload");
-    return this.__withSubmitting("avatarUpload", async () => {
-      const ok = await pickAndUploadUserAvatar();
-      if (ok) this.syncUserProfile();
-    });
+  onChooseAvatar(e) {
+    const tempPath = e && e.detail && e.detail.avatarUrl;
+    if (!tempPath) return;
+    const { uploadAvatarFromTempPath } = require("../../utils/avatarUpload");
+    if (this.data.__submitting_avatarUpload) return;
+    this.setData({ __submitting_avatarUpload: true });
+    uploadAvatarFromTempPath(tempPath)
+      .then((ok) => {
+        if (ok) this.syncUserProfile();
+        return ok;
+      })
+      .finally(() => {
+        this.setData({ __submitting_avatarUpload: false });
+      });
   },
 
   startEditNickname() {
@@ -213,6 +241,18 @@ Page({
     const key = momentScore.weekMondayKey(momentScore.getIsoWeekMonday(new Date()));
     wx.navigateTo({
       url: `/subpkg/poster/index?weekStart=${encodeURIComponent(key)}`,
+    });
+  },
+
+  goCheckInCalendar() {
+    wx.navigateTo({
+      url: "/subpkg/check-in-calendar/index",
+    });
+  },
+
+  goMomentWeekHistory() {
+    wx.navigateTo({
+      url: "/subpkg/moment-week-list/index",
     });
   },
 

@@ -311,6 +311,138 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 12rpx;
+}
+
+.task-head-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.task-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  flex-shrink: 0;
+}
+
+.subtask-count {
+  color: #6f86a0;
+  font-size: 24rpx;
+  flex-shrink: 0;
+}
+
+.subtask-count-done {
+  color: #8ea1b6;
+  font-size: 22rpx;
+  margin-left: 4rpx;
+}
+
+.tree-toggle {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tree-toggle-done {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.tree-toggle-hover {
+  opacity: 0.75;
+}
+
+.tree-toggle-icon {
+  color: #2e628b;
+  font-size: 24rpx;
+}
+
+.task-done-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-done-title-row {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  min-width: 0;
+}
+
+.subtask-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin: 0 0 16rpx 24rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.55);
+  border: 2rpx solid rgba(226, 234, 247, 0.85);
+  box-sizing: border-box;
+}
+
+.subtask-tree-row-done {
+  margin: 0;
+  padding: 14rpx 20rpx 14rpx 28rpx;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1rpx solid rgba(226, 234, 247, 0.9);
+}
+
+.subtask-tree-row-hover {
+  background: rgba(237, 244, 252, 0.85);
+}
+
+.tree-prefix {
+  color: #94a3b8;
+  font-size: 28rpx;
+  width: 28rpx;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.subtask-tree-check-wrap {
+  flex-shrink: 0;
+  padding: 4rpx;
+}
+
+.subtask-tree-check {
+  width: 28rpx;
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #c9dde7;
+}
+
+.subtask-tree-check-done {
+  color: #2f719c;
+}
+
+.subtask-tree-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 28rpx;
+  color: #184061;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtask-tree-title-done {
+  color: #5a7390;
+}
+
+.subtask-tree-date {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #94a3b8;
 }
 
 .task-title {

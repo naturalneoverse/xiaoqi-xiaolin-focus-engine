@@ -14,12 +14,16 @@
   </view>
 
   <view class="card">
-    <text class="title">小麟建议</text>
+    <text class="title">小麟元气寄语</text>
     <view class="advice-row">
       <view class="mascot-float-3d advice-mascot-float {{mascotAnimPaused ? 'mascot-float-paused' : ''}}">
         <image class="advice-mascot mascot-float-img" src="/images/transparent background/xiaolin.png" mode="aspectFit" binderror="onImageError" />
       </view>
+      <view wx:if="{{adviceLoading}}" class="advice-loading">
+        <text>小麟正在酝酿元气寄语…</text>
+      </view>
       <chat-bubble
+        wx:else
         text="{{adviceText}}"
         color="#b7d6ea"
         arrowPosition="left"

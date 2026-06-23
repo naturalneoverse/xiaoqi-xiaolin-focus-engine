@@ -146,11 +146,6 @@ async function ensureCalendarReady() {
   return ok;
 }
 
-function warmCalendarSession() {
-  if (deviceEnv.isDesktopWechat()) return Promise.resolve(false);
-  return ensureCalendarReady();
-}
-
 /**
  * @param {{ title: string, startTimeSec: number, repeatEndTimeSec: number, description: string }}
  */
@@ -542,5 +537,4 @@ module.exports = {
   scheduleAlarm,
   scheduleAlarmDays,
   scheduleDailyRange,
-  warmCalendarSession,
 };

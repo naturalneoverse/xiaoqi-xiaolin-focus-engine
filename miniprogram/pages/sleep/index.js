@@ -19,6 +19,8 @@ function formatMetaDateChinese(date) {
   return `${y}年${m}月${d}日`;
 }
 
+const subtaskUtil = require("../../utils/subtask");
+
 function normalizeStatus(task) {
   if (task.statusText) return task.statusText;
   return task.done ? "已完成" : "进行中";
@@ -85,6 +87,7 @@ function sortTasksNewestFirst(list) {
 }
 
 function isVisibleOnSleepTab(task, today) {
+  if (subtaskUtil.isSubtask(task)) return false;
   if (task.statusText === "已取消") return false;
   if (task.statusText === "进行中" || task.statusText === "已延期") return true;
   if (task.statusText !== "已完成") return false;
@@ -111,6 +114,7 @@ Page({
     showDoneTodayCollapse: false,
     pendingExpanded: false,
     doneTodayExpanded: false,
+    subtaskExpandedMap: {},
     metaDate: formatMetaDateChinese(new Date()),
     highlightAddBtn: false,
     doneCount: 0,
@@ -186,18 +190,29 @@ Page({
     );
     const pendingExpanded = !!this.data.pendingExpanded;
     const doneTodayExpanded = !!this.data.doneTodayExpanded;
+    const subtaskExpandedMap = subtaskUtil.readTreeExpandedMap();
     const pendingDisplay = buildPendingDisplay(pendingAll, pendingExpanded);
     const doneTodayDisplay = buildDoneTodayDisplay(doneTodayAll, doneTodayExpanded);
+    const pendingTasks = subtaskUtil.buildSleepTreeRows(
+      pendingDisplay.visible,
+      normalized,
+      subtaskExpandedMap,
+    );
+    const doneTodayTasks = subtaskUtil.buildSleepTreeRows(
+      doneTodayDisplay.visible,
+      normalized,
+      subtaskExpandedMap,
+    );
     const totalCount = visibleTasks.length;
     const doneCount = doneTodayAll.length;
     this.setData({
       allTasks: normalized,
       hasVisibleTasks: visibleTasks.length > 0,
-      pendingTasks: pendingDisplay.visible,
+      pendingTasks,
       pendingHiddenCount: pendingDisplay.hiddenCount,
       showPendingExpand: pendingDisplay.showExpand,
       showPendingCollapse: pendingDisplay.showCollapse,
-      doneTodayTasks: doneTodayDisplay.visible,
+      doneTodayTasks,
       doneTodayCount: doneTodayAll.length,
       doneTodayHiddenCount: doneTodayDisplay.hiddenCount,
       showDoneTodayExpand: doneTodayDisplay.showExpand,
@@ -205,7 +220,26 @@ Page({
       doneCount,
       totalCount,
       metaDate: formatMetaDateChinese(new Date()),
+      subtaskExpandedMap,
     });
+  },
+
+  toggleSubtaskTree(e) {
+    const parentId = e.currentTarget.dataset.id;
+    if (!parentId) return;
+    subtaskUtil.toggleTreeExpanded(parentId);
+    this.loadTasks();
+  },
+
+  onToggleSubtaskFromTree(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    const res = subtaskUtil.toggleSubtaskDone(id);
+    if (!res.ok) {
+      wx.showToast({ title: res.message || "操作失败", icon: "none" });
+      return;
+    }
+    this.loadTasks();
   },
 
   togglePendingExpand() {
@@ -234,9 +268,15 @@ Page({
       return;
     }
     const taskId = e.currentTarget.dataset.id;
+    const rowType = e.currentTarget.dataset.rowType || "parent";
+    if (rowType === "subtask") {
+      wx.navigateTo({
+        url: `/pages/subtask-detail/index?taskId=${encodeURIComponent(taskId)}`,
+      });
+      return;
+    }
     const task = this.data.allTasks.find((item) => item.id === taskId);
     if (!task) return;
-    /** 与 task-why 一致：用 taskId 从本地读详情，避免长描述导致 URL 超限 */
     wx.navigateTo({
       url: `/pages/task-detail/index?taskId=${encodeURIComponent(task.id)}`,
     });
@@ -244,20 +284,62 @@ Page({
 
   onTaskLongPress(e) {
     const taskId = e.currentTarget.dataset.id;
-    const allTasks = this.data.allTasks.slice();
-    const index = allTasks.findIndex((item) => item.id === taskId);
-    const task = allTasks[index];
-    if (!task) return;
+    const rowType = e.currentTarget.dataset.rowType || "parent";
     this.setData({ suppressTapOnce: true });
+
+    if (rowType === "subtask") {
+      const sub = subtaskUtil.findTaskById(this.data.allTasks, taskId);
+      if (!sub) return;
+      wx.showModal({
+        title: "删除子任务",
+        content: `确认删除「${sub.title || "未命名"}」？`,
+        confirmColor: "#12598f",
+        success: (res) => {
+          if (!res.confirm) return;
+          const r = subtaskUtil.deleteSubtask(taskId);
+          if (!r.ok) {
+            wx.showToast({ title: r.message || "删除失败", icon: "none" });
+            return;
+          }
+          this.loadTasks();
+          wx.showToast({ title: "已删除", icon: "success", duration: 1200 });
+        },
+      });
+      return;
+    }
+
+    const allTasks = this.data.allTasks.slice();
+    const task = allTasks.find((item) => item.id === taskId);
+    if (!task) return;
+    const subCount = subtaskUtil.getSubtasksForParent(allTasks, taskId).length;
+    const subtaskLine =
+      subCount > 0 ? `\n\n将同时删除 ${subCount} 个子任务。` : "";
     wx.showModal({
       title: "删除任务",
       content:
-        `确认删除「${task.title}」？\n\n` +
+        `确认删除「${task.title}」？${subtaskLine}\n\n` +
         "哲思复盘将保留，可在「我的 → 哲思复盘报告」中查看或长按删除。\n\n" +
         "若曾设置日历提醒，请自行到手机「日历」中删除相关条目。",
       confirmColor: "#12598f",
       success: (res) => {
         if (!res.confirm) return;
+        if (subCount > 0) {
+          const r = subtaskUtil.deleteParentTaskCascade(taskId);
+          if (!r.ok) {
+            wx.showToast({ title: r.message || "删除失败", icon: "none" });
+            return;
+          }
+          try {
+            reminderRegistry.removeRecord(taskId);
+          } catch (err) {
+            console.warn("delete task removeRecord", err);
+          }
+          this.loadTasks();
+          wx.showToast({ title: "已删除", icon: "success", duration: 1200 });
+          return;
+        }
+        const index = allTasks.findIndex((item) => item.id === taskId);
+        if (index < 0) return;
         allTasks.splice(index, 1);
         try {
           wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, allTasks);
@@ -268,8 +350,8 @@ Page({
         }
         try {
           reminderRegistry.removeRecord(taskId);
-        } catch (e) {
-          console.warn("delete task removeRecord", e);
+        } catch (err) {
+          console.warn("delete task removeRecord", err);
         }
         try {
           const cloudDataSync = require("../../utils/cloudDataSync");
@@ -277,15 +359,11 @@ Page({
             cloudDataSync.markTaskDeleted(taskId);
           }
           cloudDataSync.deleteTaskFromCloud(taskId);
-        } catch (e) {
-          console.warn("delete task cloud", e);
+        } catch (err) {
+          console.warn("delete task cloud", err);
         }
         this.loadTasks();
-        wx.showToast({
-          title: "已删除",
-          icon: "success",
-          duration: 1200,
-        });
+        wx.showToast({ title: "已删除", icon: "success", duration: 1200 });
       },
     });
   },

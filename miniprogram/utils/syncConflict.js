@@ -111,6 +111,8 @@ function markTaskDeleted(taskId) {
 
 function taskSnapshotHash(task) {
   if (!task) return "";
+  const pid = task.parentTaskId != null ? String(task.parentTaskId).trim() : "";
+  const sp = task.subtaskProgress;
   return stableHash({
     title: task.title,
     statusText: task.statusText,
@@ -119,8 +121,35 @@ function taskSnapshotHash(task) {
     reminderDate: task.reminderDate,
     reminderTime: task.reminderTime,
     reminderFrequency: task.reminderFrequency,
+    parentTaskId: pid,
+    subtaskProgress:
+      sp && typeof sp === "object"
+        ? { total: Number(sp.total) || 0, done: Number(sp.done) || 0 }
+        : null,
     updatedAt: task.updatedAt,
   });
+}
+
+function pickParentTaskId(localTask, cloudTask) {
+  const lPt = localTask && localTask.parentTaskId != null ? String(localTask.parentTaskId).trim() : "";
+  const cPt = cloudTask && cloudTask.parentTaskId != null ? String(cloudTask.parentTaskId).trim() : "";
+  if (!lPt && !cPt) return "";
+  const lMs = Number(localTask && localTask.updatedAt) || 0;
+  const cMs = Number(cloudTask && cloudTask.updatedAt) || 0;
+  return lMs >= cMs ? lPt : cPt;
+}
+
+function mergeTaskPair(prev, next) {
+  if (!prev) return next;
+  if (!next) return prev;
+  const localServer = getTaskServerMs(prev);
+  const cloudServer = getTaskServerMs(next);
+  const winner = cloudServer >= localServer ? { ...next } : { ...prev };
+  const parentTaskId = pickParentTaskId(prev, next);
+  if (parentTaskId) winner.parentTaskId = parentTaskId;
+  else if (winner.parentTaskId) delete winner.parentTaskId;
+  if (parentTaskId && winner.subtaskProgress) delete winner.subtaskProgress;
+  return winner;
 }
 
 function quadrantSnapshotHash(entry) {
@@ -211,8 +240,8 @@ function mergeTasksFromCloud(cloudTasks, readLocal, writeLocal, cloudTaskToLocal
     }
 
     if (cloudServer >= localServer && cloudHash !== localHash) {
-      byId[id] = next;
-      setTaskBase(base, id, next);
+      byId[id] = mergeTaskPair(prev, next);
+      setTaskBase(base, id, byId[id]);
       changed = true;
       return;
     }

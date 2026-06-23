@@ -23,7 +23,8 @@ const tasks = [
 ];
 
 const s = buildTimeWeaveWeekStats(tasks, monday, new Date("2026-05-20T12:00:00"));
-if (s.recordedCount !== 1) throw new Error("recordedCount");
+if (s.flowingCount !== 2) throw new Error("flowingCount");
+if (s.createdInWeekCount !== 1) throw new Error("createdInWeekCount");
 if (s.totalCount !== 2) throw new Error("totalCount");
 if (!s.copyKey) throw new Error("copyKey");
 if (pickLineIndex("2026-05-19", "oneSelf") < 1) throw new Error("lineIndex");

@@ -1,0 +1,34 @@
+<view class="cal">
+  <view class="cal-head">
+    <view class="cal-nav tap-target" bindtap="onPrevMonth" hover-class="cal-nav-hover" aria-label="上一月">
+      <text class="cal-nav-icon">‹</text>
+    </view>
+    <text class="cal-title">{{monthTitle}}</text>
+    <view class="cal-nav tap-target" bindtap="onNextMonth" hover-class="cal-nav-hover" aria-label="下一月">
+      <text class="cal-nav-icon">›</text>
+    </view>
+  </view>
+
+  <view class="cal-weekdays">
+    <text wx:for="{{weekLabels}}" wx:key="*this" class="cal-weekday">{{item}}</text>
+  </view>
+
+  <view class="cal-grid">
+    <view
+      wx:for="{{cells}}"
+      wx:key="index"
+      class="cal-cell {{item.inMonth ? '' : 'cal-cell--pad'}}"
+    >
+      <view
+        wx:if="{{item.inMonth}}"
+        class="cal-day tap-target {{item.isChecked ? 'cal-day--checked' : 'cal-day--plain'}} {{item.isToday ? 'cal-day--today' : ''}}"
+        data-date-key="{{item.dateKey}}"
+        data-checked="{{item.isChecked}}"
+        bindtap="onTapDay"
+        hover-class="cal-day-hover"
+      >
+        <text class="cal-day-num">{{item.day}}</text>
+      </view>
+    </view>
+  </view>
+</view>

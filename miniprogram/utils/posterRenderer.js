@@ -65,7 +65,7 @@ const QUOTES = [
   "宽恕过去，才能开始未来。",
 ];
 
-const MILESTONE_21 = "已累计打卡21天，你活成了自己选择的样子。";
+const MILESTONE_21 = "已累计打卡21天，你活成了自己选择的样子";
 const ZERO_COPY = "这一周，为生存和责任奔波，辛苦了。";
 const CTA_TEXT = "扫我，看看你有多少真我时刻 →";
 
@@ -175,22 +175,41 @@ function bodyFontForStyle(fontStyle, sizePx) {
   return `500 ${sizePx}px PingFang SC, Helvetica Neue, sans-serif`;
 }
 
+/** 无强制换行时优先缩字号至单行容纳，避免末字/标点孤行 */
+function resolveQuoteBodyLayout(ctx, innerText, fontStyle) {
+  const bodyMaxW = TEXT_W - mid(140);
+  const text = String(innerText);
+  let sizePx = quoteBodyFontSize(text);
+  const minPx = mid(24);
+
+  if (!text.includes("\n")) {
+    while (sizePx >= minPx) {
+      ctx.font = bodyFontForStyle(fontStyle, sizePx);
+      if (ctx.measureText(text).width <= bodyMaxW) {
+        return { sizePx, bodyLines: [text] };
+      }
+      sizePx -= 2;
+    }
+  }
+
+  ctx.font = bodyFontForStyle(fontStyle, sizePx);
+  return { sizePx, bodyLines: wrapLines(ctx, text, bodyMaxW) };
+}
+
 /** 方案 C1：弯引号用宋体/Georgia 栈，与正文块整体水平居中 */
 function drawQuoteSectionFixed(ctx, cx, yStart, innerText, fontStyle) {
   const markPx = mid(68);
   const markFont = `400 ${markPx}px "Songti SC", STSong, STKaiti, "Kaiti SC", Georgia, "Times New Roman", serif`;
-  const sizePx = quoteBodyFontSize(innerText);
+  const { sizePx, bodyLines } = resolveQuoteBodyLayout(ctx, innerText, fontStyle);
   const lh = sizePx * 1.5;
   const bodyFont = bodyFontForStyle(fontStyle, sizePx);
   const innerGap = mid(10);
-  const bodyMaxW = TEXT_W - mid(140);
 
   ctx.font = markFont;
   const qwL = ctx.measureText("「").width;
   const qwR = ctx.measureText("」").width;
 
   ctx.font = bodyFont;
-  const bodyLines = wrapLines(ctx, innerText, bodyMaxW);
   let maxW = 0;
   bodyLines.forEach((ln) => {
     const w = ctx.measureText(ln).width;
@@ -228,16 +247,8 @@ function drawQuoteSectionFixed(ctx, cx, yStart, innerText, fontStyle) {
 /** 不绘制，仅量金句块高度（与 drawQuoteSectionFixed 一致，行高 1.5） */
 function measureQuoteBlockHeight(ctx, innerText, fontStyle) {
   const markPx = mid(68);
-  const markFont = `400 ${markPx}px "Songti SC", STSong, STKaiti, "Kaiti SC", Georgia, "Times New Roman", serif`;
-  const sizePx = quoteBodyFontSize(innerText);
+  const { sizePx, bodyLines } = resolveQuoteBodyLayout(ctx, innerText, fontStyle);
   const lh = sizePx * 1.5;
-  const bodyFont = bodyFontForStyle(fontStyle, sizePx);
-  const innerGap = mid(10);
-  const bodyMaxW = TEXT_W - mid(140);
-
-  ctx.font = markFont;
-  ctx.font = bodyFont;
-  const bodyLines = wrapLines(ctx, innerText, bodyMaxW);
   const topPad = Math.max(0, (bodyLines.length * lh - markPx) / 2);
   return topPad + mid(56) + bodyLines.length * lh + mid(28);
 }

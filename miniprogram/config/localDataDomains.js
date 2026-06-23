@@ -125,12 +125,13 @@ const LOCAL_DATA_DOMAINS = [
   {
     domain: "daily_check_in",
     label: "每日打卡记录",
-    storageKeys: [STORAGE_KEYS.DAILY_CHECK_INS],
+    storageKeys: [STORAGE_KEYS.DAILY_CHECK_INS, STORAGE_KEYS.DAILY_CHECK_INS_BACKUP],
     clearable: false,
     clearPresets: [],
     discardable: false,
-    cloudSync: "none",
-    notes: "登录用户每日最多记一次；仅本地。",
+    cloudSync: "push-pull",
+    notes:
+      "仅经 dailyCheckIn.js 写入（禁止直写 Storage）；主键+备份+业务回补+云并集，拒绝缩水。开发/体验/正式版共用 Storage 与云环境。",
   },
   {
     domain: "profile",

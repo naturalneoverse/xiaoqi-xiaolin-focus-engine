@@ -12,6 +12,8 @@ const CUSTOM_NAV_ROUTES = new Set([
   "pages/my/index",
   "pages/task-create/index",
   "pages/task-detail/index",
+  "pages/subtask-create/index",
+  "pages/subtask-detail/index",
   "subpkg/time-report/index",
   "subpkg/poster/index",
   "pages/settings/index",
@@ -358,8 +360,9 @@ App({
   },
 
   tryRecordDailyCheckIn() {
-    if (!this.globalData || !this.globalData.hasLoggedIn) return;
     try {
+      const auth = require("./utils/authSession");
+      if (!auth || typeof auth.isLoggedIn !== "function" || !auth.isLoggedIn()) return;
       require("./utils/dailyCheckIn").recordDailyCheckIn();
     } catch (e) {
       console.warn("[App] recordDailyCheckIn", e);
@@ -374,6 +377,19 @@ App({
       /* ignore */
     }
     this.tryRecordDailyCheckIn();
+    try {
+      require("./utils/dailyCheckIn").repairCheckInsFromActivity(false);
+    } catch (e) {
+      /* ignore */
+    }
+    try {
+      const checkInCloudSync = require("./utils/checkInCloudSync");
+      if (checkInCloudSync && typeof checkInCloudSync.pullAndMergeCheckIns === "function") {
+        checkInCloudSync.pullAndMergeCheckIns().catch(() => {});
+      }
+    } catch (e) {
+      /* ignore */
+    }
     try {
       const m = require("./utils/cloudDataSync");
       if (m && typeof m.runIncrementalDebounced === "function") {

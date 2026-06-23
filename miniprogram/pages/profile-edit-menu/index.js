@@ -1,4 +1,4 @@
-const { pickAndUploadUserAvatar } = require("../../utils/avatarUpload");
+const { uploadAvatarFromTempPath } = require("../../utils/avatarUpload");
 const { requireLoginOnLoad } = require("../../utils/requireLogin");
 
 Page({
@@ -10,8 +10,14 @@ Page({
     this.__safeNavigateBack("pages/my/index");
   },
 
-  goAvatar() {
-    return this.__withSubmitting("avatarUpload", () => pickAndUploadUserAvatar());
+  onChooseAvatar(e) {
+    const tempPath = e && e.detail && e.detail.avatarUrl;
+    if (!tempPath) return;
+    if (this.data.__submitting_avatarUpload) return;
+    this.setData({ __submitting_avatarUpload: true });
+    uploadAvatarFromTempPath(tempPath).finally(() => {
+      this.setData({ __submitting_avatarUpload: false });
+    });
   },
 
   goNickname() {
