@@ -173,8 +173,7 @@ function gateUnauthenticatedShareEntry(options) {
   } catch (e3) {
     /* ignore */
   }
-  wx.reLaunch({ url: "/pages/login/index" });
-  return true;
+  return false;
 }
 
 /**
@@ -198,10 +197,7 @@ function handleColdLaunchForQr(hasLoggedIn) {
   if (rawScene) persistReferrerFromScene(rawScene);
   if (rawShareUid) persistReferrerFromShareUid(rawShareUid);
 
-  if (path === "pages/login/index") {
-    return;
-  }
-  wx.reLaunch({ url: "/pages/login/index" });
+  /* 仅记录分享来源，不强制跳转登录页，符合「先体验后登录」 */
 }
 
 module.exports = {

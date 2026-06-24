@@ -1,9 +1,11 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const { clampNickname, clampSignature } = require("../../config/profileTextLimits");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
+const authSession = require("../../utils/authSession");
+const { navigateToLogin, promptLoginIfNeeded } = require("../../utils/requireLogin");
 const momentScore = require("../../utils/momentScore");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
+const { applyProfileToPage, DEFAULT_AVATAR, resolveAvatarDisplayUrl, isCloudFileId } = require("../../utils/avatarDisplay");
 
 Page({
   data: {
@@ -12,11 +14,13 @@ Page({
     momentUnitText: "次",
     streakDays: "0",
     notifyOn: true,
+    isLoggedIn: false,
     userProfile: {
       avatarUrl: "",
       nickname: "用户名",
       signature: "我的个性签名",
     },
+    avatarSrc: DEFAULT_AVATAR,
     editingName: false,
     editingSignature: false,
     editingNicknameValue: "",
@@ -31,38 +35,43 @@ Page({
     } catch (e) {
       /* ignore */
     }
-    if (!requireLoginOnLoad()) return;
   },
 
   onShow() {
+    const isLoggedIn = authSession.isLoggedIn();
+    this.setData({ isLoggedIn });
     ensureUserTagsOrLeave().then((ok) => {
       if (!ok) return;
       dailyCheckIn.repairCheckInsFromActivity(true);
       dailyCheckIn.recordDailyCheckIn();
       this.loadTaskStats();
       this.syncUserProfile();
-      try {
-        const profileCloudSync = require("../../utils/profileCloudSync");
-        if (profileCloudSync && typeof profileCloudSync.pullAndMergeUserProfile === "function") {
-          profileCloudSync
-            .pullAndMergeUserProfile()
-            .then(() => this.syncUserProfile())
-            .catch(() => {});
+      if (isLoggedIn) {
+        try {
+          const profileCloudSync = require("../../utils/profileCloudSync");
+          if (profileCloudSync && typeof profileCloudSync.pullAndMergeUserProfile === "function") {
+            profileCloudSync
+              .pullAndMergeUserProfile()
+              .then(() => this.syncUserProfile())
+              .catch(() => {});
+          }
+        } catch (e) {
+          /* ignore */
         }
-      } catch (e) {
-        /* ignore */
-      }
-      try {
-        const checkInCloudSync = require("../../utils/checkInCloudSync");
-        if (checkInCloudSync && typeof checkInCloudSync.pullAndMergeCheckIns === "function") {
-          checkInCloudSync
-            .pullAndMergeCheckIns()
-            .then(() => this.loadTaskStats())
-            .catch(() => this.loadTaskStats());
-        } else {
+        try {
+          const checkInCloudSync = require("../../utils/checkInCloudSync");
+          if (checkInCloudSync && typeof checkInCloudSync.pullAndMergeCheckIns === "function") {
+            checkInCloudSync
+              .pullAndMergeCheckIns()
+              .then(() => this.loadTaskStats())
+              .catch(() => this.loadTaskStats());
+          } else {
+            this.loadTaskStats();
+          }
+        } catch (e2) {
           this.loadTaskStats();
         }
-      } catch (e2) {
+      } else {
         this.loadTaskStats();
       }
       this.syncNotifyFromApp();
@@ -100,20 +109,41 @@ Page({
   },
 
   onGlobalUserProfileChange(nextProfile) {
-    this.setData({
-      userProfile: { ...nextProfile },
-    });
+    applyProfileToPage(this, nextProfile);
   },
 
   syncUserProfile() {
     const app = getApp();
-    if (!app || typeof app.getUserProfile !== "function") return;
-    this.setData({
-      userProfile: app.getUserProfile(),
-    });
+    if (!app || typeof app.getUserProfile !== "function") return Promise.resolve();
+    return applyProfileToPage(this, app.getUserProfile());
+  },
+
+  onAvatarImageError() {
+    const app = getApp();
+    const stored =
+      app && typeof app.getUserProfile === "function"
+        ? app.getUserProfile().avatarUrl
+        : this.data.userProfile.avatarUrl;
+    if (isCloudFileId(stored)) {
+      resolveAvatarDisplayUrl(stored).then((url) => {
+        this.setData({ avatarSrc: url || DEFAULT_AVATAR });
+      });
+      return;
+    }
+    this.setData({ avatarSrc: DEFAULT_AVATAR });
+  },
+
+  onTapLogin() {
+    navigateToLogin();
   },
 
   onChooseAvatar(e) {
+    if (!authSession.isLoggedIn()) {
+      promptLoginIfNeeded({
+        content: "登录后可设置头像并同步到云端。",
+      });
+      return;
+    }
     const tempPath = e && e.detail && e.detail.avatarUrl;
     if (!tempPath) return;
     const { uploadAvatarFromTempPath } = require("../../utils/avatarUpload");
@@ -121,7 +151,7 @@ Page({
     this.setData({ __submitting_avatarUpload: true });
     uploadAvatarFromTempPath(tempPath)
       .then((ok) => {
-        if (ok) this.syncUserProfile();
+        if (ok) return this.syncUserProfile();
         return ok;
       })
       .finally(() => {
@@ -130,6 +160,10 @@ Page({
   },
 
   startEditNickname() {
+    if (!authSession.isLoggedIn()) {
+      promptLoginIfNeeded({ content: "登录后可修改昵称并同步到云端。" });
+      return;
+    }
     const current = this.data.userProfile.nickname || "";
     this.setData({
       editingName: true,
@@ -148,6 +182,10 @@ Page({
   },
 
   startEditSignature() {
+    if (!authSession.isLoggedIn()) {
+      promptLoginIfNeeded({ content: "登录后可修改签名并同步到云端。" });
+      return;
+    }
     const current = this.data.userProfile.signature || "";
     this.setData({
       editingSignature: true,
@@ -211,6 +249,10 @@ Page({
   },
 
   onTapSetting() {
+    if (!authSession.isLoggedIn()) {
+      promptLoginIfNeeded({ content: "登录后可进入账号设置。" });
+      return;
+    }
     wx.navigateTo({
       url: "/pages/settings/index",
     });
@@ -263,6 +305,13 @@ Page({
   },
 
   goReflectionList() {
+    if (
+      !promptLoginIfNeeded({
+        content: "哲思复盘需登录后使用云端 AI 能力。",
+      })
+    ) {
+      return;
+    }
     wx.navigateTo({
       url: "/subpkg/reflection-list/index",
     });

@@ -315,31 +315,11 @@ App({
                   /* ignore */
                 }
               } else {
-                let localPending = false;
-                try {
-                  const lo = wx.getStorageSync(STORAGE_KEYS.USER_TAGS_LOCAL);
-                  localPending = !!(lo && lo.gender && lo.lifeStage && Array.isArray(lo.roles) && lo.roles.length >= 2);
-                } catch (e) {
-                  localPending = false;
-                }
-                let storageTagsComplete = false;
-                try {
-                  storageTagsComplete = !!wx.getStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
-                } catch (e) {
-                  storageTagsComplete = false;
-                }
-                // 云端未部署 / save 未落库时，getUserTags 会返回 tagsComplete:false。
-                // 若此时本机已标记完成（问卷兜底或上次会话），不得清存储，否则 ensureUserTagsOrLeave
-                // 会反复 reLaunch 问卷，表现为「身心/我的进不去」、关闭键看似失灵。
-                if (localPending || storageTagsComplete) {
-                  this.globalData.userTagsComplete = true;
+                const authSession = require("./utils/authSession");
+                if (authSession && typeof authSession.clearLocalUserTags === "function") {
+                  authSession.clearLocalUserTags();
                 } else {
                   this.globalData.userTagsComplete = false;
-                  try {
-                    wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
-                  } catch (e) {
-                    /* ignore */
-                  }
                 }
               }
             })

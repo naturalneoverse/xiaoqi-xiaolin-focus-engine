@@ -1,6 +1,5 @@
 /**
- * 冷启动入口：分享扫码拦截 → wx.checkSession 自动登录 → 首页或登录/问卷
- * 不在此页使用固定 setTimeout 控制结束；动画 CSS 无限循环，路由在异步回调中完成。
+ * 冷启动入口：分享扫码记录 → 已登录则校验会话进首页/问卷；未登录则游客直达首页。
  */
 
 const STORAGE_KEYS = require("../../config/storageKeys");
@@ -9,7 +8,9 @@ const shareReferrer = require("../../utils/shareReferrer");
 const { goSleepHome } = require("../../utils/goTabHome");
 
 Page({
-  data: {},
+  data: {
+    logoSrc: "/images/transparent background/logo.png",
+  },
 
   onLoad() {
     const hasLoggedInForShare =
@@ -35,11 +36,11 @@ Page({
   },
 
   /**
-   * 检查 Storage 中 token、userInfo；有效则 wx.checkSession，成功进首页，失败清会话进登录页。
+   * 已登录：校验 token/userInfo 与 wx.checkSession；未登录或会话失效则游客进首页。
    */
   runAutoLogin() {
     if (!authSession.hasLocalCredentials()) {
-      wx.reLaunch({ url: "/pages/login/index" });
+      goSleepHome();
       return;
     }
 
@@ -48,7 +49,8 @@ Page({
     }
 
     if (!authSession.hasValidTokenAndUserInfo()) {
-      wx.reLaunch({ url: "/pages/login/index" });
+      authSession.clearSessionStorage();
+      goSleepHome();
       return;
     }
 
@@ -58,7 +60,7 @@ Page({
       },
       fail: () => {
         authSession.clearSessionStorage();
-        wx.reLaunch({ url: "/pages/login/index" });
+        goSleepHome();
       },
     });
   },
@@ -85,21 +87,14 @@ Page({
       /* ignore */
     }
 
-    const resolveTagsComplete = (cloudComplete) => {
-      if (cloudComplete) return true;
-      if (authSession.isLocalTagsComplete()) {
-        try {
-          wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
-        } catch (e) {
-          /* ignore */
-        }
-        return true;
-      }
-      return false;
+    const resolveTagsComplete = (cloudResult) => {
+      const applied = authSession.applyCloudTagsStatus(cloudResult);
+      if (applied === true || applied === false) return applied;
+      return authSession.isLocalTagsComplete();
     };
 
-    const finish = (tagsComplete) => {
-      const complete = resolveTagsComplete(!!tagsComplete);
+    const finish = (cloudResult) => {
+      const complete = resolveTagsComplete(cloudResult);
       if (app && app.globalData) {
         app.globalData.userTagsComplete = complete;
       }
@@ -123,7 +118,7 @@ Page({
     };
 
     if (!wx.cloud || typeof wx.cloud.callFunction !== "function") {
-      finish(authSession.isLocalTagsComplete());
+      finish({ success: false });
       return;
     }
 
@@ -133,27 +128,10 @@ Page({
         data: { type: "getUserTags" },
       })
       .then((res) => {
-        const r = (res && res.result) || {};
-        let tagsComplete = false;
-        if (r.success) {
-          tagsComplete = !!r.tagsComplete;
-        } else {
-          try {
-            tagsComplete = !!wx.getStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
-          } catch (e5) {
-            tagsComplete = false;
-          }
-        }
-        finish(tagsComplete);
+        finish((res && res.result) || { success: false });
       })
       .catch(() => {
-        let tagsComplete = false;
-        try {
-          tagsComplete = !!wx.getStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
-        } catch (e6) {
-          tagsComplete = false;
-        }
-        finish(tagsComplete);
+        finish({ success: false });
       });
   },
 });

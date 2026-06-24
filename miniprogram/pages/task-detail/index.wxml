@@ -91,7 +91,7 @@
     <text wx:if="{{subtaskAllDoneHint}}" class="subtask-all-done-hint">子步骤已全部完成，可在上方将任务标记为已完成</text>
     <view wx:if="{{subtaskTotal === 0}}" class="subtask-empty">暂无子任务，点击下方添加</view>
     <view
-      wx:for="{{subtasks}}"
+      wx:for="{{subtasksVisible}}"
       wx:key="id"
       class="subtask-row tap-target"
       bindtap="onTapSubtaskRow"
@@ -102,6 +102,13 @@
       </view>
       <text class="subtask-title {{item.done ? 'subtask-title-done' : ''}}">{{item.title}}</text>
       <text wx:if="{{item.dateLabel}}" class="subtask-date">{{item.dateLabel}}</text>
+    </view>
+    <view
+      wx:if="{{subtaskFoldable}}"
+      class="subtask-fold-row tap-target"
+      catchtap="onToggleSubtaskExpand"
+    >
+      <text class="subtask-fold-link">{{subtaskExpanded ? '收起' : '展开全部（还有 ' + subtaskHiddenCount + ' 条）'}}</text>
     </view>
     <view
       class="subtask-add tap-target {{subtaskAtLimit ? 'subtask-add-limit' : (subtaskCanAdd ? '' : 'subtask-add-disabled')}}"
@@ -202,11 +209,13 @@
     </block>
   </view>
 
-  <view class="page-scroll-tail"></view>
+  <view class="page-scroll-tail {{showReflectionBtn ? 'page-scroll-tail-action' : ''}}"></view>
   </view>
 
   <view wx:if="{{showReflectionBtn}}" class="page-action-bar">
-    <button class="page-action-btn" plain hover-class="page-action-btn-hover" bindtap="goReflection">哲思复盘</button>
+    <view class="page-action-btn-wrap page-action-btn--breathe {{mascotAnimPaused ? 'page-action-btn--breathe-paused' : ''}}">
+      <button class="page-action-btn page-action-btn-glass" plain hover-class="page-action-btn-hover" bindtap="goReflection">哲思复盘</button>
+    </view>
   </view>
 
   <view wx:if="{{showMascotModal}}" class="mascot-mask" bindtap="closeMascotModal">

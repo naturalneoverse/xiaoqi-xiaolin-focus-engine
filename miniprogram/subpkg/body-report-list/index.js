@@ -1,5 +1,4 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { applyReflectionNavBar } = require("../../config/reflectionTheme");
 const { buildPastBodyReportRows } = require("../../utils/reportHistoryLists");
 
@@ -10,7 +9,6 @@ Page({
   },
 
   onLoad() {
-    if (!requireLoginOnLoad()) return;
   },
 
   onShow() {

@@ -145,6 +145,47 @@ function isLocalTagsComplete() {
   }
 }
 
+/** 清除本机标签完成标记与暂存答案（云端明确未完成时调用） */
+function clearLocalUserTags() {
+  try {
+    wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
+    wx.removeStorageSync(STORAGE_KEYS.USER_TAGS_LOCAL);
+  } catch (e) {
+    /* ignore */
+  }
+  try {
+    const app = getApp();
+    if (app && app.globalData) app.globalData.userTagsComplete = false;
+  } catch (e) {
+    /* ignore */
+  }
+}
+
+/**
+ * 云端 getUserTags / loginByCode 结果写入本机标签态。
+ * @returns {boolean|null} true/false 表示已确定；null 表示云端未给出有效结果，调用方自行兜底
+ */
+function applyCloudTagsStatus(result) {
+  const r = result && typeof result === "object" ? result : {};
+  if (r.success !== true) return null;
+  if (r.tagsComplete) {
+    try {
+      wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
+    } catch (e) {
+      /* ignore */
+    }
+    try {
+      const app = getApp();
+      if (app && app.globalData) app.globalData.userTagsComplete = true;
+    } catch (e) {
+      /* ignore */
+    }
+    return true;
+  }
+  clearLocalUserTags();
+  return false;
+}
+
 function persistAfterLogin(loginResult, profile) {
   const lr = loginResult || {};
   const p = profile || {};
@@ -268,6 +309,8 @@ module.exports = {
   hasLocalCredentials,
   isLoggedIn,
   isLocalTagsComplete,
+  clearLocalUserTags,
+  applyCloudTagsStatus,
   isProfileCustomized,
   markProfileCustomized,
   syncUserInfoFromProfile,

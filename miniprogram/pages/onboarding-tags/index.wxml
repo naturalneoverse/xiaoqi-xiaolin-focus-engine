@@ -15,6 +15,7 @@ module.exports.has = function (roles, id) {
       <text class="hero-gr">γνῶθι σεαυτόν</text>
       <text class="hero-cn">认识你自己</text>
       <text class="hero-author">——苏格拉底</text>
+      <text class="hero-tagline">知你所思，才能妥帖陪伴</text>
     </view>
 
     <view class="section">
@@ -73,7 +74,7 @@ module.exports.has = function (roles, id) {
       进入小麒小麟
     </button>
 
-    <text class="footer-line">你填写，你定义，你不必解释。</text>
+    <text class="footer-line">简单填完信息，小麒小麟更懂怎么陪你</text>
     <view class="scroll-pad"></view>
   </scroll-view>
 </view>

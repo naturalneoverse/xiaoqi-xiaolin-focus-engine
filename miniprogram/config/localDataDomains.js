@@ -1,6 +1,6 @@
 /**
  * 本地业务数据域清单（F3-1）。
- * 供设置页「清除数据」文案生成（F3-2）、帮助页（I4）、Storage 降级（F2b）引用。
+ * 供设置页「清除缓存」文案生成（F3-2）、帮助页（I4）、Storage 降级（F2b）引用。
  * 本文件仅描述元数据，不在 Step 1 实现 clearMethod。
  */
 const STORAGE_KEYS = require("./storageKeys");
@@ -21,17 +21,16 @@ const SCATTERED_STORAGE_KEYS = {
 const IMAGE_CACHE_KEY_PREFIXES = ["temp_image_", "image_temp_", "draft_image_"];
 
 /**
- * 设置页「清除数据」预设 ID（F3-2 实现时遍历注册表）
+ * 设置页「清除缓存」预设 ID（F3-2 实现时遍历注册表）
  * @readonly
  */
 const CLEAR_PRESET_IDS = {
-  IMAGE_CACHE: "imageCache",
-  TASKS_REFLECTION: "tasksReflection",
+  APP_CACHE: "appCache",
 };
 
 /**
  * @typedef {'none'|'push-only'|'pull-merge'} CloudSyncKind
- * @typedef {'imageCache'|'tasksReflection'} ClearPresetId
+ * @typedef {'appCache'} ClearPresetId
  *
  * @typedef {object} LocalDataDomain
  * @property {string} domain
@@ -53,8 +52,8 @@ const LOCAL_DATA_DOMAINS = [
     domain: "tasks",
     label: "任务记录",
     storageKeys: [STORAGE_KEYS.TASKS_DATA],
-    clearable: true,
-    clearPresets: [CLEAR_PRESET_IDS.TASKS_REFLECTION],
+    clearable: false,
+    clearPresets: [],
     discardable: false,
     cloudSync: "push-pull",
     notes: "listTasks/pull + saveTask + deleteTask；删任务不删哲思复盘（产品设定）。",
@@ -64,8 +63,8 @@ const LOCAL_DATA_DOMAINS = [
     domain: "reflection",
     label: "哲思复盘作答",
     storageKeys: [STORAGE_KEYS.REFLECTION_RECORDS],
-    clearable: true,
-    clearPresets: [CLEAR_PRESET_IDS.TASKS_REFLECTION],
+    clearable: false,
+    clearPresets: [],
     discardable: false,
     cloudSync: "push-pull",
     notes: "按 taskId 聚合四象限；云集合 reflection_quadrants（Step2 API）。与任务生命周期解耦。用户可在哲思列表长按手动删除。",
@@ -75,18 +74,18 @@ const LOCAL_DATA_DOMAINS = [
     domain: "reflection_ark_pending",
     label: "哲思回响生成队列",
     storageKeys: [SCATTERED_STORAGE_KEYS.REFLECTION_ARK_PENDING],
-    clearable: false,
-    clearPresets: [],
+    clearable: true,
+    clearPresets: [CLEAR_PRESET_IDS.APP_CACHE],
     discardable: true,
     cloudSync: "none",
-    notes: "后台生成 pending；purgeRecordByTaskId 会清对应 task。设置「清除任务与哲思」当前不清此项。",
+    notes: "后台生成 pending；purgeRecordByTaskId 会清对应 task。设置「清除缓存」会清此项。",
   },
   {
     domain: "reflection_ark_failed",
     label: "哲思回响生成失败记录",
     storageKeys: [SCATTERED_STORAGE_KEYS.REFLECTION_ARK_GEN_FAILED],
-    clearable: false,
-    clearPresets: [],
+    clearable: true,
+    clearPresets: [CLEAR_PRESET_IDS.APP_CACHE],
     discardable: true,
     cloudSync: "none",
     notes: "生成失败标记；可丢弃后由用户重新保存象限触发。",
@@ -224,10 +223,10 @@ const LOCAL_DATA_DOMAINS = [
     storageKeys: [STORAGE_KEYS.CACHE_IMAGES],
     keyPrefixes: IMAGE_CACHE_KEY_PREFIXES,
     clearable: true,
-    clearPresets: [CLEAR_PRESET_IDS.IMAGE_CACHE],
+    clearPresets: [CLEAR_PRESET_IDS.APP_CACHE],
     discardable: true,
     cloudSync: "none",
-    notes: "设置「清除图片缓存」；含 temp_image_ / image_temp_ / draft_image_ 前缀 key。",
+    notes: "设置「清除缓存」；含 temp_image_ / image_temp_ / draft_image_ 前缀 key。",
   },
   {
     domain: "ui_guide",
@@ -236,8 +235,8 @@ const LOCAL_DATA_DOMAINS = [
       SCATTERED_STORAGE_KEYS.CALENDAR_NOTICE_GUIDE_COUNT,
       SCATTERED_STORAGE_KEYS.CALENDAR_NOTICE_GUIDE_NEVER,
     ],
-    clearable: false,
-    clearPresets: [],
+    clearable: true,
+    clearPresets: [CLEAR_PRESET_IDS.APP_CACHE],
     discardable: true,
     cloudSync: "none",
     notes: "UI 提示状态，非用户业务数据。",
@@ -246,8 +245,8 @@ const LOCAL_DATA_DOMAINS = [
     domain: "debug",
     label: "应用错误快照",
     storageKeys: [SCATTERED_STORAGE_KEYS.APP_LAST_ERROR],
-    clearable: false,
-    clearPresets: [],
+    clearable: true,
+    clearPresets: [CLEAR_PRESET_IDS.APP_CACHE],
     discardable: true,
     cloudSync: "none",
     notes: "app.js 诊断用，可安全丢弃。",

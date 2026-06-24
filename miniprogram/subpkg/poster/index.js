@@ -1,5 +1,4 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const momentScore = require("../../utils/momentScore");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
 const posterRenderer = require("../../utils/posterRenderer");
@@ -104,7 +103,6 @@ Page({
     } catch (e) {
       /* ignore */
     }
-    if (!requireLoginOnLoad()) return;
     const raw = options && options.weekStart ? decodeURIComponent(options.weekStart) : "";
     this.__weekMondayKey = raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";
     this.__blind = posterRenderer.rollBlindBox();
@@ -158,6 +156,11 @@ Page({
 
   goBack() {
     this.__safeNavigateBack("/pages/sleep/index");
+  },
+
+  onPreviewImageError() {
+    wx.showToast({ title: "预览加载失败", icon: "none" });
+    this.setData({ previewSrc: "" });
   },
 
   goHome() {

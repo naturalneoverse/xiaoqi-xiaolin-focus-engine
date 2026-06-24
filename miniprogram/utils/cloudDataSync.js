@@ -3,6 +3,8 @@
  * 全量 / 增量游标：CLOUD_FULL_SYNCED、LAST_SYNC_TASK_AT、LAST_SYNC_BODY_AT。
  */
 const STORAGE_KEYS = require("../config/storageKeys");
+const taskStorage = require("./taskStorage");
+const taskSyncTime = require("./taskSyncTime");
 
 let _startupQueued = false;
 let _lastStartupWall = 0;
@@ -68,12 +70,7 @@ function checkOnline() {
 }
 
 function readTasks() {
-  try {
-    const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
-    return Array.isArray(raw) ? raw : [];
-  } catch (e) {
-    return [];
-  }
+  return taskStorage.readTasks();
 }
 
 function readBodies() {
@@ -86,22 +83,11 @@ function readBodies() {
 }
 
 function parseCreatedToMs(taskOrRecord) {
-  const s = String((taskOrRecord && (taskOrRecord.createdAt || taskOrRecord.timeText)) || "")
-    .trim()
-    .replace(/\//g, "-");
-  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
-  if (!m) return 0;
-  const t = new Date(+m[1], +m[2] - 1, +m[3], m[4] != null ? +m[4] : 0, m[5] != null ? +m[5] : 0, 0, 0);
-  const ms = t.getTime();
-  return Number.isNaN(ms) ? 0 : ms;
+  return taskSyncTime.parseCreatedToMs(taskOrRecord);
 }
 
-/** 用于与 lastSync* 严格大于比较：优先 updatedAt，否则回退 createdAt 解析 */
 function getTaskEffectiveMs(task) {
-  if (task && Number.isFinite(Number(task.updatedAt)) && Number(task.updatedAt) > 0) {
-    return Number(task.updatedAt);
-  }
-  return parseCreatedToMs(task) || 0;
+  return taskSyncTime.getTaskEffectiveMs(task);
 }
 
 function getBodyEffectiveMs(record) {
@@ -144,10 +130,7 @@ function parseCloudResult(res) {
 }
 
 function getTaskServerMs(task) {
-  if (!task) return 0;
-  const s = Number(task.serverUpdatedAtMs);
-  if (Number.isFinite(s) && s > 0) return s;
-  return getTaskEffectiveMs(task);
+  return taskSyncTime.getTaskServerMs(task);
 }
 
 function getBodyServerMs(record) {
@@ -158,13 +141,7 @@ function getBodyServerMs(record) {
 }
 
 function writeTasks(list) {
-  try {
-    wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, Array.isArray(list) ? list : []);
-    return true;
-  } catch (e) {
-    console.error("[cloudDataSync] writeTasks", e);
-    return false;
-  }
+  return taskStorage.writeTasks(list, { recordCheckIn: false });
 }
 
 function writeBodies(list) {
@@ -279,7 +256,7 @@ async function callQuickstart(type, data) {
 
 async function pullTasksFromCloud() {
   const raw = await callQuickstart("listTasks");
-  if (!raw || !raw.success) return false;
+  if (!raw || !raw.success) return { merged: false, conflicts: 0 };
   const syncConflict = require("./syncConflict");
   const r = syncConflict.mergeTasksFromCloud(
     raw.tasks,
@@ -295,11 +272,19 @@ async function pullTasksFromCloud() {
     if (rec.changed) {
       writeTasks(rec.tasks);
       merged = true;
+      const byId = Object.create(null);
+      rec.tasks.forEach((t) => {
+        if (t && t.id) byId[String(t.id)] = t;
+      });
+      (rec.changedIds || []).forEach((id) => {
+        const t = byId[id];
+        if (t) syncConflict.refreshBaseAfterTaskSave(t);
+      });
     }
   } catch (e) {
     console.warn("[cloudDataSync] subtask reconcile", e);
   }
-  return merged;
+  return { merged, conflicts: Number(r.conflicts) || 0 };
 }
 
 async function pullBodiesFromCloud() {
@@ -314,7 +299,9 @@ async function pullAndMergeFromCloud() {
   if (!(await ensureCloudCallable())) return;
   if (!(await checkOnline())) return;
   try {
-    await pullTasksFromCloud();
+    let conflictAdded = 0;
+    const taskPull = await pullTasksFromCloud();
+    if (taskPull && taskPull.conflicts) conflictAdded += taskPull.conflicts;
     await pullBodiesFromCloud();
     await require("./reflectionCloudSync").pullAndMergeFromCloud();
     try {
@@ -354,7 +341,7 @@ function deleteTaskFromCloud(taskId) {
 async function pushTaskToCloud(task) {
   if (task && task.id) {
     try {
-      if (require("./syncConflict").isTaskTombstoned(task.id)) return false;
+      if (require("./syncConflict").isTaskTombstoned(task.id)) return { ok: false };
     } catch (e) {
       /* ignore */
     }
@@ -362,7 +349,7 @@ async function pushTaskToCloud(task) {
   /* 不因 cloudInitOk / 登录态拦截；仅保留 API 存在性 */
   if (!wx.cloud || typeof wx.cloud.callFunction !== "function") {
     console.warn("[cloudDataSync] saveTask 跳过：wx.cloud 不可用");
-    return false;
+    return { ok: false };
   }
   const payload = ensureTaskForCloud(task);
   try {
@@ -386,11 +373,16 @@ async function pushTaskToCloud(task) {
       } catch (e2) {
         console.warn("[cloudDataSync] saveTask 返回体(无法序列化)", raw, res);
       }
+      return { ok: false };
     }
-    return ok;
+    const serverUpdatedAtMs = Number(raw && raw.serverUpdatedAtMs);
+    return {
+      ok: true,
+      serverUpdatedAtMs: Number.isFinite(serverUpdatedAtMs) ? serverUpdatedAtMs : 0,
+    };
   } catch (e) {
     logCloudFail("saveTask", null, e);
-    return false;
+    return { ok: false };
   }
 }
 
@@ -437,7 +429,20 @@ async function afterTaskSaved(task) {
   } catch (e) {
     /* ignore */
   }
-  await pushTaskToCloud(task);
+  const result = await pushTaskToCloud(task);
+  if (!result || !result.ok) return;
+  const syncConflict = require("./syncConflict");
+  let saved = task;
+  if (result.serverUpdatedAtMs > 0) {
+    const list = readTasks();
+    const idx = list.findIndex((t) => t && String(t.id) === String(task.id));
+    if (idx >= 0) {
+      saved = { ...list[idx], serverUpdatedAtMs: result.serverUpdatedAtMs };
+      list[idx] = saved;
+      writeTasks(list);
+    }
+  }
+  syncConflict.refreshBaseAfterTaskSave(saved);
 }
 
 async function afterBodySaved(record) {
@@ -518,7 +523,7 @@ async function runFullSyncIfNeeded() {
     if (!t || !t.id) continue;
     if (syncConflict.isTaskTombstoned(t.id)) continue;
     const ok = await pushTaskToCloud(t);
-    if (!ok) return;
+    if (!ok || !ok.ok) return;
     maxTask = Math.max(maxTask, ensureTaskForCloud(t).updatedAt);
   }
 
@@ -556,8 +561,8 @@ async function runIncrementalSync() {
     if (syncConflict.isTaskTombstoned(t.id)) continue;
     const eff = getTaskEffectiveMs(t);
     if (eff > lastT) {
-      const ok = await pushTaskToCloud(t);
-      if (!ok) return;
+      const result = await pushTaskToCloud(t);
+      if (!result || !result.ok) return;
       maxTask = Math.max(maxTask, eff);
     }
   }

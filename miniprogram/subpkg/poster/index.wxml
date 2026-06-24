@@ -13,7 +13,7 @@
 
   <view class="poster-column">
     <view wx:if="{{previewSrc}}" class="preview-wrap">
-      <image class="preview-img" src="{{previewSrc}}" mode="widthFix" show-menu-by-longpress />
+      <image class="preview-img" src="{{previewSrc}}" mode="widthFix" show-menu-by-longpress binderror="onPreviewImageError" />
     </view>
 
     <canvas

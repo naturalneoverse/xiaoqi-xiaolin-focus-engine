@@ -1,5 +1,4 @@
 const { parsePayload } = require("../../utils/parsePayload");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { QUIZ_SECTIONS, labelsFromIds } = require("../../config/taskQuizChoices");
 const {
   buildQuizCode,
@@ -65,7 +64,6 @@ Page({
   },
 
   onLoad(options) {
-    if (!requireLoginOnLoad()) return;
     const payload = parsePayload(options.payload);
     const restored = payload.quizSelections || {};
     this.setData({

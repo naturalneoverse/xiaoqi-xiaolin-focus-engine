@@ -8,6 +8,11 @@
   </view>
 
   <view class="card story-card">
+    <view class="about-intro-link" bindtap="goBrandIntro">
+      <text class="about-intro-title">认识小麒小麟</text>
+      <text class="about-intro-arrow">›</text>
+    </view>
+    <view class="line"></view>
     <text class="title">品牌故事</text>
     <text class="p">小麒小麟，取自中国传统瑞兽'麒麟'。麒为雄，麟为雌，一智慧一能量，正如我们每个人内心的双重力量——向内觉察，向外行动。</text>
     <text class="p">这是一款基于现象学与存在主义哲学的专注效率工具。

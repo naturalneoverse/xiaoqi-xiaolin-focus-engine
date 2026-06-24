@@ -1,5 +1,5 @@
-const STORAGE_KEYS = require("../../config/storageKeys");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
+const authSession = require("../../utils/authSession");
+const taskStorage = require("../../utils/taskStorage");
 const reminderRegistry = require("../../utils/reminderRegistry");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 const { getTodayKey } = require("../../utils/dateKeys");
@@ -137,7 +137,6 @@ Page({
     } catch (e) {
       /* ignore */
     }
-    if (!requireLoginOnLoad()) return;
     this.loadTasks();
   },
 
@@ -150,31 +149,36 @@ Page({
           this.getTabBar().setData({ selected: 0 });
         }
       };
-      let pull = Promise.resolve();
+      refreshUi();
       try {
-        const cloudDataSync = require("../../utils/cloudDataSync");
-        if (cloudDataSync && typeof cloudDataSync.ensureCloudCallable === "function") {
-          pull = cloudDataSync.ensureCloudCallable().then((ok) => {
-            if (!ok || typeof cloudDataSync.pullAndMergeFromCloud !== "function") return;
-            return cloudDataSync.pullAndMergeFromCloud();
-          });
+        const brandIntro = require("../../utils/brandIntroNavigate");
+        if (brandIntro.scheduleBrandIntroPromptOnSleep) {
+          brandIntro.scheduleBrandIntroPromptOnSleep(600);
         }
-      } catch (e) {
+      } catch (e0) {
         /* ignore */
+      }
+
+      let pull = Promise.resolve();
+      if (authSession.isLoggedIn()) {
+        try {
+          const cloudDataSync = require("../../utils/cloudDataSync");
+          if (cloudDataSync && typeof cloudDataSync.ensureCloudCallable === "function") {
+            pull = cloudDataSync.ensureCloudCallable().then((ok) => {
+              if (!ok || typeof cloudDataSync.pullAndMergeFromCloud !== "function") return;
+              return cloudDataSync.pullAndMergeFromCloud();
+            });
+          }
+        } catch (e) {
+          /* ignore */
+        }
       }
       pull.catch(() => {}).finally(refreshUi);
     });
   },
 
   loadTasks() {
-    let storedTasks = [];
-    try {
-      const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
-      storedTasks = Array.isArray(raw) ? raw : [];
-    } catch (e) {
-      console.error("loadTasks getStorageSync", e);
-      storedTasks = [];
-    }
+    const storedTasks = taskStorage.readTasks();
     const normalized = sortTasksNewestFirst(
       storedTasks.length ? storedTasks.map(normalizeTask) : []
     );
@@ -341,10 +345,7 @@ Page({
         const index = allTasks.findIndex((item) => item.id === taskId);
         if (index < 0) return;
         allTasks.splice(index, 1);
-        try {
-          wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, allTasks);
-        } catch (err) {
-          console.error("delete task setStorageSync", err);
+        if (!taskStorage.writeTasks(allTasks)) {
           wx.showToast({ title: "删除失败", icon: "none" });
           return;
         }

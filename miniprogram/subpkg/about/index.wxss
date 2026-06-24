@@ -67,6 +67,26 @@ page {
   margin-bottom: 60rpx;
 }
 
+.about-intro-link {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8rpx 0 16rpx;
+}
+
+.about-intro-title {
+  font-size: 30rpx;
+  color: #12598f;
+  font-weight: 600;
+}
+
+.about-intro-arrow {
+  font-size: 36rpx;
+  color: #9ec7e6;
+  line-height: 1;
+}
+
 .title {
   display: block;
   font-size: 34rpx;

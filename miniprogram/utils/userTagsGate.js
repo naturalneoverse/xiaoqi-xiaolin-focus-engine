@@ -10,50 +10,46 @@ function ensureUserTagsOrLeave() {
   if (!app || !app.globalData || !app.globalData.hasLoggedIn) {
     return Promise.resolve(true);
   }
-  if (app.globalData.userTagsComplete === true) {
-    return Promise.resolve(true);
-  }
-  if (authSession.isLocalTagsComplete()) {
-    app.globalData.userTagsComplete = true;
-    return Promise.resolve(true);
-  }
   if (!wx.cloud || typeof wx.cloud.callFunction !== "function") {
+    if (authSession.isLocalTagsComplete()) {
+      app.globalData.userTagsComplete = true;
+      return Promise.resolve(true);
+    }
     return Promise.resolve(true);
   }
-  return wx.cloud
-    .callFunction({
-      name: "quickstartFunctions",
-      data: { type: "getUserTags" },
-    })
+  const callTags = wx.cloud.callFunction({
+    name: "quickstartFunctions",
+    data: { type: "getUserTags" },
+  });
+  const timeoutMs = 5000;
+  const timed = Promise.race([
+    callTags,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("getUserTags timeout")), timeoutMs);
+    }),
+  ]);
+  return timed
     .then((res) => {
       const r = (res && res.result) || {};
-      if (r.success && r.tagsComplete) {
-        app.globalData.userTagsComplete = true;
-        try {
-          wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
-        } catch (e) {
-          /* ignore */
-        }
+      const applied = authSession.applyCloudTagsStatus(r);
+      if (applied === true) {
         return true;
+      }
+      if (applied === false) {
+        wx.reLaunch({ url: "/pages/onboarding-tags/index" });
+        return false;
       }
       if (authSession.isLocalTagsComplete()) {
         app.globalData.userTagsComplete = true;
-        try {
-          wx.setStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE, true);
-        } catch (e) {
-          /* ignore */
-        }
         return true;
-      }
-      /** 仅云端明确「未填完」时才拦；success:false（未部署/报错）不 reLaunch，避免预览卡死 */
-      if (r.success === true && r.tagsComplete === false) {
-        wx.reLaunch({ url: "/pages/onboarding-tags/index" });
-        return false;
       }
       return true;
     })
     .catch((e) => {
       console.warn("getUserTags gate", e);
+      if (app.globalData.userTagsComplete === true) {
+        return true;
+      }
       if (authSession.isLocalTagsComplete()) {
         app.globalData.userTagsComplete = true;
         return true;

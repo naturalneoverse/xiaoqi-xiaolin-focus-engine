@@ -194,6 +194,18 @@ page {
   text-align: center;
 }
 
+.skip-login-link {
+  display: block;
+  margin-top: 28rpx;
+  color: #6f859b;
+  font-size: 26rpx;
+  text-align: center;
+}
+
+.skip-login-link:active {
+  opacity: 0.72;
+}
+
 .footer-tip {
   margin-top: 72rpx;
   color: #7f95aa;

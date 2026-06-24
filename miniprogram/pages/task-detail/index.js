@@ -1,7 +1,4 @@
-const STORAGE_KEYS = require("../../config/storageKeys");
 const { TASK_CONTENT_MAX } = require("../../config/taskLimits");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
-const dailyCheckIn = require("../../utils/dailyCheckIn");
 const mascotCopyClient = require("../../utils/mascotCopyClient");
 const mascotCopyStats = require("../../utils/mascotCopyStats");
 const { raceResolve, MASCOT_ENGINE_TIMEOUT_MS } = require("../../utils/raceResolve");
@@ -14,6 +11,23 @@ const { formatCompanionBubbleLines } = require("../../utils/formatCompanionBubbl
 const subtaskUtil = require("../../utils/subtask");
 const STATUS_OPTIONS = ["进行中", "已完成", "已延期", "已取消"];
 const { REMINDER_FREQ_OPTIONS, FREQ_SINGLE } = reminderSchedule;
+
+/** 子任务超过此数量时默认折叠，可展开全部 */
+const SUBTASK_FOLD_THRESHOLD = 8;
+
+function buildSubtaskFoldView(list, expanded) {
+  const all = Array.isArray(list) ? list : [];
+  const total = all.length;
+  const foldable = total > SUBTASK_FOLD_THRESHOLD;
+  const subtasksVisible = foldable && !expanded
+    ? all.slice(0, SUBTASK_FOLD_THRESHOLD)
+    : all;
+  return {
+    subtasksVisible,
+    subtaskFoldable: foldable,
+    subtaskHiddenCount: foldable && !expanded ? total - SUBTASK_FOLD_THRESHOLD : 0,
+  };
+}
 
 /** 提交成功气泡：两行小麒模式（与副标题「小麒来为您庆祝啦」分工） */
 const TASK_SUCCESS_LINE1 = "恭喜您完成全部选择～";
@@ -44,27 +58,12 @@ function canShowReflectionEntry(statusText) {
 }
 
 function toCompletedAt() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  return `${y}-${m}-${d} ${hh}:${mm}`;
-}
-
-function readTasksFromStorage() {
-  try {
-    const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
-    return Array.isArray(raw) ? raw : [];
-  } catch (e) {
-    return [];
-  }
+  return subtaskUtil.toCompletedAt();
 }
 
 function findTaskById(taskId) {
   if (!taskId) return null;
-  return readTasksFromStorage().find((t) => t && t.id === taskId) || null;
+  return subtaskUtil.findTaskById(subtaskUtil.readTasks(), taskId);
 }
 
 function getTextLength(value) {
@@ -165,6 +164,10 @@ Page({
     tags: [],
     showReflectionBtn: false,
     subtasks: [],
+    subtasksVisible: [],
+    subtaskExpanded: false,
+    subtaskFoldable: false,
+    subtaskHiddenCount: 0,
     subtaskDone: 0,
     subtaskTotal: 0,
     subtaskProgressPercent: 0,
@@ -182,7 +185,6 @@ Page({
   },
 
   onLoad(options) {
-    if (!requireLoginOnLoad()) return;
     const app = getApp();
     const imageAssets = (app && app.globalData && app.globalData.imageAssets) || {};
     const showSuccess = options && options.showSuccess === "1";
@@ -275,14 +277,25 @@ Page({
     const progress = subtaskUtil.computeProgress(subs);
     const percent = progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
     const list = subtaskUtil.buildSubtaskListView(taskId, tasks);
+    const fold = buildSubtaskFoldView(list, this.data.subtaskExpanded);
     this.setData({
       subtasks: list,
+      ...fold,
       subtaskDone: progress.done,
       subtaskTotal: progress.total,
       subtaskProgressPercent: percent,
       subtaskCanAdd: gate.ok,
       subtaskAtLimit: gate.reason === "limit",
       subtaskAllDoneHint: subtaskUtil.shouldShowSubtaskAllDoneHint(parent, tasks),
+    });
+  },
+
+  onToggleSubtaskExpand() {
+    const next = !this.data.subtaskExpanded;
+    const fold = buildSubtaskFoldView(this.data.subtasks, next);
+    this.setData({
+      subtaskExpanded: next,
+      ...fold,
     });
   },
 
@@ -585,7 +598,7 @@ Page({
   },
 
   loadCreateMascotTextFromCategory(tagTexts) {
-    const tasks = readTasksFromStorage();
+    const tasks = subtaskUtil.readTasks();
     const taskCategory = taskCategoryFromTagTexts(tagTexts);
     const stats = mascotCopyStats.buildTaskCreateStats(tasks, taskCategory);
     const localLine = mascotCopyClient.composeLocalCopy("task_create", stats).text;
@@ -683,13 +696,7 @@ Page({
       wx.showToast({ title: "无法保存：缺少任务标识", icon: "none" });
       return false;
     }
-    let tasks = [];
-    try {
-      tasks = readTasksFromStorage();
-    } catch (err) {
-      console.error("persistTaskUpdates getStorageSync", err);
-      return false;
-    }
+    let tasks = subtaskUtil.readTasks();
     let saved = null;
     const nextTasks = tasks.map((task) => {
       if (task.id !== taskId) return task;
@@ -706,18 +713,13 @@ Page({
       saved = merged;
       return merged;
     });
-    try {
-      wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
-      dailyCheckIn.recordDailyCheckIn();
-    } catch (err) {
-      console.error("persistTaskUpdates setStorageSync", err);
+    if (!subtaskUtil.writeTasks(nextTasks)) {
       wx.showToast({ title: "保存失败", icon: "none" });
       return false;
     }
     try {
       if (saved) {
-        const cloudDataSync = require("../../utils/cloudDataSync");
-        cloudDataSync.afterTaskSaved(saved);
+        subtaskUtil.saveTasksAndSync([saved]);
         if (patch.tags && subtaskUtil.isTopLevelTask(saved)) {
           subtaskUtil.syncParentTagsToSubtasks(taskId);
         }
@@ -726,7 +728,7 @@ Page({
         }
       }
     } catch (e) {
-      console.warn("[task-detail] cloudDataSync", e);
+      console.warn("[task-detail] cloud sync", e);
     }
     return true;
   },

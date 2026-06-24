@@ -3,6 +3,7 @@
  */
 const STORAGE_KEYS = require("../config/storageKeys");
 const { QUADRANT_IDS, isValidQuadrantId } = require("../config/reflectionRecordSchema");
+const taskSyncTime = require("./taskSyncTime");
 
 const QUADRANT_TITLES = {
   1: "观实归真",
@@ -12,6 +13,38 @@ const QUADRANT_TITLES = {
 };
 
 let _promptBusy = false;
+
+function getPendingConflictIdSet() {
+  return new Set(
+    readConflicts()
+      .map((x) => (x && x.id ? String(x.id) : ""))
+      .filter(Boolean),
+  );
+}
+
+function hasPendingTaskConflict(taskId) {
+  return getPendingConflictIdSet().has(`task:${String(taskId || "").trim()}`);
+}
+
+function hasPendingReflectionConflict(taskId, quadrantId) {
+  const tid = String(taskId || "").trim();
+  const qid = String(quadrantId || "").trim();
+  if (!tid || !qid) return false;
+  return getPendingConflictIdSet().has(`reflection:${tid}:${qid}`);
+}
+
+function getCurrentRoute() {
+  try {
+    const pages = getCurrentPages();
+    const cur = pages[pages.length - 1];
+    return cur && cur.route ? String(cur.route) : "";
+  } catch (e) {
+    return "";
+  }
+}
+
+let _lastPromptKeys = "";
+let _lastPromptAt = 0;
 
 function readJson(key, fallback) {
   try {
@@ -109,25 +142,52 @@ function markTaskDeleted(taskId) {
   }
 }
 
+/** 完成态归一化，避免 done 与 statusText 轻微不一致误报冲突 */
+function normalizeTaskStatus(task) {
+  if (!task) return { statusText: "进行中", done: false };
+  const st = String(task.statusText || "").trim();
+  if (st === "已完成") return { statusText: "已完成", done: true };
+  if (st === "已取消") return { statusText: "已取消", done: false };
+  if (st === "进行中") return { statusText: "进行中", done: false };
+  if (task.done) return { statusText: "已完成", done: true };
+  return { statusText: st || "进行中", done: !!task.done };
+}
+
+/**
+ * 任务冲突快照 hash（不含 subtaskProgress：由 reconcileSubtasksAfterMerge 重算）
+ */
 function taskSnapshotHash(task) {
   if (!task) return "";
   const pid = task.parentTaskId != null ? String(task.parentTaskId).trim() : "";
-  const sp = task.subtaskProgress;
+  const status = normalizeTaskStatus(task);
   return stableHash({
     title: task.title,
-    statusText: task.statusText,
-    done: task.done,
+    statusText: status.statusText,
+    done: status.done,
     content: task.content,
     reminderDate: task.reminderDate,
     reminderTime: task.reminderTime,
     reminderFrequency: task.reminderFrequency,
     parentTaskId: pid,
-    subtaskProgress:
-      sp && typeof sp === "object"
-        ? { total: Number(sp.total) || 0, done: Number(sp.done) || 0 }
-        : null,
-    updatedAt: task.updatedAt,
   });
+}
+
+/** 哈希算法升级后：以当前本地任务校正基准，避免旧 hash 误报双向变更 */
+function ensureTaskBaseHashesCurrent(readLocal) {
+  if (typeof readLocal !== "function") return;
+  const base = readBase();
+  let dirty = false;
+  readLocal().forEach((t) => {
+    if (!t || !t.id) return;
+    const id = String(t.id);
+    const row = base.tasks[id];
+    const h = taskSnapshotHash(t);
+    if (!row || row.hash !== h) {
+      setTaskBase(base, id, t);
+      dirty = true;
+    }
+  });
+  if (dirty) writeBase(base);
 }
 
 function pickParentTaskId(localTask, cloudTask) {
@@ -158,9 +218,7 @@ function quadrantSnapshotHash(entry) {
 }
 
 function getTaskServerMs(task) {
-  const s = Number(task && task.serverUpdatedAtMs);
-  if (Number.isFinite(s) && s > 0) return s;
-  return Number(task && task.updatedAt) || 0;
+  return taskSyncTime.getTaskServerMs(task);
 }
 
 function getQuadrantServerMs(entry) {
@@ -190,6 +248,7 @@ function setQuadrantBase(base, taskId, quadrantId, entry) {
  * @returns {{ merged: boolean, conflicts: number }}
  */
 function mergeTasksFromCloud(cloudTasks, readLocal, writeLocal, cloudTaskToLocal, getEffectiveMs) {
+  ensureTaskBaseHashesCurrent(readLocal);
   const list = Array.isArray(cloudTasks) ? cloudTasks : [];
   const local = readLocal();
   const byId = Object.create(null);
@@ -211,6 +270,11 @@ function mergeTasksFromCloud(cloudTasks, readLocal, writeLocal, cloudTaskToLocal
     const prev = byId[id];
     const baseRow = base.tasks[id];
 
+    if (hasPendingTaskConflict(id)) {
+      if (prev) setTaskBase(base, id, prev);
+      return;
+    }
+
     if (!prev) {
       byId[id] = next;
       setTaskBase(base, id, next);
@@ -227,15 +291,20 @@ function mergeTasksFromCloud(cloudTasks, readLocal, writeLocal, cloudTaskToLocal
     const cloudServer = getTaskServerMs(next);
 
     if (localChanged && cloudChanged && localHash !== cloudHash) {
-      pushConflict({
-        id: `task:${id}`,
-        kind: "task",
-        taskId: id,
-        taskTitle: prev.title || next.title || "未命名任务",
-        localSnapshot: prev,
-        cloudSnapshot: next,
-      });
-      conflicts += 1;
+      const conflictId = `task:${id}`;
+      const alreadyQueued = getPendingConflictIdSet().has(conflictId);
+      if (!alreadyQueued) {
+        pushConflict({
+          id: conflictId,
+          kind: "task",
+          taskId: id,
+          taskTitle: prev.title || next.title || "未命名任务",
+          localSnapshot: prev,
+          cloudSnapshot: next,
+        });
+        conflicts += 1;
+      }
+      setTaskBase(base, id, prev);
       return;
     }
 
@@ -309,6 +378,11 @@ function mergeReflectionFromCloud(cloudRecords, readAll, writeAll) {
       const baseTask = base.reflection[taskId] || {};
       const baseRow = baseTask[key];
 
+      if (hasPendingReflectionConflict(taskId, qid)) {
+        if (localEntry) setQuadrantBase(base, taskId, qid, localEntry);
+        return;
+      }
+
       if (!localEntry || !localEntry.completedAtMs) {
         localRec.quadrants[key] = {
           cardResponses: cloudEntry.cardResponses || [],
@@ -328,25 +402,30 @@ function mergeReflectionFromCloud(cloudRecords, readAll, writeAll) {
       const cloudChanged = baseHash && cloudHash !== baseHash;
 
       if (localChanged && cloudChanged && localHash !== cloudHash) {
-        pushConflict({
-          id: `reflection:${taskId}:${qid}`,
-          kind: "reflection_quadrant",
-          taskId,
-          quadrantId: qid,
-          taskTitle: localRec.taskTitle || cloudRec.taskTitle || "未命名任务",
-          localSnapshot: {
-            cardResponses: localEntry.cardResponses,
-            completedAt: localEntry.completedAt,
-            completedAtMs: localEntry.completedAtMs,
-          },
-          cloudSnapshot: {
-            cardResponses: cloudEntry.cardResponses,
-            completedAt: cloudEntry.completedAt,
-            completedAtMs: cloudEntry.completedAtMs,
-            serverUpdatedAtMs: cloudEntry.serverUpdatedAtMs || 0,
-          },
-        });
-        conflicts += 1;
+        const conflictId = `reflection:${taskId}:${qid}`;
+        const alreadyQueued = getPendingConflictIdSet().has(conflictId);
+        if (!alreadyQueued) {
+          pushConflict({
+            id: conflictId,
+            kind: "reflection_quadrant",
+            taskId,
+            quadrantId: qid,
+            taskTitle: localRec.taskTitle || cloudRec.taskTitle || "未命名任务",
+            localSnapshot: {
+              cardResponses: localEntry.cardResponses,
+              completedAt: localEntry.completedAt,
+              completedAtMs: localEntry.completedAtMs,
+            },
+            cloudSnapshot: {
+              cardResponses: cloudEntry.cardResponses,
+              completedAt: cloudEntry.completedAt,
+              completedAtMs: cloudEntry.completedAtMs,
+              serverUpdatedAtMs: cloudEntry.serverUpdatedAtMs || 0,
+            },
+          });
+          conflicts += 1;
+        }
+        setQuadrantBase(base, taskId, qid, localEntry);
         return;
       }
 
@@ -385,26 +464,38 @@ function mergeReflectionFromCloud(cloudRecords, readAll, writeAll) {
   return { merged: changed, conflicts };
 }
 
-function applyTaskChoice(conflict, useCloud) {
+async function applyTaskChoice(conflict, useCloud) {
   const cloudSync = require("./cloudDataSync");
   const id = conflict.taskId;
   const list = cloudSync.readTasks();
   const idx = list.findIndex((t) => t && String(t.id) === String(id));
-  const chosen = useCloud
+  let chosen = useCloud
     ? cloudSync.cloudTaskToLocal(conflict.cloudSnapshot)
-    : conflict.localSnapshot;
-  if (!chosen) return;
+    : { ...(conflict.localSnapshot || {}) };
+  if (!chosen) return { ok: false };
   if (idx >= 0) list[idx] = chosen;
   else list.unshift(chosen);
   cloudSync.writeTasks(list);
+
+  if (!useCloud) {
+    const pushResult = await cloudSync.pushTaskToCloud(chosen);
+    const ok = !!(pushResult && (pushResult.ok === true || pushResult === true));
+    if (!ok) {
+      return { ok: false, reason: "push_failed" };
+    }
+    const serverMs = pushResult && Number(pushResult.serverUpdatedAtMs);
+    if (Number.isFinite(serverMs) && serverMs > 0) {
+      chosen = { ...chosen, serverUpdatedAtMs: serverMs };
+      if (idx >= 0) list[idx] = chosen;
+      else if (list[0] && String(list[0].id) === String(id)) list[0] = chosen;
+      cloudSync.writeTasks(list);
+    }
+  }
+
   const base = readBase();
   setTaskBase(base, id, chosen);
   writeBase(base);
-  if (!useCloud) {
-    cloudSync.pushTaskToCloud(chosen).then((ok) => {
-      if (ok) refreshBaseAfterTaskSave(chosen);
-    });
-  }
+  return { ok: true };
 }
 
 function applyReflectionQuadrantChoice(conflict, useCloud) {
@@ -442,14 +533,15 @@ function applyReflectionQuadrantChoice(conflict, useCloud) {
 }
 
 function resolveConflictItem(item, useCloud) {
-  if (!item) return;
+  if (!item) return Promise.resolve({ ok: false });
   if (item.kind === "task") {
-    applyTaskChoice(item, useCloud);
-    return;
+    return applyTaskChoice(item, useCloud);
   }
   if (item.kind === "reflection_quadrant") {
     applyReflectionQuadrantChoice(item, useCloud);
+    return Promise.resolve({ ok: true });
   }
+  return Promise.resolve({ ok: false });
 }
 
 function buildConflictContent(item) {
@@ -464,13 +556,28 @@ function buildConflictContent(item) {
 
 function tryShowPendingConflicts() {
   if (_promptBusy) return Promise.resolve(false);
+  const route = getCurrentRoute();
+  if (route === "pages/onboarding-tags/index") {
+    return Promise.resolve(false);
+  }
   const items = readConflicts();
-  if (!items.length) return Promise.resolve(false);
+  if (!items.length) {
+    _lastPromptKeys = "";
+    return Promise.resolve(false);
+  }
+  const key = items.map((i) => i.id).join("|");
+  const now = Date.now();
+  if (key === _lastPromptKeys && now - _lastPromptAt < 10000) {
+    return Promise.resolve(false);
+  }
+  _lastPromptKeys = key;
+  _lastPromptAt = now;
   _promptBusy = true;
 
   const showOne = (index) => {
     if (index >= items.length) {
       _promptBusy = false;
+      if (!readConflicts().length) _lastPromptKeys = "";
       return Promise.resolve(true);
     }
     const item = items[index];
@@ -483,9 +590,19 @@ function tryShowPendingConflicts() {
         confirmColor: "#12598f",
         success: (res) => {
           const useCloud = !!(res && res.confirm);
-          resolveConflictItem(item, useCloud);
-          removeConflict(item.id);
-          resolve();
+          Promise.resolve(resolveConflictItem(item, useCloud))
+            .then((result) => {
+              if (result && result.ok) {
+                removeConflict(item.id);
+                if (!readConflicts().length) _lastPromptKeys = "";
+              } else if (result && result.reason === "push_failed") {
+                wx.showToast({
+                  title: "同步失败，请稍后重试",
+                  icon: "none",
+                });
+              }
+            })
+            .finally(() => resolve());
         },
         fail: () => resolve(),
       });

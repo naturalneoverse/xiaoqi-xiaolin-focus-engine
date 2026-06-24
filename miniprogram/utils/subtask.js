@@ -3,32 +3,19 @@
  */
 
 const STORAGE_KEYS = require("../config/storageKeys");
-const dailyCheckIn = require("./dailyCheckIn");
 const { newLocalTaskId } = require("./taskCreatePersist");
 const { formatDateTime } = require("./dateFormat");
+const taskStorage = require("./taskStorage");
 
 const MAX_SUBTASKS = 20;
 const PARENT_BLOCKED_FOR_ADD = new Set(["已完成", "已取消"]);
 
 function readTasks() {
-  try {
-    const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
-    return Array.isArray(raw) ? raw : [];
-  } catch (e) {
-    console.error("[subtask] readTasks", e);
-    return [];
-  }
+  return taskStorage.readTasks();
 }
 
 function writeTasks(tasks) {
-  try {
-    wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, tasks);
-    dailyCheckIn.recordDailyCheckIn();
-    return true;
-  } catch (e) {
-    console.error("[subtask] writeTasks", e);
-    return false;
-  }
+  return taskStorage.writeTasks(tasks);
 }
 
 function cloudSaveTasks(list) {
@@ -42,6 +29,24 @@ function cloudSaveTasks(list) {
     });
   } catch (e) {
     console.warn("[subtask] cloudSaveTasks", e);
+  }
+}
+
+/** 本地写入 + 刷新同步基准 + 异步 push */
+function saveTasksAndSync(list) {
+  refreshSyncBaseForTasks(list);
+  cloudSaveTasks(list);
+}
+
+/** 本地写入后立即刷新同步基准，避免 pull 窗口期误判冲突 */
+function refreshSyncBaseForTasks(list) {
+  try {
+    const syncConflict = require("./syncConflict");
+    (list || []).forEach((t) => {
+      if (t && t.id) syncConflict.refreshBaseAfterTaskSave(t);
+    });
+  } catch (e) {
+    /* ignore */
   }
 }
 
@@ -118,10 +123,17 @@ function recountParentProgress(tasks, parentId) {
   const progress = computeProgress(subtasks);
   return (tasks || []).map((t) => {
     if (!t || String(t.id) !== pid) return t;
+    const prev = t.subtaskProgress;
+    if (
+      prev
+      && Number(prev.total) === Number(progress.total)
+      && Number(prev.done) === Number(progress.done)
+    ) {
+      return t;
+    }
     return {
       ...t,
       subtaskProgress: progress,
-      updatedAt: Date.now(),
     };
   });
 }
@@ -210,34 +222,58 @@ function createSubtask(parentId, fields) {
   if (!writeTasks(next)) {
     return { ok: false, message: "保存失败" };
   }
-  cloudSaveTasks([subtask, savedParent].filter(Boolean));
+  saveTasksAndSync([subtask, savedParent].filter(Boolean));
   return { ok: true, subtask, parent: savedParent, tasks: next };
 }
 
 function toggleSubtaskDone(subtaskId) {
   const id = String(subtaskId || "").trim();
+  const sub = findTaskById(readTasks(), id);
+  if (!sub || !isSubtask(sub)) {
+    return { ok: false, message: "子任务不存在" };
+  }
+  const nextDone = sub.statusText !== "已完成";
+  return updateSubtaskFields(
+    id,
+    {
+      statusText: nextDone ? "已完成" : "进行中",
+      done: nextDone,
+      completedAt: nextDone ? toCompletedAt() : "",
+    },
+    { recountParent: true },
+  );
+}
+
+/**
+ * 子任务字段更新（详情页编辑共用）
+ * @param {string} subtaskId
+ * @param {object} patch
+ * @param {{ recountParent?: boolean }} [opts]
+ */
+function updateSubtaskFields(subtaskId, patch, opts) {
+  const id = String(subtaskId || "").trim();
+  const recountParent = !!(opts && opts.recountParent);
   let tasks = readTasks();
   const sub = findTaskById(tasks, id);
   if (!sub || !isSubtask(sub)) {
     return { ok: false, message: "子任务不存在" };
   }
-  const pid = getParentTaskId(sub);
-  const nextDone = sub.statusText !== "已完成";
-  const patch = {
-    ...sub,
-    statusText: nextDone ? "已完成" : "进行中",
-    done: nextDone,
-    completedAt: nextDone ? toCompletedAt() : "",
-    updatedAt: Date.now(),
-  };
-  let next = upsertTaskInList(tasks, patch);
-  next = recountParentProgress(next, pid);
+  let saved = { ...sub, ...patch, updatedAt: Date.now() };
+  if (patch.statusText != null) {
+    saved.statusText = patch.statusText;
+    saved.done = patch.done != null ? patch.done : patch.statusText === "已完成";
+  }
+  let next = upsertTaskInList(tasks, saved);
+  const pid = getParentTaskId(saved);
+  if (recountParent) {
+    next = recountParentProgress(next, pid);
+  }
   const savedParent = findTaskById(next, pid);
   if (!writeTasks(next)) {
     return { ok: false, message: "保存失败" };
   }
-  cloudSaveTasks([patch, savedParent].filter(Boolean));
-  return { ok: true, subtask: patch, parent: savedParent };
+  saveTasksAndSync([saved, savedParent].filter(Boolean));
+  return { ok: true, subtask: saved, parent: savedParent };
 }
 
 function deleteSubtask(subtaskId) {
@@ -255,7 +291,7 @@ function deleteSubtask(subtaskId) {
     return { ok: false, message: "删除失败" };
   }
   cloudDeleteTask(id);
-  if (savedParent) cloudSaveTasks([savedParent]);
+  if (savedParent) saveTasksAndSync([savedParent]);
   return { ok: true, parent: savedParent };
 }
 
@@ -300,7 +336,7 @@ function syncParentTagsToSubtasks(parentId) {
     updated.push(next);
   });
   if (!writeTasks(tasks)) return { ok: false };
-  cloudSaveTasks(updated);
+  saveTasksAndSync(updated);
   return { ok: true, updated };
 }
 
@@ -441,7 +477,7 @@ function detachSubtaskAsIndependent(subtaskId) {
   if (!writeTasks(next)) {
     return { ok: false, message: "操作失败" };
   }
-  cloudSaveTasks([detached, savedParent].filter(Boolean));
+  saveTasksAndSync([detached, savedParent].filter(Boolean));
   return { ok: true, task: detached, parent: savedParent };
 }
 
@@ -461,21 +497,26 @@ function shouldShowSubtaskAllDoneHint(parent, tasksOpt) {
 /**
  * 云 pull / merge 后：剔除悬空子任务、重算父 subtaskProgress（PRD 4.4）
  * @param {object[]} tasks
- * @returns {{ tasks: object[], changed: boolean }}
+ * @returns {{ tasks: object[], changed: boolean, changedIds: string[] }}
  */
 function reconcileSubtasksAfterMerge(tasks) {
   const input = Array.isArray(tasks) ? tasks.slice() : [];
-  let byId = Object.create(null);
+  const inputById = Object.create(null);
   input.forEach((t) => {
-    if (t && t.id) byId[String(t.id)] = t;
+    if (t && t.id) inputById[String(t.id)] = t;
   });
 
   let list = input.filter((t) => {
     if (!t || !t.id) return false;
     const pid = getParentTaskId(t);
     if (!pid) return true;
-    const parent = byId[pid];
+    const parent = inputById[pid];
     return !!(parent && !isSubtask(parent));
+  });
+
+  let byId = Object.create(null);
+  input.forEach((t) => {
+    if (t && t.id) byId[String(t.id)] = t;
   });
 
   list = list.map((t) => {
@@ -511,8 +552,23 @@ function reconcileSubtasksAfterMerge(tasks) {
     return rest;
   });
 
-  const changed = JSON.stringify(list) !== JSON.stringify(input);
-  return { tasks: list, changed };
+  const changedIds = new Set();
+  input.forEach((t) => {
+    if (!t || !t.id) return;
+    const id = String(t.id);
+    const after = list.find((x) => x && String(x.id) === id);
+    if (!after) {
+      changedIds.add(id);
+      return;
+    }
+    if (JSON.stringify(after) !== JSON.stringify(t)) changedIds.add(id);
+  });
+  list.forEach((t) => {
+    if (t && t.id && !inputById[String(t.id)]) changedIds.add(String(t.id));
+  });
+
+  const changed = changedIds.size > 0;
+  return { tasks: list, changed, changedIds: [...changedIds] };
 }
 
 module.exports = {
@@ -528,6 +584,7 @@ module.exports = {
   canAddSubtaskToParent,
   createSubtask,
   toggleSubtaskDone,
+  updateSubtaskFields,
   deleteSubtask,
   buildSubtaskListView,
   getSubtaskProgressView,
@@ -544,4 +601,7 @@ module.exports = {
   isAllSubtasksDone,
   shouldShowSubtaskAllDoneHint,
   reconcileSubtasksAfterMerge,
+  refreshSyncBaseForTasks,
+  saveTasksAndSync,
+  toCompletedAt,
 };

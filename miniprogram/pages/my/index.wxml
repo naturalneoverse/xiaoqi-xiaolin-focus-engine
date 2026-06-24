@@ -11,17 +11,19 @@
 
   <view class="profile-card profile-card-gradient">
     <view class="avatar-wrap">
-      <image wx:if="{{userProfile.avatarUrl}}" class="avatar-image" src="{{userProfile.avatarUrl}}" mode="aspectFill" binderror="onImageError" data-err-field="userProfile.avatarUrl" />
+      <image wx:if="{{avatarSrc}}" class="avatar-image" src="{{avatarSrc}}" mode="aspectFill" binderror="onAvatarImageError" />
       <view wx:else class="avatar">👤</view>
       <button
+        wx:if="{{isLoggedIn}}"
         class="avatar-hit"
         open-type="chooseAvatar"
         bindchooseavatar="onChooseAvatar"
         hover-class="none"
       />
+      <view wx:else class="avatar-hit" bindtap="onTapLogin" />
     </view>
     <input
-      wx:if="{{editingName}}"
+      wx:if="{{isLoggedIn && editingName}}"
       class="name-input"
       value="{{editingNicknameValue}}"
       focus
@@ -31,12 +33,13 @@
       confirm-type="done"
     />
     <text
-      wx:else
+      wx:elif="{{isLoggedIn}}"
       class="name {{(!userProfile.nickname || userProfile.nickname === '用户名') ? 'name-placeholder' : ''}}"
       bindtap="startEditNickname"
     >{{(!userProfile.nickname || userProfile.nickname === '用户名') ? '空缺中' : userProfile.nickname}}</text>
+    <text wx:else class="name name-placeholder" bindtap="onTapLogin">点击登录</text>
     <input
-      wx:if="{{editingSignature}}"
+      wx:if="{{isLoggedIn && editingSignature}}"
       class="signature-input"
       value="{{editingSignatureValue}}"
       focus
@@ -46,10 +49,11 @@
       confirm-type="done"
     />
     <text
-      wx:else
+      wx:elif="{{isLoggedIn}}"
       class="signature {{(!userProfile.signature || userProfile.signature === '我的个性签名') ? 'signature-placeholder' : ''}}"
       bindtap="startEditSignature"
     >{{(!userProfile.signature || userProfile.signature === '我的个性签名') ? '等你来定义我' : userProfile.signature}}</text>
+    <text wx:else class="signature signature-placeholder" bindtap="onTapLogin">登录后完善资料</text>
   </view>
 
   <view class="stats">

@@ -3,10 +3,8 @@ const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const {
   executeClearPreset,
   buildClearConfirmContent,
-  buildClearFinalConfirmContent,
   CLEAR_PRESET_IDS,
 } = require("../../utils/localDataClear");
-const CLEAR_OPTIONS = ["清除图片缓存", "清除任务与哲思本地记录"];
 
 Page({
   data: {
@@ -67,82 +65,28 @@ Page({
   },
 
   onClearCache() {
-    wx.showActionSheet({
-      itemList: CLEAR_OPTIONS,
-      itemColor: "#dc2626",
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          this.confirmClearImageCache();
-          return;
-        }
-        if (res.tapIndex === 1) {
-          this.confirmClearAllRecords();
-        }
-      },
-    });
-  },
-
-  confirmClearImageCache() {
     wx.showModal({
-      title: "清除图片缓存",
-      content: buildClearConfirmContent(CLEAR_PRESET_IDS.IMAGE_CACHE),
+      title: "清除缓存",
+      content: buildClearConfirmContent(CLEAR_PRESET_IDS.APP_CACHE),
+      cancelText: "取消",
+      confirmText: "清除",
       confirmColor: "#dc2626",
       success: (res) => {
         if (!res.confirm) return;
-        const result = executeClearPreset(CLEAR_PRESET_IDS.IMAGE_CACHE);
+        const result = executeClearPreset(CLEAR_PRESET_IDS.APP_CACHE);
         if (!result.ok) {
           wx.showModal({
             title: "清除失败",
-            content: "图片缓存清除失败，请稍后重试",
+            content: "缓存清除失败，请稍后重试",
             showCancel: false,
           });
           return;
         }
         wx.showToast({
-          title: "图片缓存已清除",
+          title: "缓存已清除",
           icon: "success",
         });
       },
-    });
-  },
-
-  confirmClearAllRecords() {
-    wx.showModal({
-      title: "清除任务与哲思记录",
-      content: buildClearConfirmContent(CLEAR_PRESET_IDS.TASKS_REFLECTION),
-      cancelText: "取消",
-      confirmText: "继续清空",
-      confirmColor: "#dc2626",
-      success: (res) => {
-        if (!res.confirm) return;
-        wx.showModal({
-          title: "最终确认",
-          content: buildClearFinalConfirmContent(CLEAR_PRESET_IDS.TASKS_REFLECTION),
-          cancelText: "再想想",
-          confirmText: "确认清空",
-          confirmColor: "#dc2626",
-          success: (res2) => {
-            if (!res2.confirm) return;
-            this._executeClearAllTasks();
-          },
-        });
-      },
-    });
-  },
-
-  _executeClearAllTasks() {
-    const result = executeClearPreset(CLEAR_PRESET_IDS.TASKS_REFLECTION);
-    if (!result.ok) {
-      wx.showModal({
-        title: "清除失败",
-        content: "任务与哲思记录清空失败，请稍后重试",
-        showCancel: false,
-      });
-      return;
-    }
-    wx.showToast({
-      title: "任务已清空",
-      icon: "success",
     });
   },
 

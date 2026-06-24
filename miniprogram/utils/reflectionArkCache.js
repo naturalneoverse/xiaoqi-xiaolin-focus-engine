@@ -180,6 +180,12 @@ function clearMemoryCacheForQuadrant(taskId, quadrantId) {
   });
 }
 
+function clearAllMemoryCache() {
+  Object.keys(memoryCache).forEach((k) => {
+    delete memoryCache[k];
+  });
+}
+
 module.exports = {
   fetchCacheEntry,
   fetchQuadrantCacheRows,
@@ -188,5 +194,6 @@ module.exports = {
   rememberReplyInMemory,
   clearMemoryCacheForTask,
   clearMemoryCacheForQuadrant,
+  clearAllMemoryCache,
   buildTextHash,
 };

@@ -1,0 +1,260 @@
+.intro-page {
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: #184a72;
+}
+
+.intro-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: block;
+}
+
+.intro-bg-fallback {
+  z-index: 0;
+}
+
+.intro-skip-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 22;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 0;
+}
+
+.intro-skip {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 400;
+  color: rgba(24, 74, 114, 0.78);
+  letter-spacing: 1rpx;
+}
+
+.intro-text-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 56rpx;
+  padding-right: 56rpx;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.intro-line {
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 46rpx;
+  line-height: 1.55;
+  font-weight: 500;
+  color: #eff7fd;
+  letter-spacing: 3rpx;
+  white-space: pre-line;
+  text-shadow:
+    0 0 24rpx rgba(183, 214, 234, 0.45),
+    0 4rpx 24rpx rgba(15, 40, 70, 0.5);
+}
+
+.intro-line-in {
+  opacity: 0;
+  animation: introMagicIn 960ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.intro-line-stack {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-line-held {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.intro-line-hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.intro-dissolve-canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+.intro-dissolve-overlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+@keyframes introMagicIn {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 14rpx, 0);
+    text-shadow:
+      0 0 8rpx rgba(183, 214, 234, 0.08),
+      0 4rpx 16rpx rgba(15, 40, 70, 0.15);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    text-shadow:
+      0 0 24rpx rgba(183, 214, 234, 0.45),
+      0 4rpx 24rpx rgba(15, 40, 70, 0.5);
+  }
+}
+
+.intro-mascot-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 8;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.45s ease-out;
+  pointer-events: none;
+}
+
+.intro-mascot-visible {
+  opacity: 1;
+}
+
+.intro-mascot-left {
+  justify-content: flex-start;
+  padding-left: 6vw;
+}
+
+.intro-mascot-right {
+  justify-content: flex-end;
+  padding-right: 6vw;
+}
+
+.intro-mascot-center {
+  justify-content: center;
+}
+
+.intro-mascot-dual {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2vw;
+}
+
+.intro-mascot-img {
+  display: block;
+  height: auto;
+  max-height: 100%;
+}
+
+.intro-mascot-img-alt {
+  margin-left: -4vw;
+}
+
+.intro-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 14;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.intro-progress {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8rpx;
+  max-width: 80vw;
+  margin: 0 auto;
+}
+
+.intro-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: rgba(183, 214, 234, 0.32);
+}
+
+.intro-dot-on {
+  background: rgba(239, 247, 253, 0.92);
+}
+
+.intro-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 16;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  box-sizing: border-box;
+  padding-left: 24rpx;
+  padding-right: 24rpx;
+}
+
+.intro-hint {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: rgba(24, 74, 114, 0.62);
+}
+
+.intro-cta {
+  pointer-events: auto;
+  margin: 0;
+  width: 100%;
+  max-width: 560rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: 44rpx;
+  background: #12598f !important;
+  color: #fff !important;
+  font-size: 32rpx;
+  font-weight: 600;
+  border: none;
+  padding: 0;
+  box-shadow: 0 8rpx 28rpx rgba(18, 89, 143, 0.35);
+}
+
+.intro-cta::after {
+  border: none;
+}
+
+.intro-cta-hover {
+  opacity: 0.9;
+}
+
+.intro-tap-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 18;
+}

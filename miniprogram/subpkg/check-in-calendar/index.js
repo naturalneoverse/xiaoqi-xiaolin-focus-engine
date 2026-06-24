@@ -1,4 +1,3 @@
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const calendarView = require("../../utils/checkInCalendarView");
 const dailyCheckIn = require("../../utils/dailyCheckIn");
 
@@ -13,7 +12,6 @@ Page({
   },
 
   onLoad() {
-    if (!requireLoginOnLoad()) return;
     const now = new Date();
     this._viewYear = now.getFullYear();
     this._viewMonth = now.getMonth() + 1;

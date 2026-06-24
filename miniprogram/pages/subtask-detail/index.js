@@ -1,29 +1,14 @@
-const STORAGE_KEYS = require("../../config/storageKeys");
-const { TASK_CONTENT_MAX, TASK_NAME_MAX } = require("../../config/taskLimits");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const subtask = require("../../utils/subtask");
-const dailyCheckIn = require("../../utils/dailyCheckIn");
+const { TASK_CONTENT_MAX, TASK_NAME_MAX } = require("../../config/taskLimits");
 
 const STATUS_OPTIONS = ["进行中", "已完成"];
-
 function clampTextByLength(value, maxLength) {
   const chars = Array.from(value || "");
   if (chars.length <= maxLength) return value || "";
   return chars.slice(0, maxLength).join("");
 }
 
-function toCompletedAt() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  return `${y}-${m}-${d} ${hh}:${mm}`;
-}
-
-function formatDateRangeText(startDate, endDate) {
-  if (!startDate) return "未设置";
+function formatDateRangeText(startDate, endDate) {  if (!startDate) return "未设置";
   return endDate ? `${startDate} → ${endDate}` : startDate;
 }
 
@@ -46,7 +31,6 @@ Page({
   },
 
   onLoad(options) {
-    if (!requireLoginOnLoad()) return;
     const taskId = options && options.taskId ? decodeURIComponent(String(options.taskId)) : "";
     if (!taskId) {
       wx.showToast({ title: "缺少任务", icon: "none" });
@@ -137,46 +121,18 @@ Page({
     const patch = {
       statusText,
       done: statusText === "已完成",
-      completedAt: statusText === "已完成" ? toCompletedAt() : "",
+      completedAt: statusText === "已完成" ? subtask.toCompletedAt() : "",
     };
     this.setData({ statusText, statusIndex: idx });
     this.persist(patch, true);
   },
 
   persist(patch, recountParent) {
-    const taskId = this.data.taskId;
-    let tasks = subtask.readTasks();
-    let saved = null;
-    tasks = tasks.map((t) => {
-      if (!t || t.id !== taskId) return t;
-      saved = { ...t, ...patch, updatedAt: Date.now() };
-      if (patch.statusText != null) {
-        saved.statusText = patch.statusText;
-        saved.done = patch.done != null ? patch.done : patch.statusText === "已完成";
-      }
-      return saved;
-    });
-    if (recountParent && saved) {
-      tasks = subtask.recountParentProgress(tasks, subtask.getParentTaskId(saved));
+    const r = subtask.updateSubtaskFields(this.data.taskId, patch, { recountParent });
+    if (!r.ok) {
+      wx.showToast({ title: r.message || "保存失败", icon: "none" });
     }
-    if (!subtask.writeTasks(tasks)) {
-      wx.showToast({ title: "保存失败", icon: "none" });
-      return;
-    }
-    const cloudList = [saved];
-    if (recountParent && saved) {
-      const parent = subtask.findTaskById(tasks, subtask.getParentTaskId(saved));
-      if (parent) cloudList.push(parent);
-    }
-    try {
-      const cloudDataSync = require("../../utils/cloudDataSync");
-      cloudList.forEach((t) => cloudDataSync.afterTaskSaved(t));
-    } catch (e) {
-      /* ignore */
-    }
-    dailyCheckIn.recordDailyCheckIn();
   },
-
   onDelete() {
     wx.showModal({
       title: "删除子任务",

@@ -1,5 +1,4 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { applyReflectionNavBar } = require("../../config/reflectionTheme");
 const { buildMomentTrailView, MOMENT_TRAIL_INTRO_TEXT } = require("../../utils/momentTrailView");
 
@@ -19,7 +18,6 @@ Page({
   },
 
   onLoad() {
-    if (!requireLoginOnLoad()) return;
   },
 
   onShow() {

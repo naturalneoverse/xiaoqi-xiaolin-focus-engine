@@ -5,7 +5,6 @@ const { parsePayload } = require("../../utils/parsePayload");
 
 const OPTIONS = LAYER_OPTIONS.map((o) => ({ key: o.title, desc: o.desc, id: o.id }));
 
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const {
   getPriorityTagClass,
   getForWhomTagClass,
@@ -45,7 +44,6 @@ Page({
   },
 
   onLoad(options) {
-    if (!requireLoginOnLoad()) return;
     const payload = parsePayload(options.payload);
     this.setData({
       payload,

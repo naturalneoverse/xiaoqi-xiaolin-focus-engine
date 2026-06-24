@@ -11,4 +11,9 @@ Page({
       this.setData({ appVersion: v });
     }
   },
+
+  goBrandIntro() {
+    const { openBrandIntro } = require("../../utils/brandIntroNavigate");
+    openBrandIntro({ from: "about" });
+  },
 });

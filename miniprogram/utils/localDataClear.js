@@ -1,11 +1,12 @@
 /**
- * 设置页「清除数据」：按 localDataDomains 注册表执行清除并生成确认文案（F3-2）。
+ * 设置页「清除缓存」：按 localDataDomains 注册表执行清除并生成确认文案（F3-2）。
  */
 const STORAGE_KEYS = require("../config/storageKeys");
 const {
   CLEAR_PRESET_IDS,
   getClearPresetIncludedLabels,
   getClearPresetExcludedLabels,
+  getDomainsByClearPreset,
 } = require("../config/localDataDomains");
 
 function removeKeys(keys) {
@@ -18,12 +19,14 @@ function removeKeys(keys) {
   });
 }
 
-function removeImageCachePrefixKeys() {
+function removeKeyPrefixKeys(prefixes) {
+  const list = Array.isArray(prefixes) ? prefixes : [];
+  if (!list.length) return;
   try {
     const storageInfo = wx.getStorageInfoSync ? wx.getStorageInfoSync() : null;
     const allKeys = (storageInfo && storageInfo.keys) || [];
     allKeys.forEach((key) => {
-      if (/^(temp_image_|image_temp_|draft_image_)/.test(key)) {
+      if (list.some((prefix) => String(key).indexOf(prefix) === 0)) {
         try {
           wx.removeStorageSync(key);
         } catch (e) {
@@ -32,7 +35,38 @@ function removeImageCachePrefixKeys() {
       }
     });
   } catch (e) {
-    console.warn("[localDataClear] removeImageCachePrefixKeys", e);
+    console.warn("[localDataClear] removeKeyPrefixKeys", e);
+  }
+}
+
+function collectPresetStorageKeys(presetId) {
+  const keys = [];
+  getDomainsByClearPreset(presetId).forEach((domain) => {
+    (domain.storageKeys || []).forEach((key) => {
+      if (key && keys.indexOf(key) === -1) keys.push(key);
+    });
+  });
+  return keys;
+}
+
+function collectPresetKeyPrefixes(presetId) {
+  const prefixes = [];
+  getDomainsByClearPreset(presetId).forEach((domain) => {
+    (domain.keyPrefixes || []).forEach((prefix) => {
+      if (prefix && prefixes.indexOf(prefix) === -1) prefixes.push(prefix);
+    });
+  });
+  return prefixes;
+}
+
+function clearReflectionArkMemoryCache() {
+  try {
+    const reflectionArkCache = require("./reflectionArkCache");
+    if (reflectionArkCache && typeof reflectionArkCache.clearAllMemoryCache === "function") {
+      reflectionArkCache.clearAllMemoryCache();
+    }
+  } catch (e) {
+    console.warn("[localDataClear] clearReflectionArkMemoryCache", e);
   }
 }
 
@@ -43,13 +77,10 @@ function removeImageCachePrefixKeys() {
 function executeClearPreset(presetId) {
   const id = String(presetId || "").trim();
   try {
-    if (id === CLEAR_PRESET_IDS.IMAGE_CACHE) {
-      removeKeys([STORAGE_KEYS.CACHE_IMAGES]);
-      removeImageCachePrefixKeys();
-      return { ok: true };
-    }
-    if (id === CLEAR_PRESET_IDS.TASKS_REFLECTION) {
-      removeKeys([STORAGE_KEYS.TASKS_DATA, STORAGE_KEYS.REFLECTION_RECORDS]);
+    if (id === CLEAR_PRESET_IDS.APP_CACHE) {
+      removeKeys(collectPresetStorageKeys(id));
+      removeKeyPrefixKeys(collectPresetKeyPrefixes(id));
+      clearReflectionArkMemoryCache();
       return { ok: true };
     }
     return { ok: false, errMsg: "unknown_preset" };
@@ -65,39 +96,22 @@ function executeClearPreset(presetId) {
  */
 function buildClearConfirmContent(presetId) {
   const id = String(presetId || "").trim();
-  if (id === CLEAR_PRESET_IDS.IMAGE_CACHE) {
-    return "将清除本机图片缓存（含临时图片），不影响任务、哲思、身体等业务记录。是否继续？";
-  }
-  if (id === CLEAR_PRESET_IDS.TASKS_REFLECTION) {
+  if (id === CLEAR_PRESET_IDS.APP_CACHE) {
     const included = getClearPresetIncludedLabels(id);
     const excluded = getClearPresetExcludedLabels(id);
-    const inc = included.length ? included.join("、") : "（无）";
-    const exc = excluded.length ? excluded.join("、") : "（无）";
+    const inc = included.length ? included.join("、") : "临时缓存";
+    const exc = excluded.length ? excluded.join("、") : "您的业务记录";
     return (
       `将清除：${inc}。\n` +
       `不会清除：${exc}。\n` +
-      "部分数据可在对应页面单独删除。删除后不可恢复，是否继续？"
+      "清除后不影响登录状态，部分页面下次打开可能重新加载。是否继续？"
     );
   }
-  return "确定清除吗？";
-}
-
-/**
- * @param {string} presetId
- * @returns {string}
- */
-function buildClearFinalConfirmContent(presetId) {
-  const id = String(presetId || "").trim();
-  if (id === CLEAR_PRESET_IDS.TASKS_REFLECTION) {
-    const included = getClearPresetIncludedLabels(id).join("、");
-    return `此操作不可逆，${included || "所选数据"}将从本机删除，确定继续吗？`;
-  }
-  return "此操作不可逆，确定继续吗？";
+  return "确定清除缓存吗？";
 }
 
 module.exports = {
   executeClearPreset,
   buildClearConfirmContent,
-  buildClearFinalConfirmContent,
   CLEAR_PRESET_IDS,
 };

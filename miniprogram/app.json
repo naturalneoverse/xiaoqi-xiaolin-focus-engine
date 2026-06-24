@@ -34,6 +34,7 @@
       "pages": [
         "help/index",
         "about/index",
+        "brand-intro/index",
         "body-report/index",
         "body-report-list/index",
         "today-report/index",
@@ -51,9 +52,9 @@
     }
   ],
   "window": {
-    "backgroundColor": "#F0F7FF",
+    "backgroundColor": "#E2EAF7",
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#F0F7FF",
+    "navigationBarBackgroundColor": "#E2EAF7",
     "navigationBarTitleText": "时间",
     "navigationBarTextStyle": "black"
   },

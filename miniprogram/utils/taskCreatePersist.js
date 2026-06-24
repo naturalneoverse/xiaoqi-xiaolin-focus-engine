@@ -2,8 +2,7 @@
  * 任务创建流程：本地落库 + reLaunch 任务详情（draft 幂等、清空问卷栈）
  */
 
-const STORAGE_KEYS = require("../config/storageKeys");
-const dailyCheckIn = require("./dailyCheckIn");
+const taskStorage = require("./taskStorage");
 const { goSleepHome } = require("./goTabHome");
 const reminderRegistry = require("./reminderRegistry");
 
@@ -32,10 +31,9 @@ function writeTaskToStorage(task, draftTaskId) {
   }
   let prevTasks = [];
   try {
-    const raw = wx.getStorageSync(STORAGE_KEYS.TASKS_DATA);
-    prevTasks = Array.isArray(raw) ? raw : [];
+    prevTasks = taskStorage.readTasks();
   } catch (e) {
-    console.error("[taskCreatePersist] getStorageSync", e);
+    console.error("[taskCreatePersist] readTasks", e);
     return { ok: false };
   }
   const nextTasks = [
@@ -45,22 +43,18 @@ function writeTaskToStorage(task, draftTaskId) {
     },
     ...prevTasks.filter((t) => t && t.id !== taskId),
   ];
-  try {
-    wx.setStorageSync(STORAGE_KEYS.TASKS_DATA, nextTasks);
-    dailyCheckIn.recordDailyCheckIn();
-    try {
-      const subtaskUtil = require("./subtask");
-      if (subtaskUtil.isTopLevelTask(task)) {
-        subtaskUtil.syncParentTagsToSubtasks(task.id);
-      }
-    } catch (e) {
-      /* ignore */
-    }
-    return { ok: true };
-  } catch (e) {
-    console.error("[taskCreatePersist] setStorageSync", e);
+  if (!taskStorage.writeTasks(nextTasks)) {
     return { ok: false };
   }
+  try {
+    const subtaskUtil = require("./subtask");
+    if (subtaskUtil.isTopLevelTask(task)) {
+      subtaskUtil.syncParentTagsToSubtasks(task.id);
+    }
+  } catch (e) {
+    /* ignore */
+  }
+  return { ok: true };
 }
 
 /**

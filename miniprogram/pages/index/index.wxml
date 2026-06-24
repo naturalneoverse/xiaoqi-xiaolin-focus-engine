@@ -3,7 +3,7 @@
 
   <view class="hero">
     <view class="avatar-wrap">
-      <image class="avatar-inner" src="{{userProfile.avatarUrl}}" mode="aspectFill" binderror="onImageError" data-err-field="userProfile.avatarUrl" />
+      <image class="avatar-inner" src="{{avatarSrc}}" mode="aspectFill" binderror="onImageError" data-err-field="avatarSrc" />
     </view>
     <text class="hero-title" bindtap="goBodyQuizStart">身心平衡</text>
     <text class="hero-subtitle">寻找内在的宁静与自律</text>

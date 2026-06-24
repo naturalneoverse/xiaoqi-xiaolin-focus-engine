@@ -22,6 +22,7 @@
     >
       <text class="wechat-btn-text">{{isLoading ? loadingText : "微信一键登录"}}</text>
     </button>
+    <text class="skip-login-link" bindtap="onSkipLogin">暂不登录，先体验功能</text>
   </view>
 
   <text class="footer-tip">用智慧爱自己 用行动爱世界</text>

@@ -226,10 +226,10 @@ async function uploadAvatarFromTempPath(tempFilePath) {
     try {
       const profileCloudSync = require("./profileCloudSync");
       if (profileCloudSync && typeof profileCloudSync.pushUserProfileNow === "function") {
-        profileCloudSync.pushUserProfileNow().catch(() => {});
+        await profileCloudSync.pushUserProfileNow();
       }
     } catch (e) {
-      /* ignore */
+      console.warn("[avatarUpload] profile push", errMsgOf(e));
     }
 
     dailyCheckIn.recordDailyCheckIn();

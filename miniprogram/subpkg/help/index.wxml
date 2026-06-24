@@ -1,5 +1,13 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="card guide-card">
+    <view class="guide-head brand-intro-head" bindtap="goBrandIntro">
+      <view class="guide-left">
+        <text class="guide-index">★</text>
+        <text class="guide-q">认识小麒小麟</text>
+      </view>
+      <text class="guide-arrow">›</text>
+    </view>
+    <view class="line"></view>
     <text class="section-title">使用指南</text>
 
     <view class="guide-item" wx:for="{{guideList}}" wx:key="title">

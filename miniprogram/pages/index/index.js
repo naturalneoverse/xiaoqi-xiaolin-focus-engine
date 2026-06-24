@@ -1,16 +1,17 @@
 // index.js
 const STORAGE_KEYS = require("../../config/storageKeys");
 const bodyStats = require("../../utils/bodyStats");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
 const { goMyHome, goSleepHome } = require("../../utils/goTabHome");
 const { getTodayKey } = require("../../utils/dateKeys");
+const { applyProfileToPage, DEFAULT_AVATAR } = require("../../utils/avatarDisplay");
 
 Page({
   data: {
     userProfile: {
-      avatarUrl: "/images/transparent background/avatar.png",
+      avatarUrl: DEFAULT_AVATAR,
     },
+    avatarSrc: DEFAULT_AVATAR,
     showTip: false,
     powerList: [
       {
@@ -115,7 +116,6 @@ Page({
     } catch (e) {
       /* ignore */
     }
-    if (!requireLoginOnLoad()) return;
   },
 
   onShow() {
@@ -171,20 +171,16 @@ Page({
   },
 
   onGlobalUserProfileChange(nextProfile) {
-    this.setData({
-      userProfile: {
-        ...this.data.userProfile,
-        ...nextProfile,
-      },
+    applyProfileToPage(this, {
+      ...this.data.userProfile,
+      ...nextProfile,
     });
   },
 
   syncUserProfile() {
     const app = getApp();
-    if (!app || typeof app.getUserProfile !== "function") return;
-    this.setData({
-      userProfile: app.getUserProfile(),
-    });
+    if (!app || typeof app.getUserProfile !== "function") return Promise.resolve();
+    return applyProfileToPage(this, app.getUserProfile());
   },
 
   onClickPowerInfo(e) {

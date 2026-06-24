@@ -64,6 +64,10 @@ Component({
   methods: {
     noop() {},
 
+    onMascotImageError() {
+      this.setData({ mascotImage: "/images/transparent background/avatar.png" });
+    },
+
     _updateMascot(agent) {
       const key = agent === "xiaoqi" ? "xiaoqi" : "xiaolin";
       this.setData({ mascotImage: MASCOT_IMAGES[key] });

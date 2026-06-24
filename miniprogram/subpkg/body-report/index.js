@@ -13,7 +13,6 @@ const mascotCopyClient = require("../../utils/mascotCopyClient");
 const bodyWeekArchive = require("../../utils/bodyWeekArchive");
 const bodyWeekReportCare = require("../../utils/bodyWeekReportCare");
 const { goMindHome } = require("../../utils/goTabHome");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const layoutFixture = require("../../config/bodyReportLayoutFixture");
 
 const SLEEP_OPTIONS = bodyStats.SLEEP_OPTIONS;
@@ -54,7 +53,6 @@ Page({
   },
 
   onLoad(options) {
-    if (!requireLoginOnLoad()) return;
     wx.setNavigationBarTitle({ title: "身体边界报告" });
     const raw = options && options.weekStart ? decodeURIComponent(String(options.weekStart)) : "";
     this.__weekMondayKey = raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : "";

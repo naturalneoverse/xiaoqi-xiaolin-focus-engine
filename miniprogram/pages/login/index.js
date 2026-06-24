@@ -1,6 +1,7 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const authSession = require("../../utils/authSession");
 const { goAfterLoginSplash } = require("../../utils/loginSplashNavigate");
+const { goSleepHome } = require("../../utils/goTabHome");
 
 Page({
   data: {
@@ -127,6 +128,10 @@ Page({
     wx.navigateTo({ url: "/pages/privacy/index" });
   },
 
+  onSkipLogin() {
+    goSleepHome();
+  },
+
   async onLoginTap() {
     if (this.data.isFirstLogin && !this.data.agree) return;
     await this.__withSubmitting("login", async () => {
@@ -169,34 +174,32 @@ Page({
         }
         const profile = app && typeof app.getUserProfile === "function" ? app.getUserProfile() : {};
         authSession.persistAfterLogin(result, profile);
-        let tagsComplete = result.tagsComplete === true;
-        if (wx.cloud && typeof wx.cloud.callFunction === "function") {
+        let tagsComplete = false;
+        const loginApplied = authSession.applyCloudTagsStatus(result);
+        if (loginApplied === true || loginApplied === false) {
+          tagsComplete = loginApplied;
+        } else if (wx.cloud && typeof wx.cloud.callFunction === "function") {
           try {
             const cf = await wx.cloud.callFunction({
               name: "quickstartFunctions",
               data: { type: "getUserTags" },
             });
             const tr = (cf && cf.result) || {};
-            if (tr.success) {
-              tagsComplete = !!tr.tagsComplete;
+            const tagApplied = authSession.applyCloudTagsStatus(tr);
+            if (tagApplied === true || tagApplied === false) {
+              tagsComplete = tagApplied;
+            } else {
+              tagsComplete = authSession.isLocalTagsComplete();
             }
           } catch (e) {
             console.warn("getUserTags after login", e);
-            try {
-              tagsComplete = !!wx.getStorageSync(STORAGE_KEYS.USER_TAGS_COMPLETE);
-            } catch (e2) {
-              tagsComplete = false;
-            }
+            tagsComplete = authSession.isLocalTagsComplete();
           }
+        } else {
+          tagsComplete = authSession.isLocalTagsComplete();
         }
         if (app && app.globalData) {
           app.globalData.userTagsComplete = tagsComplete;
-        }
-        if (!tagsComplete && authSession.isLocalTagsComplete()) {
-          tagsComplete = true;
-          if (app && app.globalData) {
-            app.globalData.userTagsComplete = true;
-          }
         }
         try {
           if (tagsComplete) {

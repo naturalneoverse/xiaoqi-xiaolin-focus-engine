@@ -134,7 +134,7 @@ async function pullAndMergeUserProfile() {
     const cloudMs = cloudProfile.updatedAtMs || 0;
     const localDefault = !isMeaningfulProfile(local);
 
-    if (localDefault || cloudMs >= localMs) {
+    if (localDefault) {
       const patch = buildPatchFromCloud(cloudProfile, local);
       if (patch) {
         app.setUserProfile(patch, {
@@ -144,9 +144,28 @@ async function pullAndMergeUserProfile() {
         });
         return true;
       }
-    } else if (isMeaningfulProfile(local)) {
-      schedulePushUserProfile();
+      return false;
     }
+
+    if (cloudMs > localMs) {
+      const patch = buildPatchFromCloud(cloudProfile, local);
+      if (patch) {
+        app.setUserProfile(patch, {
+          markCustomized: !!cloudProfile.customized,
+          syncUserInfo: true,
+          skipCloudPush: true,
+        });
+        return true;
+      }
+      return false;
+    }
+
+    if (localMs > cloudMs) {
+      schedulePushUserProfile();
+      return false;
+    }
+
+    schedulePushUserProfile();
     return false;
   } catch (e) {
     console.warn("[profileCloudSync] pull", e);
@@ -179,7 +198,27 @@ async function pushUserProfileNow() {
       },
     });
     const raw = parseCloudResult(res);
-    return !!(raw && raw.success);
+    if (raw && raw.success) {
+      const serverMs = Number(raw.serverUpdatedAtMs);
+      if (Number.isFinite(serverMs) && serverMs > 0) {
+        try {
+          const app = getApp();
+          if (app && typeof app.setUserProfile === "function") {
+            const localMs = getLocalUpdatedMs(local);
+            if (serverMs >= localMs) {
+              app.setUserProfile(
+                { updatedAtMs: serverMs },
+                { skipCloudPush: true, markCustomized: false, syncUserInfo: false },
+              );
+            }
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      }
+      return true;
+    }
+    return false;
   } catch (e) {
     console.warn("[profileCloudSync] push", e);
     return false;

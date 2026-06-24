@@ -40,7 +40,9 @@ const STORAGE_KEYS = {
   SYNC_TASK_TOMBSTONES_V1: "sync_task_tombstones_v1",
   /** 真我时刻轨迹页：首次说明蒙层已展示 */
   MOMENT_TRAIL_INTRO_SEEN: "moment_trail_intro_seen",
-  /** 新建真我向任务守护弹窗：上次展示或操作时间戳（24h 频控） */
+  /** 品牌引导页（小麒小麟三幕）已完整观看 */
+  BRAND_INTRO_SEEN: "brand_intro_seen",
+  /** 时间首页：新建真我向任务守护弹窗：上次展示或操作时间戳（24h 频控） */
   TASK_GUARDIAN_PROMPT_LAST_AT: "task_guardian_prompt_last_at",
   /** 时间首页：父任务子任务树展开状态 { [parentTaskId]: true } */
   SUBTASK_TREE_EXPANDED: "subtask_tree_expanded_v1",

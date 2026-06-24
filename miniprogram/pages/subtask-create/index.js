@@ -3,7 +3,6 @@ const {
   TASK_NAME_FIRST_LINE_MAX,
   TASK_CONTENT_MAX,
 } = require("../../config/taskLimits");
-const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const subtask = require("../../utils/subtask");
 const speechRecognition = require("../../utils/speechRecognition");
 
@@ -78,7 +77,6 @@ Page({
   },
 
   onLoad(options) {
-    if (!requireLoginOnLoad()) return;
     speechRecognition.warmUp().catch(() => {});
     const parentTaskId = options && options.parentTaskId ? decodeURIComponent(String(options.parentTaskId)) : "";
     if (!parentTaskId) {

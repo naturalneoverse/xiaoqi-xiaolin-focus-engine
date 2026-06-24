@@ -1,0 +1,92 @@
+<view class="intro-page" style="{{viewport.pageStyle}}">
+  <image
+    wx:if="{{!bgFallback}}"
+    class="intro-bg"
+    src="{{bgPath}}"
+    mode="aspectFill"
+    binderror="onBgError"
+  />
+  <view wx:else class="intro-bg intro-bg-fallback" style="background: {{skyFallbackCss}}; {{viewport.pageStyle}}"></view>
+
+  <view class="intro-text-zone" style="{{viewport.textZoneStyle}}">
+    <view
+      wx:if="{{lineText && lineAnim}}"
+      class="intro-line-stack"
+      style="min-height: {{lineStackH}}px;"
+      wx:key="stepIndex"
+    >
+      <text
+        class="intro-line {{lineAnim === 'in' ? 'intro-line-in' : 'intro-line-held'}} {{dissolveHideText ? 'intro-line-hidden' : ''}}"
+      >{{lineText}}</text>
+      <canvas
+        wx:if="{{dissolveActive}}"
+        type="2d"
+        id="dissolveCanvas"
+        class="intro-dissolve-canvas intro-dissolve-overlay"
+        style="width: {{dissolveCanvasW}}px; height: {{dissolveCanvasH}}px; opacity: {{dissolveCanvasVisible ? 1 : 0}};"
+      ></canvas>
+    </view>
+  </view>
+
+  <view
+    class="intro-mascot-zone intro-mascot-{{speaker.align}} {{mascotVisible ? 'intro-mascot-visible' : ''}}"
+    style="{{viewport.mascotZoneStyle}}"
+  >
+    <view wx:if="{{speaker.dual}}" class="intro-mascot-dual">
+      <image
+        class="intro-mascot-img"
+        style="{{viewport.mascotDualImgStyle}}"
+        src="{{speaker.avatar}}"
+        mode="widthFix"
+        binderror="onMascotError"
+      />
+      <image
+        class="intro-mascot-img intro-mascot-img-alt"
+        style="{{viewport.mascotDualImgStyle}}"
+        src="{{speaker.avatarAlt}}"
+        mode="widthFix"
+        binderror="onMascotError"
+      />
+    </view>
+    <image
+      wx:else
+      class="intro-mascot-img"
+      style="{{viewport.mascotImgStyle}}"
+      src="{{speaker.avatar}}"
+      mode="widthFix"
+      binderror="onMascotError"
+    />
+  </view>
+
+  <view
+    class="intro-nav"
+    style="{{showCta ? viewport.introNavCtaStyle : viewport.introNavStyle}}"
+  >
+    <view class="intro-progress">
+      <view
+        wx:for="{{progressDots}}"
+        wx:key="index"
+        class="intro-dot {{index <= stepIndex ? 'intro-dot-on' : ''}}"
+      ></view>
+    </view>
+    <text wx:if="{{!showCta}}" class="intro-hint">{{hintText}}</text>
+  </view>
+
+  <view wx:if="{{showCta}}" class="intro-footer" style="{{viewport.introCtaFooterStyle}}">
+    <button
+      class="intro-cta"
+      hover-class="intro-cta-hover"
+      bindtap="onTapCta"
+    >{{ctaText}}</button>
+  </view>
+
+  <view
+    class="intro-skip-wrap tap-target"
+    style="{{viewport.introSkipStyle}}"
+    catchtap="onSkip"
+  >
+    <text class="intro-skip">{{skipText}}</text>
+  </view>
+
+  <view wx:if="{{!showCta}}" class="intro-tap-layer" bindtap="onTapAdvance"></view>
+</view>
