@@ -2,6 +2,7 @@ const STORAGE_KEYS = require("../../config/storageKeys");
 const momentScore = require("../../utils/momentScore");
 const { buildPastWeeklyReportRows } = require("../../utils/reportHistoryLists");
 const { goSleepHome } = require("../../utils/goTabHome");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const {
   getPastTaskAllTags,
   buildPastDateDisplay,
@@ -130,6 +131,7 @@ Page({
   },
 
   onLoad() {
+    if (!requireLoginOnLoad()) return;
   },
 
   onShow() {

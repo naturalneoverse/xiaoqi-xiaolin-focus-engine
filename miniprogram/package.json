@@ -1,6 +1,6 @@
 {
   "name": "xiaoqi-xiaolin-focus-miniprogram",
-  "version": "1.2.0",
+  "version": "1.4.2",
   "private": true,
   "description": "WeChat miniprogram root; code uses relative requires. No runtime npm deps.",
   "dependencies": {}

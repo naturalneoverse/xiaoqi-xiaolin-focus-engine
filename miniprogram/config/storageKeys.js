@@ -42,6 +42,8 @@ const STORAGE_KEYS = {
   MOMENT_TRAIL_INTRO_SEEN: "moment_trail_intro_seen",
   /** 品牌引导页（小麒小麟三幕）已完整观看 */
   BRAND_INTRO_SEEN: "brand_intro_seen",
+  /** 已执行的发版本地迁移 id 列表（string[]） */
+  RELEASE_MIGRATIONS_APPLIED: "release_migrations_applied",
   /** 时间首页：新建真我向任务守护弹窗：上次展示或操作时间戳（24h 频控） */
   TASK_GUARDIAN_PROMPT_LAST_AT: "task_guardian_prompt_last_at",
   /** 时间首页：父任务子任务树展开状态 { [parentTaskId]: true } */

@@ -2,6 +2,7 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const bodyStats = require("../../utils/bodyStats");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
+const { promptLoginIfNeeded } = require("../../utils/requireLogin");
 const { goMyHome, goSleepHome } = require("../../utils/goTabHome");
 const { getTodayKey } = require("../../utils/dateKeys");
 const { applyProfileToPage, DEFAULT_AVATAR } = require("../../utils/avatarDisplay");
@@ -289,12 +290,26 @@ Page({
   },
 
   goBodyReport() {
+    if (
+      !promptLoginIfNeeded({
+        content: "登录后可查看与记录身体边界。",
+      })
+    ) {
+      return;
+    }
     wx.navigateTo({
       url: "/subpkg/body-report/index?source=body-home",
     });
   },
 
   goBodyQuizStart() {
+    if (
+      !promptLoginIfNeeded({
+        content: "登录后可开始身心平衡记录。",
+      })
+    ) {
+      return;
+    }
     wx.navigateTo({
       url: "/pages/body-sleep/index",
     });

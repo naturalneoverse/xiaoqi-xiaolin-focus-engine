@@ -1,4 +1,5 @@
 const subtask = require("../../utils/subtask");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { TASK_CONTENT_MAX, TASK_NAME_MAX } = require("../../config/taskLimits");
 
 const STATUS_OPTIONS = ["进行中", "已完成"];
@@ -31,6 +32,7 @@ Page({
   },
 
   onLoad(options) {
+    if (!requireLoginOnLoad()) return;
     const taskId = options && options.taskId ? decodeURIComponent(String(options.taskId)) : "";
     if (!taskId) {
       wx.showToast({ title: "缺少任务", icon: "none" });

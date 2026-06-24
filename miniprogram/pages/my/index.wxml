@@ -1,7 +1,8 @@
-<view class="page" style="{{_globalSafeAreaStyle}}">
+<scroll-view class="page-scroll" scroll-y enhanced show-scrollbar="{{false}}" style="{{_globalSafeAreaStyle}}">
+  <view class="page-inner">
   <view class="my-nav">
     <view class="my-nav-inner">
-      <view class="setting-btn tap-target" bindtap="onTapSetting">
+      <view class="setting-btn tap-target" catchtap="onTapSetting">
         <image class="setting-icon" src="/images/transparent background/setting.svg" mode="aspectFit" binderror="onImageError" />
       </view>
       <text class="my-nav-title">我的中心</text>
@@ -13,13 +14,7 @@
     <view class="avatar-wrap">
       <image wx:if="{{avatarSrc}}" class="avatar-image" src="{{avatarSrc}}" mode="aspectFill" binderror="onAvatarImageError" />
       <view wx:else class="avatar">👤</view>
-      <button
-        wx:if="{{isLoggedIn}}"
-        class="avatar-hit"
-        open-type="chooseAvatar"
-        bindchooseavatar="onChooseAvatar"
-        hover-class="none"
-      />
+      <view wx:if="{{isLoggedIn}}" class="avatar-hit tap-target" bindtap="onPickAvatar" />
       <view wx:else class="avatar-hit" bindtap="onTapLogin" />
     </view>
     <input
@@ -57,7 +52,7 @@
   </view>
 
   <view class="stats">
-    <view class="stat-item tap-target" bindtap="goMomentWeekHistory" hover-class="stat-item-hover">
+    <view class="stat-item tap-target" catchtap="goMomentWeekHistory" hover-class="stat-item-hover">
       <view class="stat-icon-wrap">
         <image class="stat-icon-image" src="/images/transparent background/realme.png" mode="aspectFit" binderror="onImageError" />
       </view>
@@ -69,7 +64,7 @@
         </view>
       </view>
     </view>
-    <view class="stat-item tap-target" bindtap="goCheckInCalendar" hover-class="stat-item-hover">
+    <view class="stat-item tap-target" catchtap="goCheckInCalendar" hover-class="stat-item-hover">
       <view class="stat-icon-wrap">
         <image class="stat-icon-image stat-icon-image-clocking" src="/images/transparent background/clocking.png" mode="aspectFit" binderror="onImageError" />
       </view>
@@ -90,18 +85,18 @@
 
   <view class="group">
     <text class="group-title">我的数据</text>
-    <view class="cell" bindtap="goTimeReport">
-      <text>时间编织报告</text>
+    <view class="cell cell-tap" catchtap="goTimeReport" hover-class="cell-hover">
+      <text class="cell-label">时间编织报告</text>
       <text class="arrow">›</text>
     </view>
     <view class="line"></view>
-    <view class="cell" bindtap="goReflectionList">
-      <text>哲思复盘报告</text>
+    <view class="cell cell-tap" catchtap="goReflectionList" hover-class="cell-hover">
+      <text class="cell-label">哲思复盘报告</text>
       <text class="arrow">›</text>
     </view>
     <view class="line"></view>
-    <view class="cell" bindtap="goBodyToday">
-      <text>身体边界记录</text>
+    <view class="cell cell-tap" catchtap="goBodyToday" hover-class="cell-hover">
+      <text class="cell-label">身体边界记录</text>
       <text class="arrow">›</text>
     </view>
     <view class="line"></view>
@@ -126,17 +121,18 @@
       />
     </view>
     <view class="line"></view>
-    <view class="cell" bindtap="goHelp">
-      <text>帮助与支持</text>
+    <view class="cell cell-tap" catchtap="goHelp" hover-class="cell-hover">
+      <text class="cell-label">帮助与支持</text>
       <text class="arrow">›</text>
     </view>
     <view class="line"></view>
-    <view class="cell" bindtap="goAbout">
-      <text>关于我们</text>
+    <view class="cell cell-tap" catchtap="goAbout" hover-class="cell-hover">
+      <text class="cell-label">关于我们</text>
       <text class="arrow">›</text>
     </view>
   </view>
 
   <text class="slogan">用智慧爱自己 用行动爱世界</text>
   <view class="tab-safe-space"></view>
-</view>
+  </view>
+</scroll-view>

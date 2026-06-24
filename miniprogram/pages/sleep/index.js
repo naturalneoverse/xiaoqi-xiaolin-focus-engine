@@ -1,4 +1,5 @@
 const authSession = require("../../utils/authSession");
+const { promptLoginIfNeeded } = require("../../utils/requireLogin");
 const taskStorage = require("../../utils/taskStorage");
 const reminderRegistry = require("../../utils/reminderRegistry");
 const { ensureUserTagsOrLeave } = require("../../utils/userTagsGate");
@@ -236,6 +237,13 @@ Page({
   },
 
   onToggleSubtaskFromTree(e) {
+    if (
+      !promptLoginIfNeeded({
+        content: "登录后可更新任务进度并同步到云端。",
+      })
+    ) {
+      return;
+    }
     const id = e.currentTarget.dataset.id;
     if (!id) return;
     const res = subtaskUtil.toggleSubtaskDone(id);
@@ -255,18 +263,39 @@ Page({
   },
 
   goTaskCreate() {
+    if (
+      !promptLoginIfNeeded({
+        content: "登录后可创建与管理任务。",
+      })
+    ) {
+      return;
+    }
     wx.navigateTo({
       url: "/pages/task-create/index",
     });
   },
 
   goTimeReport() {
+    if (
+      !promptLoginIfNeeded({
+        content: "登录后可查看时间编织报告。",
+      })
+    ) {
+      return;
+    }
     wx.navigateTo({
       url: "/subpkg/time-report/index",
     });
   },
 
   openTaskDetail(e) {
+    if (
+      !promptLoginIfNeeded({
+        content: "登录后可查看与管理任务详情。",
+      })
+    ) {
+      return;
+    }
     if (this.data.suppressTapOnce) {
       this.setData({ suppressTapOnce: false });
       return;
@@ -287,6 +316,13 @@ Page({
   },
 
   onTaskLongPress(e) {
+    if (
+      !promptLoginIfNeeded({
+        content: "登录后可删除与管理任务。",
+      })
+    ) {
+      return;
+    }
     const taskId = e.currentTarget.dataset.id;
     const rowType = e.currentTarget.dataset.rowType || "parent";
     this.setData({ suppressTapOnce: true });

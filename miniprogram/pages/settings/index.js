@@ -9,7 +9,7 @@ const {
 Page({
   data: {
     notifyOn: true,
-    version: "1.2.0",
+    version: "1.4.2",
   },
 
   onLoad() {
@@ -17,7 +17,7 @@ Page({
     this.loadSettings();
     const app = getApp();
     const v = app && app.globalData && app.globalData.APP_VERSION;
-    this.setData({ version: v || "1.2.0" });
+    this.setData({ version: v || "1.4.2" });
   },
 
   loadSettings() {

@@ -1,23 +1,44 @@
 /**
- * 登录门禁：浏览类页面不调用；需账号能力时在 onLoad 或用户操作处按需拦截。
+ * 登录门禁：Tab 可浏览；写操作与账号页用 promptLoginIfNeeded；深链子页用 requireLoginOnLoad。
+ * 帮助/关于需登录；品牌引导分包可在体验流程中未登录打开。
  */
 
 const authSession = require("./authSession");
 
 const LOGIN_URL = "/pages/login/index";
 
+/** 未登录可浏览（仅品牌引导分包；帮助/关于需登录） */
+const GUEST_BROWSE_URLS = ["/subpkg/brand-intro/index"];
+
+function isGuestBrowseUrl(url) {
+  const raw = String(url || "")
+    .trim()
+    .replace(/^\//, "")
+    .split("?")[0];
+  return GUEST_BROWSE_URLS.some((p) => p.replace(/^\//, "") === raw);
+}
+
+function reLaunchLogin() {
+  wx.reLaunch({
+    url: LOGIN_URL,
+    fail: () => {
+      wx.redirectTo({ url: LOGIN_URL });
+    },
+  });
+}
+
 /**
  * @returns {boolean} true 可继续执行本页 onLoad 后续逻辑；false 已发起跳转登录
  */
 function requireLoginOnLoad() {
   if (authSession.isLoggedIn()) return true;
-  wx.navigateTo({
-    url: LOGIN_URL,
-    fail: () => {
-      wx.reLaunch({ url: LOGIN_URL });
-    },
-  });
+  reLaunchLogin();
   return false;
+}
+
+/** @deprecated Tab 页请用 promptLoginIfNeeded，勿在 onLoad 整页拦截 */
+function guardLoginOnLoad() {
+  return requireLoginOnLoad();
 }
 
 function navigateToLogin() {
@@ -51,7 +72,11 @@ function promptLoginIfNeeded(options) {
 
 module.exports = {
   requireLoginOnLoad,
+  guardLoginOnLoad,
+  reLaunchLogin,
   navigateToLogin,
   promptLoginIfNeeded,
+  isGuestBrowseUrl,
+  GUEST_BROWSE_URLS,
   LOGIN_URL,
 };

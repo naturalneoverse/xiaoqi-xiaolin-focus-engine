@@ -6,6 +6,7 @@ const {
   TASK_CONTENT_MAX,
 } = require("../../config/taskLimits");
 const { goSleepHome } = require("../../utils/goTabHome");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const { scheduleReminder } = require("../../utils/reminderManager");
 const deviceEnv = require("../../utils/deviceEnv");
 const speechRecognition = require("../../utils/speechRecognition");
@@ -103,6 +104,7 @@ Page({
   },
 
   onLoad() {
+    if (!requireLoginOnLoad()) return;
     wx.setNavigationBarTitle({ title: "创建新任务" });
     speechRecognition.warmUp().catch(() => {});
     const today = this.getToday();

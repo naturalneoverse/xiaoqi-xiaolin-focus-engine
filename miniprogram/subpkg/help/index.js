@@ -1,3 +1,5 @@
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
+
 Page({
   data: {
     guideList: [
@@ -127,6 +129,7 @@ Page({
   },
 
   onLoad() {
+    if (!requireLoginOnLoad()) return;
   },
 
   goBrandIntro() {

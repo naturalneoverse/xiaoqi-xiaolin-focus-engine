@@ -7,7 +7,10 @@ const authSession = require("./authSession");
  */
 function ensureUserTagsOrLeave() {
   const app = getApp();
-  if (!app || !app.globalData || !app.globalData.hasLoggedIn) {
+  if (!authSession.isLoggedIn()) {
+    return Promise.resolve(true);
+  }
+  if (!app || !app.globalData) {
     return Promise.resolve(true);
   }
   if (!wx.cloud || typeof wx.cloud.callFunction !== "function") {

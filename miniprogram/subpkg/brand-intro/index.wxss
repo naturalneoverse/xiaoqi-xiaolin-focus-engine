@@ -4,7 +4,7 @@
   top: 0;
   overflow: hidden;
   box-sizing: border-box;
-  background: #184a72;
+  background: #eff7fd;
 }
 
 .intro-bg {
@@ -13,12 +13,21 @@
   top: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
   display: block;
 }
 
-.intro-bg-fallback {
+.intro-bg-sky {
   z-index: 0;
+}
+
+.intro-bg-photo {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.45s ease-out;
+}
+
+.intro-bg-photo-visible {
+  opacity: 1;
 }
 
 .intro-skip-wrap {
@@ -122,55 +131,6 @@
       0 0 24rpx rgba(183, 214, 234, 0.45),
       0 4rpx 24rpx rgba(15, 40, 70, 0.5);
   }
-}
-
-.intro-mascot-zone {
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 8;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.45s ease-out;
-  pointer-events: none;
-}
-
-.intro-mascot-visible {
-  opacity: 1;
-}
-
-.intro-mascot-left {
-  justify-content: flex-start;
-  padding-left: 6vw;
-}
-
-.intro-mascot-right {
-  justify-content: flex-end;
-  padding-right: 6vw;
-}
-
-.intro-mascot-center {
-  justify-content: center;
-}
-
-.intro-mascot-dual {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 2vw;
-}
-
-.intro-mascot-img {
-  display: block;
-  height: auto;
-  max-height: 100%;
-}
-
-.intro-mascot-img-alt {
-  margin-left: -4vw;
 }
 
 .intro-nav {

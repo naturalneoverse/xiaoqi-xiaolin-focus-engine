@@ -1,4 +1,5 @@
 const theme = require("../../config/brandIntroTheme");
+const bgAssets = require("./backgrounds");
 const { readViewport } = require("../../utils/brandIntroLayout");
 const {
   startBrandIntroDissolve,
@@ -10,22 +11,6 @@ const {
   markBrandIntroSessionDismissed,
 } = require("../../utils/brandIntroNavigate");
 
-function speakerView(speakerKey) {
-  const meta = theme.UI.speaker[speakerKey] || theme.UI.speaker.lin;
-  if (speakerKey === "both") {
-    return {
-      ...meta,
-      dual: true,
-      align: meta.align || "center",
-    };
-  }
-  return {
-    ...meta,
-    dual: false,
-    align: meta.align || "left",
-  };
-}
-
 Page({
   data: {
     viewport: {
@@ -35,17 +20,16 @@ Page({
       safeBottom: 0,
       pageStyle: "",
       textZoneStyle: "",
-      mascotZoneStyle: "",
-      mascotImgStyle: "",
-      mascotDualImgStyle: "",
       introNavStyle: "bottom:128px;",
       introNavCtaStyle: "bottom:160px;",
       introSkipStyle: "bottom:20px;",
       introCtaFooterStyle: "bottom:56px;",
     },
-    bgPath: theme.BACKGROUND_PATH,
-    bgFallback: false,
-    skyFallbackCss: theme.SKY_GRADIENT_CSS,
+    skyGradientCss: theme.SKY_GRADIENT_CSS,
+    bgAct: 1,
+    bgPath: bgAssets.bgPathForAct(1),
+    bgImageVisible: false,
+    bgUseFallback: false,
     stepIndex: 0,
     lineText: "",
     lineAnim: "",
@@ -55,8 +39,6 @@ Page({
     dissolveCanvasVisible: false,
     dissolveCanvasW: 300,
     dissolveCanvasH: 80,
-    mascotVisible: false,
-    speaker: speakerView("lin"),
     showCta: false,
     progressDots: theme.BRAND_INTRO_STEPS.map((_, i) => i),
     hintText: theme.HINT_TEXT,
@@ -70,35 +52,13 @@ Page({
   _dissolveRun: null,
   _pageReady: false,
   _introStarted: false,
-  _bgCandidateIndex: -1,
+  _bgLoadAct: 0,
+  _bgPathIndex: 0,
 
   onLoad(options) {
     const opts = options && typeof options === "object" ? options : {};
     this._from = opts.from ? String(opts.from) : "";
     this.applyViewport();
-    this.loadBackgroundImage(0);
-  },
-
-  bgCandidates() {
-    return [theme.BACKGROUND_PATH, theme.BACKGROUND_PATH_ABS].filter(Boolean);
-  },
-
-  loadBackgroundImage(index) {
-    const candidates = this.bgCandidates();
-    if (index >= candidates.length) {
-      this.setData({ bgFallback: true });
-      return;
-    }
-    this._bgCandidateIndex = index;
-    const src = candidates[index];
-    wx.getImageInfo({
-      src,
-      success: (res) => {
-        const path = (res && res.path) ? res.path : src;
-        this.setData({ bgPath: path, bgFallback: false });
-      },
-      fail: () => this.loadBackgroundImage(index + 1),
-    });
   },
 
   onReady() {
@@ -163,21 +123,49 @@ Page({
     this.setData({ viewport: vp });
   },
 
-  onBgError() {
-    const next = (this._bgCandidateIndex >= 0 ? this._bgCandidateIndex : 0) + 1;
-    this.loadBackgroundImage(next);
+  resetBgLoadState(act) {
+    this._bgLoadAct = act;
+    this._bgPathIndex = 0;
   },
 
-  onMascotError() {
-    const fallback = "/images/transparent background/avatar.png";
-    const speaker = { ...(this.data.speaker || {}) };
-    if (speaker.dual) {
-      speaker.avatar = fallback;
-      speaker.avatarAlt = fallback;
-    } else {
-      speaker.avatar = fallback;
+  onBgLoad() {
+    if (this._bgLoadAct !== this.data.bgAct) return;
+    this.setData({
+      bgImageVisible: true,
+      bgUseFallback: false,
+    });
+  },
+
+  onBgError() {
+    if (this._bgLoadAct !== this.data.bgAct) return;
+
+    const paths = bgAssets.pathsForAct(this.data.bgAct);
+    const nextIndex = this._bgPathIndex + 1;
+    if (nextIndex < paths.length) {
+      this._bgPathIndex = nextIndex;
+      this.setData({
+        bgPath: paths[nextIndex],
+        bgImageVisible: false,
+        bgUseFallback: false,
+      });
+      return;
     }
-    this.setData({ speaker });
+
+    this.setData({
+      bgUseFallback: true,
+      bgImageVisible: false,
+    });
+  },
+
+  applyBgForAct(act, actChanged) {
+    this.resetBgLoadState(act);
+    const paths = bgAssets.pathsForAct(act);
+    this.setData({
+      bgAct: act,
+      bgPath: paths[0],
+      bgImageVisible: actChanged ? false : this.data.bgImageVisible,
+      bgUseFallback: actChanged ? false : this.data.bgUseFallback,
+    });
   },
 
   lineMetricsForStep(text) {
@@ -222,25 +210,20 @@ Page({
 
     const actChanged = index > 0
       && theme.BRAND_INTRO_STEPS[index - 1].act !== step.act;
-    const { canvasW, canvasH } = this.lineMetricsForStep(step.text);
+    const { canvasH } = this.lineMetricsForStep(step.text);
+
+    this.applyBgForAct(step.act, actChanged);
 
     this.setData({
       stepIndex: index,
       lineText: step.text,
-      speaker: speakerView(step.speaker),
       lineAnim: "in",
       lineStackH: canvasH,
       dissolveActive: false,
       dissolveHideText: false,
       dissolveCanvasVisible: false,
-      mascotVisible: !actChanged,
       showCta: false,
     });
-    if (actChanged) {
-      wx.nextTick(() => {
-        this.setData({ mascotVisible: true });
-      });
-    }
     this.scheduleAutoAdvance();
   },
 
@@ -308,7 +291,7 @@ Page({
       lineStackH: canvasH,
     });
     if (actChanged) {
-      this.setData({ mascotVisible: false });
+      this.setData({ bgImageVisible: false });
     }
     this.startDissolveCanvas(lineText);
 

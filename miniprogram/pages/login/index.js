@@ -1,7 +1,6 @@
 const STORAGE_KEYS = require("../../config/storageKeys");
 const authSession = require("../../utils/authSession");
 const { goAfterLoginSplash } = require("../../utils/loginSplashNavigate");
-const { goSleepHome } = require("../../utils/goTabHome");
 
 Page({
   data: {
@@ -126,10 +125,6 @@ Page({
 
   openPrivacy() {
     wx.navigateTo({ url: "/pages/privacy/index" });
-  },
-
-  onSkipLogin() {
-    goSleepHome();
   },
 
   async onLoginTap() {

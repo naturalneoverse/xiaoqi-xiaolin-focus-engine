@@ -195,7 +195,7 @@ function uploadErrorToast(err) {
 }
 
 /**
- * 将 chooseAvatar 得到的临时路径上传云存储并写入用户资料。
+ * 相册/拍照选图后上传云存储并写入用户资料。
  */
 async function uploadAvatarFromTempPath(tempFilePath) {
   const app = getApp();

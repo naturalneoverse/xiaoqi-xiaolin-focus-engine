@@ -75,6 +75,15 @@ page {
   padding: 8rpx 0 16rpx;
 }
 
+.about-intro-link-hover {
+  opacity: 0.88;
+}
+
+.about-intro-title,
+.about-intro-arrow {
+  pointer-events: none;
+}
+
 .about-intro-title {
   font-size: 30rpx;
   color: #12598f;

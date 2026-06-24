@@ -40,44 +40,64 @@ Page({
   onShow() {
     const isLoggedIn = authSession.isLoggedIn();
     this.setData({ isLoggedIn });
+    if (typeof this.getTabBar === "function" && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 2 });
+    }
+    this.loadTaskStats();
+    this.syncUserProfile();
+    this.syncNotifyFromApp();
+    if (!isLoggedIn) {
+      return;
+    }
     ensureUserTagsOrLeave().then((ok) => {
       if (!ok) return;
       dailyCheckIn.repairCheckInsFromActivity(true);
       dailyCheckIn.recordDailyCheckIn();
       this.loadTaskStats();
       this.syncUserProfile();
-      if (isLoggedIn) {
-        try {
-          const profileCloudSync = require("../../utils/profileCloudSync");
-          if (profileCloudSync && typeof profileCloudSync.pullAndMergeUserProfile === "function") {
-            profileCloudSync
-              .pullAndMergeUserProfile()
-              .then(() => this.syncUserProfile())
-              .catch(() => {});
-          }
-        } catch (e) {
-          /* ignore */
+      try {
+        const profileCloudSync = require("../../utils/profileCloudSync");
+        if (profileCloudSync && typeof profileCloudSync.pullAndMergeUserProfile === "function") {
+          profileCloudSync
+            .pullAndMergeUserProfile()
+            .then(() => this.syncUserProfile())
+            .catch(() => {});
         }
-        try {
-          const checkInCloudSync = require("../../utils/checkInCloudSync");
-          if (checkInCloudSync && typeof checkInCloudSync.pullAndMergeCheckIns === "function") {
-            checkInCloudSync
-              .pullAndMergeCheckIns()
-              .then(() => this.loadTaskStats())
-              .catch(() => this.loadTaskStats());
-          } else {
-            this.loadTaskStats();
-          }
-        } catch (e2) {
+      } catch (e) {
+        /* ignore */
+      }
+      try {
+        const checkInCloudSync = require("../../utils/checkInCloudSync");
+        if (checkInCloudSync && typeof checkInCloudSync.pullAndMergeCheckIns === "function") {
+          checkInCloudSync
+            .pullAndMergeCheckIns()
+            .then(() => this.loadTaskStats())
+            .catch(() => this.loadTaskStats());
+        } else {
           this.loadTaskStats();
         }
-      } else {
+      } catch (e2) {
         this.loadTaskStats();
       }
-      this.syncNotifyFromApp();
-      if (typeof this.getTabBar === "function" && this.getTabBar()) {
-        this.getTabBar().setData({ selected: 2 });
-      }
+    });
+  },
+
+  navigateToSubpkg(url) {
+    wx.navigateTo({
+      url,
+      fail: (err) => {
+        console.warn("[my] navigateTo fail", url, err);
+        wx.showToast({ title: "页面打开失败，请重试", icon: "none" });
+      },
+    });
+  },
+
+  promptFeatureLogin(content) {
+    return promptLoginIfNeeded({
+      title: "登录提示",
+      content: content || "登录后可使用此功能并同步到云端。",
+      confirmText: "去登录",
+      cancelText: "先逛逛",
     });
   },
 
@@ -137,19 +157,17 @@ Page({
     navigateToLogin();
   },
 
-  onChooseAvatar(e) {
+  onPickAvatar() {
     if (!authSession.isLoggedIn()) {
       promptLoginIfNeeded({
         content: "登录后可设置头像并同步到云端。",
       });
       return;
     }
-    const tempPath = e && e.detail && e.detail.avatarUrl;
-    if (!tempPath) return;
-    const { uploadAvatarFromTempPath } = require("../../utils/avatarUpload");
     if (this.data.__submitting_avatarUpload) return;
+    const { pickAndUploadUserAvatar } = require("../../utils/avatarUpload");
     this.setData({ __submitting_avatarUpload: true });
-    uploadAvatarFromTempPath(tempPath)
+    pickAndUploadUserAvatar()
       .then((ok) => {
         if (ok) return this.syncUserProfile();
         return ok;
@@ -249,10 +267,7 @@ Page({
   },
 
   onTapSetting() {
-    if (!authSession.isLoggedIn()) {
-      promptLoginIfNeeded({ content: "登录后可进入账号设置。" });
-      return;
-    }
+    if (!this.promptFeatureLogin("登录后可进入账号设置。")) return;
     wx.navigateTo({
       url: "/pages/settings/index",
     });
@@ -280,58 +295,43 @@ Page({
   },
 
   goCreateTask() {
+    if (!this.promptFeatureLogin("登录后可生成真我时刻海报。")) return;
     const key = momentScore.weekMondayKey(momentScore.getIsoWeekMonday(new Date()));
-    wx.navigateTo({
-      url: `/subpkg/poster/index?weekStart=${encodeURIComponent(key)}`,
-    });
+    this.navigateToSubpkg(`/subpkg/poster/index?weekStart=${encodeURIComponent(key)}`);
   },
 
   goCheckInCalendar() {
-    wx.navigateTo({
-      url: "/subpkg/check-in-calendar/index",
-    });
+    if (!this.promptFeatureLogin("登录后可查看打卡记录。")) return;
+    this.navigateToSubpkg("/subpkg/check-in-calendar/index");
   },
 
   goMomentWeekHistory() {
-    wx.navigateTo({
-      url: "/subpkg/moment-week-list/index",
-    });
+    if (!this.promptFeatureLogin("登录后可查看真我时刻记录。")) return;
+    this.navigateToSubpkg("/subpkg/moment-week-list/index");
   },
 
   goTimeReport() {
-    wx.navigateTo({
-      url: "/subpkg/weekly-report-list/index",
-    });
+    if (!this.promptFeatureLogin("登录后可查看时间编织报告。")) return;
+    this.navigateToSubpkg("/subpkg/weekly-report-list/index");
   },
 
   goReflectionList() {
-    if (
-      !promptLoginIfNeeded({
-        content: "哲思复盘需登录后使用云端 AI 能力。",
-      })
-    ) {
-      return;
-    }
-    wx.navigateTo({
-      url: "/subpkg/reflection-list/index",
-    });
+    if (!this.promptFeatureLogin("哲思复盘需登录后使用云端 AI 能力。")) return;
+    this.navigateToSubpkg("/subpkg/reflection-list/index");
   },
 
   goBodyToday() {
-    wx.navigateTo({
-      url: "/subpkg/body-report-list/index",
-    });
+    if (!this.promptFeatureLogin("登录后可查看身体边界记录。")) return;
+    this.navigateToSubpkg("/subpkg/body-report-list/index");
   },
 
   goHelp() {
-    wx.navigateTo({
-      url: "/subpkg/help/index",
-    });
+    if (!this.promptFeatureLogin("登录后可查看帮助与使用指南。")) return;
+    this.navigateToSubpkg("/subpkg/help/index");
   },
 
   goAbout() {
-    wx.navigateTo({
-      url: "/subpkg/about/index",
-    });
+    if (!this.promptFeatureLogin("登录后可查看关于我们与品牌故事。")) return;
+    this.navigateToSubpkg("/subpkg/about/index");
   },
 });

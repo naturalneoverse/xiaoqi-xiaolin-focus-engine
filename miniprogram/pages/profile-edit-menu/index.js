@@ -1,4 +1,4 @@
-const { uploadAvatarFromTempPath } = require("../../utils/avatarUpload");
+const { pickAndUploadUserAvatar } = require("../../utils/avatarUpload");
 const { requireLoginOnLoad, promptLoginIfNeeded } = require("../../utils/requireLogin");
 const authSession = require("../../utils/authSession");
 
@@ -11,15 +11,13 @@ Page({
     this.__safeNavigateBack("pages/my/index");
   },
 
-  onChooseAvatar(e) {
+  onPickAvatar() {
     if (!authSession.isLoggedIn()) {
       promptLoginIfNeeded({ content: "登录后可设置头像并同步到云端。" });
       return;
     }
-    const tempPath = e && e.detail && e.detail.avatarUrl;
-    if (!tempPath) return;
     this.__withSubmitting("avatarUpload", () =>
-      uploadAvatarFromTempPath(tempPath).then((ok) => {
+      pickAndUploadUserAvatar().then((ok) => {
         if (ok) {
           setTimeout(() => this.goBack(), 400);
         }

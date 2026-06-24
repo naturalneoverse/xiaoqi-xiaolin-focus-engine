@@ -8,7 +8,7 @@
   </view>
 
   <view class="card story-card">
-    <view class="about-intro-link" bindtap="goBrandIntro">
+    <view class="about-intro-link" catchtap="goBrandIntro" hover-class="about-intro-link-hover">
       <text class="about-intro-title">认识小麒小麟</text>
       <text class="about-intro-arrow">›</text>
     </view>

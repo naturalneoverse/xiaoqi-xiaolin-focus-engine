@@ -1,12 +1,17 @@
 <view class="intro-page" style="{{viewport.pageStyle}}">
+  <view
+    class="intro-bg intro-bg-sky"
+    style="background: {{skyGradientCss}}; {{viewport.pageStyle}}"
+  ></view>
+
   <image
-    wx:if="{{!bgFallback}}"
-    class="intro-bg"
+    class="intro-bg intro-bg-photo {{bgImageVisible && !bgUseFallback ? 'intro-bg-photo-visible' : ''}}"
+    style="{{viewport.pageStyle}}"
     src="{{bgPath}}"
     mode="aspectFill"
+    bindload="onBgLoad"
     binderror="onBgError"
   />
-  <view wx:else class="intro-bg intro-bg-fallback" style="background: {{skyFallbackCss}}; {{viewport.pageStyle}}"></view>
 
   <view class="intro-text-zone" style="{{viewport.textZoneStyle}}">
     <view
@@ -26,36 +31,6 @@
         style="width: {{dissolveCanvasW}}px; height: {{dissolveCanvasH}}px; opacity: {{dissolveCanvasVisible ? 1 : 0}};"
       ></canvas>
     </view>
-  </view>
-
-  <view
-    class="intro-mascot-zone intro-mascot-{{speaker.align}} {{mascotVisible ? 'intro-mascot-visible' : ''}}"
-    style="{{viewport.mascotZoneStyle}}"
-  >
-    <view wx:if="{{speaker.dual}}" class="intro-mascot-dual">
-      <image
-        class="intro-mascot-img"
-        style="{{viewport.mascotDualImgStyle}}"
-        src="{{speaker.avatar}}"
-        mode="widthFix"
-        binderror="onMascotError"
-      />
-      <image
-        class="intro-mascot-img intro-mascot-img-alt"
-        style="{{viewport.mascotDualImgStyle}}"
-        src="{{speaker.avatarAlt}}"
-        mode="widthFix"
-        binderror="onMascotError"
-      />
-    </view>
-    <image
-      wx:else
-      class="intro-mascot-img"
-      style="{{viewport.mascotImgStyle}}"
-      src="{{speaker.avatar}}"
-      mode="widthFix"
-      binderror="onMascotError"
-    />
   </view>
 
   <view

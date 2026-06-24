@@ -3,6 +3,7 @@ const mascotCopyClient = require("../../utils/mascotCopyClient");
 const mascotCopyStats = require("../../utils/mascotCopyStats");
 const { raceResolve, MASCOT_ENGINE_TIMEOUT_MS } = require("../../utils/raceResolve");
 const { goSleepHome } = require("../../utils/goTabHome");
+const { requireLoginOnLoad } = require("../../utils/requireLogin");
 const reminderSchedule = require("../../utils/reminderSchedule");
 const { scheduleReminder } = require("../../utils/reminderManager");
 const deviceEnv = require("../../utils/deviceEnv");
@@ -185,6 +186,7 @@ Page({
   },
 
   onLoad(options) {
+    if (!requireLoginOnLoad()) return;
     const app = getApp();
     const imageAssets = (app && app.globalData && app.globalData.imageAssets) || {};
     const showSuccess = options && options.showSuccess === "1";

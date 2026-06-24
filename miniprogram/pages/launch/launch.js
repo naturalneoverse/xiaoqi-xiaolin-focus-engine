@@ -1,5 +1,5 @@
 /**
- * 冷启动入口：分享扫码记录 → 已登录则校验会话进首页/问卷；未登录则游客直达首页。
+ * 冷启动入口：分享扫码记录 → 已登录则校验会话进首页/问卷；未登录则进时间首页浏览。
  */
 
 const STORAGE_KEYS = require("../../config/storageKeys");
@@ -36,7 +36,7 @@ Page({
   },
 
   /**
-   * 已登录：校验 token/userInfo 与 wx.checkSession；未登录或会话失效则游客进首页。
+   * 已登录：校验 token/userInfo 与 wx.checkSession；未登录或会话失效则进时间首页（可浏览，操作用时再登录）。
    */
   runAutoLogin() {
     if (!authSession.hasLocalCredentials()) {

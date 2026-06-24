@@ -1,5 +1,17 @@
 page {
   background: #e2eaf7;
+  height: 100%;
+}
+
+.page-scroll {
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.page-inner {
+  min-height: 100%;
+  padding: 0 30rpx 0;
+  box-sizing: border-box;
 }
 
 .page {
@@ -14,6 +26,8 @@ page {
   padding: 0 12rpx 12rpx 16rpx;
   background: #f0f7ff;
   box-sizing: border-box;
+  position: relative;
+  z-index: 2;
 }
 
 .my-nav-inner {
@@ -61,6 +75,7 @@ page {
 .setting-icon {
   width: 40rpx;
   height: 40rpx;
+  pointer-events: none;
 }
 
 .profile-card {
@@ -102,6 +117,7 @@ page {
   border-radius: 999rpx;
   background: transparent;
   opacity: 0;
+  z-index: 2;
 }
 
 .avatar-hit::after {
@@ -195,6 +211,12 @@ page {
 
 .stat-item-hover {
   opacity: 0.92;
+}
+
+.stat-icon-wrap,
+.stat-content,
+.stat-icon-image {
+  pointer-events: none;
 }
 
 .stat-icon-wrap {
@@ -324,6 +346,24 @@ page {
   color: #334155;
   font-size: 34rpx;
   box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+.cell-tap {
+  cursor: pointer;
+}
+
+.cell-hover {
+  background: rgba(226, 234, 247, 0.55);
+}
+
+.cell-label,
+.cell .arrow,
+.stat-title,
+.stat-value,
+.stat-unit {
+  pointer-events: none;
 }
 
 .line {
@@ -372,5 +412,5 @@ page {
 }
 
 .tab-safe-space {
-  height: 176rpx;
+  height: calc(204rpx + env(safe-area-inset-bottom));
 }

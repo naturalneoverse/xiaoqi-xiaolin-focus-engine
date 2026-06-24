@@ -41,7 +41,7 @@ const DEFAULT_SETTINGS = {
 };
 
 /** 产品版本：关于页、设置页展示；与 miniprogram/package.json 的 version 同步 */
-const APP_VERSION = "1.2.0";
+const APP_VERSION = "1.4.2";
 
 function getWindowInfoSafe() {
   try {
@@ -124,7 +124,7 @@ function buildSafeAreaStyle(route) {
   } else {
     const win = getWindowInfoSafe();
     const ww = win.windowWidth || 375;
-    // 系统导航页：默认约 24rpx；时间首页「今日任务」与 + 需更疏朗
+    // 系统导航页：默认约 24rpx；时间首页「今日编织」与 + 需更疏朗
     let rpx = 24;
     if (r === "pages/sleep/index") rpx = 44;
     topPx = Math.ceil((rpx / 750) * ww);
@@ -238,6 +238,11 @@ App({
     console.error("[App.onPageNotFound]", res && (res.path || res));
   },
   onLaunch: function () {
+    try {
+      require("./utils/releaseMigration").runPendingReleaseMigrations();
+    } catch (e) {
+      console.warn("[App.onLaunch] releaseMigration", e);
+    }
     const localProfile = this.loadLocalUserProfile();
     const localSettings = this.loadLocalSettings();
     const hasLoggedIn = this.loadHasLoggedIn();

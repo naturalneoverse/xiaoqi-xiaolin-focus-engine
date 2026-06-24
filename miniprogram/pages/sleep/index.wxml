@@ -1,6 +1,6 @@
 <view class="page" style="{{_globalSafeAreaStyle}}">
   <view class="top-bar">
-    <text class="main-title">今日任务</text>
+    <text class="main-title">今日编织</text>
     <view class="add-btn tap-target {{highlightAddBtn ? 'add-btn--highlight' : ''}}" bindtap="goTaskCreate">
       <image class="add-btn-icon" src="/images/transparent background/creat.png" mode="aspectFit" binderror="onImageError" />
     </view>
